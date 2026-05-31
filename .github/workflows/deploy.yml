@@ -109,40 +109,9 @@ jobs:
             SERVER_BASE_URL=${SECRET_SERVER_BASE_URL}
             EOF
 
-            # 确保共享网络存在
+            # 确保共享网络存在，并把 ddyq-mysql 接入（幂等操作）
             docker network create ddyq-net 2>/dev/null || true
-
-            # 确保 ddyq-mysql 在运行并加入 ddyq-net
-            if docker inspect ddyq-mysql &>/dev/null; then
-              docker start ddyq-mysql 2>/dev/null || true
-              docker network connect ddyq-net ddyq-mysql 2>/dev/null || true
-            else
-              docker run -d \
-                --name ddyq-mysql \
-                --restart unless-stopped \
-                --network ddyq-net \
-                -e MYSQL_ROOT_PASSWORD=root \
-                -e MYSQL_DATABASE=doudouyouqian \
-                -v ddyq_mysql_data:/var/lib/mysql \
-                docker.m.daocloud.io/library/mysql:8.0 \
-                --character-set-server=utf8mb4 \
-                --collation-server=utf8mb4_unicode_ci
-            fi
-
-            # 等待 MySQL 就绪（最多 5 分钟）
-            echo "Waiting for MySQL..."
-            for i in $(seq 1 150); do
-              if docker exec ddyq-mysql mysqladmin ping -h 127.0.0.1 -proot --silent 2>/dev/null; then
-                echo "MySQL ready after ${i} attempts"
-                break
-              fi
-              if [ "$i" -eq 150 ]; then
-                echo "ERROR: MySQL not ready after 5 minutes"
-                docker logs ddyq-mysql --tail 30
-                exit 1
-              fi
-              sleep 2
-            done
+            docker network connect ddyq-net ddyq-mysql 2>/dev/null || true
 
             docker compose -f docker-compose.deploy.yml build
 
