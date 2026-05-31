@@ -111,7 +111,7 @@ jobs:
             # 清理悬空镜像，减少 overlay 初始化时间
             docker image prune -f
 
-            docker compose -f docker-compose.deploy.yml build
+            DOCKER_BUILDKIT=0 docker compose -f docker-compose.deploy.yml build
 
             # 用临时容器（sleep）执行 migrate：
             # 避免 NestJS 启动崩溃导致无法 exec，sleep 保持容器稳定运行
@@ -136,7 +136,7 @@ jobs:
             docker rm -f ddyq-api-migrate 2>/dev/null || true
 
             # 启动真正的 api，并打印启动日志供调试
-            COMPOSE_IGNORE_ORPHANS=true docker compose -f docker-compose.deploy.yml up -d api
+            DOCKER_BUILDKIT=0 COMPOSE_IGNORE_ORPHANS=true docker compose -f docker-compose.deploy.yml up -d api
             sleep 10
             echo "=== api 启动日志 ==="
             docker logs ddyq-api --tail 30 2>&1 || true
