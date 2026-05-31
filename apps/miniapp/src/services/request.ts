@@ -2,7 +2,8 @@ import Taro from '@tarojs/taro';
 import { useAuthStore } from '../stores/auth';
 import { showToast } from '../utils/toast';
 
-export const BASE_URL = process.env.TARO_APP_API_URL || 'http://localhost:3000';
+declare const TARO_APP_API_URL: string;
+export const BASE_URL = TARO_APP_API_URL;
 
 function generateTraceId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);

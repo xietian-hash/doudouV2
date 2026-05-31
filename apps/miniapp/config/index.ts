@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [],
   defineConstants: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
-    'process.env.TARO_APP_API_URL': JSON.stringify(process.env.TARO_APP_API_URL || 'http://localhost:3000'),
+    TARO_APP_API_URL: JSON.stringify(process.env.TARO_APP_API_URL || 'http://localhost:3000'),
   },
   copy: { patterns: [], options: {} },
   framework: 'react',
