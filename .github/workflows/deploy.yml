@@ -140,7 +140,7 @@ jobs:
 
             docker compose -f docker-compose.deploy.yml build --pull
             docker compose -f docker-compose.deploy.yml run --rm api \
-              node /app/node_modules/.bin/prisma migrate deploy \
+              node /app/apps/api/node_modules/.bin/prisma migrate deploy \
               --schema /app/apps/api/prisma/schema.prisma
             docker compose -f docker-compose.deploy.yml up -d api
             docker image prune -f
