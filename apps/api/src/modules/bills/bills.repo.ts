@@ -11,10 +11,13 @@ export class BillsRepo {
       where: { id, isDeleted: 0 },
       include: {
         category: {
-          include: {
-            parent: {
-              select: { id: true, name: true, icon: true },
-            },
+          select: {
+            id: true,
+            name: true,
+            icon: true,
+            parentId: true,
+            type: true,
+            parent: { select: { id: true, name: true, icon: true } },
           },
         },
         account: { select: { id: true, name: true } },
@@ -62,10 +65,13 @@ export class BillsRepo {
         orderBy: [{ billDate: 'desc' }, { id: 'desc' }],
         include: {
           category: {
-            include: {
-              parent: {
-                select: { id: true, name: true, icon: true },
-              },
+            select: {
+              id: true,
+              name: true,
+              icon: true,
+              parentId: true,
+              type: true,
+              parent: { select: { id: true, name: true, icon: true } },
             },
           },
           account: { select: { id: true, name: true } },

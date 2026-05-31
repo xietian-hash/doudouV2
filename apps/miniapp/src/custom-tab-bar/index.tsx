@@ -19,19 +19,27 @@ export default class CustomTabBar extends Component<Record<string, never>, State
     const curr = pages[pages.length - 1]?.route || '';
     const idx = TABS.findIndex(t => curr.includes(t.key));
     this.setState({ selected: idx >= 0 ? idx : 0 });
-    Taro.eventCenter.on('tabBar:hide', () => this.setState({ hidden: true }));
-    Taro.eventCenter.on('tabBar:show', () => this.setState({ hidden: false }));
+    Taro.eventCenter.on('tabBar:hide', this.hide);
+    Taro.eventCenter.on('tabBar:show', this.show);
   }
 
   componentWillUnmount() {
-    Taro.eventCenter.off('tabBar:hide');
-    Taro.eventCenter.off('tabBar:show');
+    Taro.eventCenter.off('tabBar:hide', this.hide);
+    Taro.eventCenter.off('tabBar:show', this.show);
   }
 
   switchTab(index: number, path: string) {
     this.setState({ selected: index });
     Taro.switchTab({ url: `/${path}` });
   }
+
+  hide = () => {
+    this.setState({ hidden: true });
+  };
+
+  show = () => {
+    this.setState({ hidden: false });
+  };
 
   render() {
     const { selected, hidden } = this.state;

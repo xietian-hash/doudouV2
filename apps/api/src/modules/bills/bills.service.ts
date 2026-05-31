@@ -61,6 +61,13 @@ function serializeBill(bill: {
       id: bt.tag.id.toString(),
       name: bt.tag.name,
     })),
+    categoryName: bill.category?.name ?? '',
+    categoryIcon: bill.category?.icon ?? null,
+    accountName: bill.account?.name ?? '',
+    tags: bill.billTags?.map((bt) => ({
+      id: bt.tag.id.toString(),
+      name: bt.tag.name,
+    })) ?? [],
   };
 }
 

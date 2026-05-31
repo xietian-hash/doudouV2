@@ -17,18 +17,34 @@ interface Props {
 
 interface State {
   selected: number;
+  hidden: boolean;
 }
 
 export default class BottomNav extends Component<Props, State> {
-  state: State = { selected: 0 };
+  state: State = { selected: 0, hidden: false };
 
   componentDidMount() {
     this.syncSelected();
+    Taro.eventCenter.on('tabBar:hide', this.hide);
+    Taro.eventCenter.on('tabBar:show', this.show);
+  }
+
+  componentWillUnmount() {
+    Taro.eventCenter.off('tabBar:hide', this.hide);
+    Taro.eventCenter.off('tabBar:show', this.show);
   }
 
   componentDidShow() {
     this.syncSelected();
   }
+
+  hide = () => {
+    this.setState({ hidden: true });
+  };
+
+  show = () => {
+    this.setState({ hidden: false });
+  };
 
   syncSelected() {
     const pages = Taro.getCurrentPages();
@@ -43,9 +59,9 @@ export default class BottomNav extends Component<Props, State> {
   }
 
   render() {
-    const { selected } = this.state;
+    const { selected, hidden } = this.state;
     return (
-      <View className='tab-bar'>
+      <View className='tab-bar' style={hidden ? { display: 'none' } : {}}>
         {TABS.map((tab, idx) => (
           <View
             key={tab.path}
