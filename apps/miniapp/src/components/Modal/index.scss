@@ -3,7 +3,7 @@
 .modal-mask {
   position: fixed;
   inset: 0;
-  background: $color-mask;
+  background: rgba(43, 74, 58, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -13,54 +13,71 @@
 .modal-box {
   width: 670rpx;
   background: $color-surface;
-  border-radius: $radius-xl;
-  padding: $spacing-xl;
+  border-radius: 40rpx;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: $spacing-l;
+}
+
+.modal-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32rpx 40rpx 24rpx;
 }
 
 .modal-title {
-  font-size: 36rpx;
-  font-weight: 800;
+  font-size: 34rpx;
+  font-weight: 700;
   color: $color-text-main;
-  text-align: center;
+}
+
+.modal-close {
+  width: 44rpx;
+  height: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  line-height: 1;
+  color: #7A9E8E;
 }
 
 .modal-body {
-  font-size: 28rpx;
-  color: $color-text-sub;
-  text-align: center;
+  padding: 0 40rpx;
 }
 
 .modal-footer {
+  padding: 24rpx 40rpx 80rpx;
   display: flex;
-  gap: 20rpx;
+  gap: 24rpx;
 }
 
 .modal-btn {
   flex: 1;
-  height: 84rpx;
-  border-radius: $radius-l;
+  border-radius: 24rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28rpx;
-  font-weight: 600;
+  padding: 28rpx 0;
+  font-size: 30rpx;
+  box-sizing: border-box;
 }
 
 .modal-btn--cancel {
-  background: $color-surface-meta;
-  color: $color-text-sub;
-  font-weight: normal;
+  background: #F0FBF5;
+  color: #7A9E8E;
 }
 
 .modal-btn--confirm {
   background: $color-brand;
   color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4rpx 40rpx rgba(43, 74, 58, 0.094);
 }
 
 .modal-btn--danger {
   background: $color-error;
   color: #fff;
+  font-weight: 600;
 }

@@ -10,7 +10,8 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 16rpx 32rpx 0;
+  padding: 16rpx 32rpx;
+  gap: 20rpx;
   box-sizing: border-box;
 }
 
@@ -18,7 +19,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8rpx 0 4rpx;
+  padding: 8rpx 0;
 }
 
 .month-nav {
@@ -56,38 +57,56 @@
 .summary-row {
   display: flex;
   gap: 20rpx;
-  margin: 12rpx 0;
 }
 
-.summary-pill {
+.summary-card {
   flex: 1;
-  height: 72rpx;
-  border-radius: $radius-l;
-  background: $color-surface-light;
+  background: $color-surface;
+  border-radius: 32rpx;
+  padding: 28rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  box-shadow: 0 8rpx 40rpx rgba(43, 74, 58, 0.09);
+}
+
+.summary-card-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24rpx;
 }
 
-.summary-pill--income {
-  background: $color-income-bg;
-}
-
-.summary-label {
+.summary-card-label {
   font-size: 24rpx;
   color: $color-text-sub;
+  font-family: $font-cn;
 }
 
-.summary-value {
-  font-size: 26rpx;
-  font-weight: 700;
-  color: $color-text-main;
+.summary-badge {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.summary-badge--expense {
+  background: $color-surface-light;
+}
+
+.summary-badge-icon {
+  font-size: 24rpx;
+}
+
+.summary-card-amount {
+  font-size: 44rpx;
+  font-weight: 800;
   font-family: $font-num;
 }
 
-.summary-pill--income .summary-value {
-  color: $color-income;
+.summary-card-amount--expense {
+  color: $color-brand;
 }
 
 .calendar-card {
@@ -171,7 +190,6 @@
 .bill-list {
   flex: 1;
   min-height: 0;
-  margin-top: 12rpx;
 }
 
 .empty {

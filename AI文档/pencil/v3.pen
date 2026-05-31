@@ -24570,6 +24570,822 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "xOLqu",
+      "x": 6642,
+      "y": 2038,
+      "name": "分类管理-删除确认弹窗",
+      "clip": true,
+      "width": 375,
+      "height": 844,
+      "fill": "#F0FBF5",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "ifbGj",
+          "x": 0,
+          "y": 0,
+          "name": "状态栏",
+          "width": 375,
+          "height": 44,
+          "padding": [
+            0,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "mk29i",
+              "name": "时间",
+              "fill": "#2B4A3A",
+              "content": "9:41",
+              "fontFamily": "Inter",
+              "fontSize": 15,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "jYvt2",
+              "name": "右",
+              "gap": 5,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "JO8Cn",
+                  "name": "signal",
+                  "width": 15,
+                  "height": 15,
+                  "icon": "signal",
+                  "library": "lucide",
+                  "fill": "#2B4A3A"
+                },
+                {
+                  "type": "icon",
+                  "id": "oByg2",
+                  "name": "wifi",
+                  "width": 15,
+                  "height": 15,
+                  "icon": "wifi",
+                  "library": "lucide",
+                  "fill": "#2B4A3A"
+                },
+                {
+                  "type": "icon",
+                  "id": "owRY2",
+                  "name": "battery",
+                  "width": 20,
+                  "height": 14,
+                  "icon": "battery",
+                  "library": "lucide",
+                  "fill": "#2B4A3A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "u2kiq",
+          "x": 0,
+          "y": 44,
+          "name": "导航栏",
+          "width": 375,
+          "height": 48,
+          "fill": "#00000000",
+          "padding": [
+            0,
+            16
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "k40IIi",
+              "name": "返回",
+              "gap": 4,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "mScwh",
+                  "name": "ic",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "chevron-left",
+                  "library": "lucide",
+                  "fill": "#2B4A3A"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "W6bBQw",
+              "name": "标题框",
+              "width": "fill_container",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "wIUX9",
+                  "name": "标题",
+                  "fill": "#2B4A3A",
+                  "content": "分类管理",
+                  "fontFamily": "Noto Sans SC",
+                  "fontSize": 17,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "XnOnf",
+              "name": "操作按钮",
+              "fill": "#5DBE88",
+              "cornerRadius": 16,
+              "gap": 4,
+              "padding": [
+                6,
+                12
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "P0sRG",
+                  "name": "ic",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "plus",
+                  "library": "lucide",
+                  "fill": "#FFFFFF"
+                },
+                {
+                  "type": "text",
+                  "id": "ZH3QB",
+                  "name": "文字",
+                  "fill": "#FFFFFF",
+                  "content": "添加",
+                  "fontFamily": "Noto Sans SC",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "AzHat",
+          "x": 0,
+          "y": 92,
+          "name": "类型切换",
+          "width": 375,
+          "height": 44,
+          "fill": "#FFFFFF",
+          "stroke": "#E8F3EE",
+          "strokeWidth": 1,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "V5TUW",
+              "name": "支出",
+              "width": "fill_container",
+              "height": 44,
+              "stroke": "#5DBE88",
+              "strokeWidth": {
+                "bottom": 2
+              },
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "k5goNN",
+                  "name": "t",
+                  "fill": "#5DBE88",
+                  "content": "支出",
+                  "fontFamily": "Noto Sans SC",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "saCOp",
+              "name": "收入",
+              "width": "fill_container",
+              "height": 44,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "M2lFVz",
+                  "name": "t",
+                  "fill": "#7A9E8E",
+                  "content": "收入",
+                  "fontFamily": "Noto Sans SC",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "lvZhd",
+          "x": 0,
+          "y": 136,
+          "name": "分类列表",
+          "opacity": 0.4,
+          "width": 375,
+          "height": 708,
+          "layout": "vertical",
+          "gap": 10,
+          "padding": [
+            12,
+            16
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "C1cIOA",
+              "name": "分类-餐饮",
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "cornerRadius": 16,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#2B4A3A18",
+                "offset": {
+                  "x": 0,
+                  "y": 4
+                },
+                "blur": 20
+              },
+              "layout": "vertical",
+              "gap": 10,
+              "padding": [
+                14,
+                16
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "mHMc5",
+                  "name": "主行",
+                  "width": "fill_container",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "K9H54w",
+                      "name": "圆",
+                      "width": 38,
+                      "height": 38,
+                      "fill": "#EAF7EF",
+                      "cornerRadius": 19,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ZvxVa",
+                          "name": "emoji",
+                          "fill": "#000000",
+                          "content": "🍜",
+                          "fontFamily": "Inter",
+                          "fontSize": 20,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "zQwN7",
+                      "name": "名称",
+                      "fill": "#2B4A3A",
+                      "content": "餐饮",
+                      "fontFamily": "Noto Sans SC",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "o5CHkC",
+                  "name": "子分类行",
+                  "width": "fill_container",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "G2jyqP",
+                      "name": "pill-早餐",
+                      "fill": "#EAF7EF",
+                      "cornerRadius": 12,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "uR2jl",
+                          "name": "t",
+                          "fill": "#5DBE88",
+                          "content": "早餐",
+                          "fontFamily": "Noto Sans SC",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "lNNfg",
+                      "name": "pill-午餐",
+                      "fill": "#EAF7EF",
+                      "cornerRadius": 12,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "AMzmn",
+                          "name": "t",
+                          "fill": "#5DBE88",
+                          "content": "午餐",
+                          "fontFamily": "Noto Sans SC",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "WHTKt",
+                      "name": "pill-晚餐",
+                      "fill": "#EAF7EF",
+                      "cornerRadius": 12,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "qdQVF",
+                          "name": "t",
+                          "fill": "#5DBE88",
+                          "content": "晚餐",
+                          "fontFamily": "Noto Sans SC",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "jk6hM",
+                      "name": "pill-零食饮料",
+                      "fill": "#EAF7EF",
+                      "cornerRadius": 12,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "O0qRfG",
+                          "name": "t",
+                          "fill": "#5DBE88",
+                          "content": "零食饮料",
+                          "fontFamily": "Noto Sans SC",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "p9enD",
+                      "name": "pill-餐厅聚餐",
+                      "fill": "#EAF7EF",
+                      "cornerRadius": 12,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "s2uBVm",
+                          "name": "t",
+                          "fill": "#5DBE88",
+                          "content": "餐厅聚餐",
+                          "fontFamily": "Noto Sans SC",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "xuWMG",
+              "name": "分类-交通",
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "cornerRadius": 16,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#2B4A3A18",
+                "offset": {
+                  "x": 0,
+                  "y": 4
+                },
+                "blur": 20
+              },
+              "layout": "vertical",
+              "gap": 10,
+              "padding": [
+                14,
+                16
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "DCPiN",
+                  "name": "主行",
+                  "width": "fill_container",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "d8iaKq",
+                      "name": "圆",
+                      "width": 38,
+                      "height": 38,
+                      "fill": "#EAF7EF",
+                      "cornerRadius": 19,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "aW0i3",
+                          "name": "emoji",
+                          "fill": "#000000",
+                          "content": "🚌",
+                          "fontFamily": "Inter",
+                          "fontSize": 20,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "T2NZ3",
+                      "name": "名称",
+                      "fill": "#2B4A3A",
+                      "content": "交通",
+                      "fontFamily": "Noto Sans SC",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "gJeuB",
+                  "name": "子分类行",
+                  "width": "fill_container",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "U3zIMt",
+                      "name": "pill-公交地铁",
+                      "fill": "#EAF7EF",
+                      "cornerRadius": 12,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "E3Lt2",
+                          "name": "t",
+                          "fill": "#5DBE88",
+                          "content": "公交地铁",
+                          "fontFamily": "Noto Sans SC",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "fvnBV",
+                      "name": "pill-打车",
+                      "fill": "#EAF7EF",
+                      "cornerRadius": 12,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "NzGdH",
+                          "name": "t",
+                          "fill": "#5DBE88",
+                          "content": "打车",
+                          "fontFamily": "Noto Sans SC",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "w67GwM",
+                      "name": "pill-加油",
+                      "fill": "#EAF7EF",
+                      "cornerRadius": 12,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "f20Cd",
+                          "name": "t",
+                          "fill": "#5DBE88",
+                          "content": "加油",
+                          "fontFamily": "Noto Sans SC",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "zFatJ",
+                      "name": "pill-停车",
+                      "fill": "#EAF7EF",
+                      "cornerRadius": 12,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "z2Z4v",
+                          "name": "t",
+                          "fill": "#5DBE88",
+                          "content": "停车",
+                          "fontFamily": "Noto Sans SC",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "ht8Nz",
+          "x": 0,
+          "y": 0,
+          "name": "遮罩",
+          "fill": "#00000060",
+          "width": 375,
+          "height": 844
+        },
+        {
+          "type": "frame",
+          "id": "W2OMQ",
+          "x": 24,
+          "y": 320,
+          "name": "弹窗",
+          "width": 327,
+          "fill": "#FFFFFF",
+          "cornerRadius": 20,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#2B4A3A28",
+            "offset": {
+              "x": 0,
+              "y": 8
+            },
+            "blur": 32
+          },
+          "layout": "vertical",
+          "gap": 20,
+          "padding": [
+            28,
+            24
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "ju8Je",
+              "name": "头部",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "zV6Al",
+                  "name": "图标圆",
+                  "width": 52,
+                  "height": 52,
+                  "fill": "#FFF3ED",
+                  "cornerRadius": 26,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "l3qkYI",
+                      "name": "ic",
+                      "width": 26,
+                      "height": 26,
+                      "icon": "triangle-alert",
+                      "library": "lucide",
+                      "fill": "#F97316"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "SYMH9",
+                  "name": "标题",
+                  "fill": "#2B4A3A",
+                  "content": "删除分类",
+                  "fontFamily": "Noto Sans SC",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "g5Jnmd",
+              "name": "提示框",
+              "width": "fill_container",
+              "fill": "#FFF8F5",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "padding": [
+                14,
+                16
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "j31jbk",
+                  "name": "提示",
+                  "fill": "#8A6550",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "该分类已关联 3 条账单，删除后账单仍可正常显示，但无法再按此分类筛选。\n\n确认删除？",
+                  "fontFamily": "Noto Sans SC",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Yk89z",
+              "name": "按钮组",
+              "width": "fill_container",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "aTeKf",
+                  "name": "取消",
+                  "width": "fill_container",
+                  "height": 46,
+                  "fill": "#F0FBF5",
+                  "cornerRadius": 16,
+                  "stroke": "#D1E8DD",
+                  "strokeWidth": 1.5,
+                  "padding": [
+                    14,
+                    0
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "j3RKX",
+                      "name": "t",
+                      "fill": "#7A9E8E",
+                      "content": "取消",
+                      "fontFamily": "Noto Sans SC",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "uSXN4",
+                  "name": "确认删除",
+                  "width": "fill_container",
+                  "height": 46,
+                  "fill": "#FF4444",
+                  "cornerRadius": 16,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#FF444418",
+                    "offset": {
+                      "x": 0,
+                      "y": 4
+                    },
+                    "blur": 20
+                  },
+                  "padding": [
+                    14,
+                    0
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "LzyFq",
+                      "name": "t",
+                      "fill": "#FFFFFF",
+                      "content": "确认删除",
+                      "fontFamily": "Noto Sans SC",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

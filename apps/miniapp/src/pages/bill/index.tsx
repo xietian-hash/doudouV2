@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { View, Text, ScrollView, Input } from '@tarojs/components';
 import Taro from '@tarojs/taro';
-import { getCategories } from '../../services/categories';
+import { getCategories, createCategory } from '../../services/categories';
 import { getAccounts } from '../../services/accounts';
 import { getTags, createTag } from '../../services/tags';
 import { createBill, createBillBatch, updateBill } from '../../services/bills';
@@ -11,6 +11,7 @@ import { formatDate, getDaysInMonth, getFirstDayOfWeek } from '../../utils/date'
 import { showToast } from '../../utils/toast';
 import NumKeyboard from '../../components/NumKeyboard';
 import Drawer from '../../components/Drawer';
+import Modal from '../../components/Modal';
 import BottomNav from '../../components/BottomNav';
 import './index.scss';
 
@@ -28,6 +29,7 @@ export default function BillPage() {
   const [type, setType] = useState<BillType>(1);
   const [amount, setAmount] = useState('0');
   const [categories, setCategories] = useState<Category[]>([]);
+  const [categoryTree, setCategoryTree] = useState<Category[]>([]);
   const [selectedCat, setSelectedCat] = useState<Category | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
@@ -42,8 +44,14 @@ export default function BillPage() {
   const [showTagDrawer, setShowTagDrawer] = useState(false);
   const [showDateDrawer, setShowDateDrawer] = useState(false);
   const [showRemarkDrawer, setShowRemarkDrawer] = useState(false);
+  const [showCategoryDrawer, setShowCategoryDrawer] = useState(false);
   const [showNewTagDrawer, setShowNewTagDrawer] = useState(false);
   const [newTagName, setNewTagName] = useState('');
+  const [showAddSubCatDialog, setShowAddSubCatDialog] = useState(false);
+  const [addSubCatParentId, setAddSubCatParentId] = useState<string | null>(null);
+  const [addSubCatParentName, setAddSubCatParentName] = useState('');
+  const [newSubCatName, setNewSubCatName] = useState('');
+  const [submittingSubCat, setSubmittingSubCat] = useState(false);
   const [calYear, setCalYear] = useState(new Date().getFullYear());
   const [calMonth, setCalMonth] = useState(new Date().getMonth() + 1);
 
@@ -76,7 +84,10 @@ export default function BillPage() {
 
   async function loadCategories() {
     try {
-      const cats = await getCategories({ type, onlyLeaf: true });
+      const [cats, tree] = await Promise.all([
+        getCategories({ type, onlyLeaf: true }),
+        getCategories({ type }),
+      ]);
       const sorted = [...cats].sort((a, b) => {
         if (a.lastUsedAt && b.lastUsedAt) return b.lastUsedAt.localeCompare(a.lastUsedAt);
         if (a.lastUsedAt) return -1;
@@ -84,6 +95,7 @@ export default function BillPage() {
         return a.sort - b.sort;
       });
       setCategories(sorted);
+      setCategoryTree(tree);
       setSelectedCat(prev => {
         if (prev && prev.type === type && sorted.some(cat => cat.id === prev.id)) return prev;
         return sorted[0] || null;
@@ -254,8 +266,66 @@ export default function BillPage() {
     setSelectedTagIds(prev => prev.includes(id) ? [] : [id]);
   };
 
+  const openCategoryDrawer = () => {
+    Taro.eventCenter.trigger('tabBar:hide');
+    setShowCategoryDrawer(true);
+  };
+
+  const closeCategoryDrawer = () => {
+    setShowCategoryDrawer(false);
+    Taro.eventCenter.trigger('tabBar:show');
+  };
+
+  const selectCategory = (cat: Category) => {
+    setSelectedCat(cat);
+    closeCategoryDrawer();
+  };
+
   const selectedTagNames = tags.filter(tag => selectedTagIds.includes(tag.id)).map(tag => tag.name);
-  const displayCategories = categories.length > 8 ? categories.slice(0, 7) : categories.slice(0, 8);
+  const hasMoreCategories = categories.length > 24;
+  const displayCategories = hasMoreCategories ? categories.slice(0, 23) : categories.slice(0, 24);
+  const categorySections = (() => {
+    const usedIds = new Set<string>();
+    const sections = categoryTree
+      .filter(parent => !parent.parentId && parent.children?.length)
+      .map(parent => {
+        const items = (parent.children || [])
+          .filter(child => categories.some(cat => cat.id === child.id))
+          .sort((a, b) => a.sort - b.sort);
+        items.forEach(item => usedIds.add(item.id));
+        return { title: parent.name, parentId: parent.id, items };
+      })
+      .filter(section => section.items.length > 0);
+    const rest = categories.filter(cat => !usedIds.has(cat.id));
+    if (rest.length > 0) sections.push({ title: '其他', parentId: undefined as string | undefined, items: rest });
+    return sections.length > 0 ? sections : [{ title: '分类', parentId: undefined as string | undefined, items: categories }];
+  })();
+
+  const openAddSubCat = (parentId: string, parentName: string) => {
+    setAddSubCatParentId(parentId);
+    setAddSubCatParentName(parentName);
+    setNewSubCatName('');
+    setShowAddSubCatDialog(true);
+  };
+
+  const handleAddSubCat = async () => {
+    const name = newSubCatName.trim();
+    if (!name) { showToast('请输入分类名称', 'error'); return; }
+    if (!addSubCatParentId) return;
+    setSubmittingSubCat(true);
+    try {
+      await createCategory({ name, type, parentId: addSubCatParentId });
+      setShowAddSubCatDialog(false);
+      setNewSubCatName('');
+      await loadCategories();
+      showToast('分类已添加');
+    } catch (e) {
+      console.error(e);
+      showToast('添加失败，请重试', 'error');
+    } finally {
+      setSubmittingSubCat(false);
+    }
+  };
   const categoryLabel = selectedCat?.name || '选择分类';
   const categoryIcon = selectedCat?.icon || '📝';
   const displayDate = (() => {
@@ -286,9 +356,8 @@ export default function BillPage() {
           <Text className={`amount-value${amount === '0' ? ' amount-value--placeholder' : ''}`}>
             {amount === '0' ? '0.00' : amount}
           </Text>
-          <View className='amount-cursor' />
         </View>
-        <View className='selected-category'>
+        <View className='selected-category' onClick={() => openCategoryDrawer()}>
           <View className='selected-category-icon'>
             <Text>{categoryIcon}</Text>
           </View>
@@ -316,13 +385,13 @@ export default function BillPage() {
               <Text className='cat-empty-text'>添加分类</Text>
             </View>
           )}
-          {categories.length > 8 && (
-            <View className='cat-item cat-item--add' onClick={() => Taro.navigateTo({ url: '/subpkg/category-manage/index' })}>
+          {hasMoreCategories && (
+            <View className='cat-item cat-item--add' onClick={() => openCategoryDrawer()}>
               <Text className='cat-icon'>＋</Text>
               <Text className='cat-name'>更多</Text>
             </View>
           )}
-          {categories.length > 0 && categories.length < 8 && (
+          {categories.length > 0 && categories.length < 24 && (
             <View className='cat-item cat-item--add' onClick={() => Taro.navigateTo({ url: '/subpkg/category-manage/index' })}>
               <Text className='cat-icon'>＋</Text>
               <Text className='cat-name'>添加</Text>
@@ -360,6 +429,108 @@ export default function BillPage() {
         onCenterTouchStart={startRecording}
         onCenterTouchEnd={stopRecording}
       />
+
+      {showCategoryDrawer && (
+        <View className='category-sheet-mask' onClick={() => closeCategoryDrawer()}>
+          <View className='category-sheet' onClick={e => e.stopPropagation()}>
+            <View className='category-sheet-handle-wrap'>
+              <View className='category-sheet-handle' />
+            </View>
+            <View className='category-sheet-title-row'>
+              <Text className='category-sheet-title'>选择分类</Text>
+              <Text className='category-sheet-close' onClick={() => closeCategoryDrawer()}>×</Text>
+            </View>
+            <ScrollView scrollY className='category-sheet-scroll'>
+              {categorySections.map(section => (
+                <View key={section.title} className='category-section'>
+                  <View className='category-section-header'>
+                    <Text className='category-section-title'>{section.title}</Text>
+                    <View className='category-section-line' />
+                  </View>
+                  <View className='category-section-grid'>
+                    {section.items.map(cat => (
+                      <View
+                        key={cat.id}
+                        className={`category-section-item${selectedCat?.id === cat.id ? ' category-section-item--active' : ''}`}
+                        onClick={() => selectCategory(cat)}
+                      >
+                        <Text className='category-section-icon'>{cat.icon || '📝'}</Text>
+                        <Text className='category-section-name'>{cat.name}</Text>
+                      </View>
+                    ))}
+                    {section.parentId && (
+                      <View
+                        className='category-section-item category-section-item--add'
+                        onClick={() => openAddSubCat(section.parentId!, section.title)}
+                      >
+                        <Text className='category-section-add-icon'>＋</Text>
+                        <Text className='category-section-name'>添加</Text>
+                      </View>
+                    )}
+                    {section.parentId && (4 - ((section.items.length + 1) % 4)) % 4 >= 1 && (
+                      <View className='category-section-empty' />
+                    )}
+                    {section.parentId && (4 - ((section.items.length + 1) % 4)) % 4 >= 2 && (
+                      <View className='category-section-empty' />
+                    )}
+                    {section.parentId && (4 - ((section.items.length + 1) % 4)) % 4 >= 3 && (
+                      <View className='category-section-empty' />
+                    )}
+                  </View>
+                </View>
+              ))}
+              <View className='category-section-grid category-section-grid--last'>
+                <View className='category-section-item category-section-item--add' onClick={() => Taro.navigateTo({ url: '/subpkg/category-manage/index' })}>
+                  <Text className='category-section-add-icon'>＋</Text>
+                  <Text className='category-section-name'>添加</Text>
+                </View>
+                <View className='category-section-empty' />
+                <View className='category-section-empty' />
+                <View className='category-section-empty' />
+              </View>
+            </ScrollView>
+            <View className='category-sheet-footer'>
+              <View className='category-sheet-cancel' onClick={() => closeCategoryDrawer()}>
+                <Text>取消</Text>
+              </View>
+              <View className='category-sheet-manage' onClick={() => Taro.navigateTo({ url: '/subpkg/category-manage/index' })}>
+                <Text>管理分类</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
+
+      <Modal
+        visible={showAddSubCatDialog}
+        title='添加二级分类'
+        cancelText='取消'
+        confirmText={submittingSubCat ? '添加中...' : '确认'}
+        onCancel={() => setShowAddSubCatDialog(false)}
+        onConfirm={handleAddSubCat}
+      >
+        <View className='add-subcat-form'>
+          <View className='add-subcat-field'>
+            <Text className='add-subcat-label'>分类名称</Text>
+            <View className='add-subcat-input-wrap'>
+              <Input
+                className='add-subcat-input'
+                value={newSubCatName}
+                onInput={e => setNewSubCatName(e.detail.value)}
+                placeholder='请输入分类名称'
+                maxlength={10}
+              />
+            </View>
+          </View>
+          <View className='add-subcat-field'>
+            <Text className='add-subcat-label'>所属分类</Text>
+            <View className='add-subcat-parent-display'>
+              <Text className='add-subcat-parent-text'>{addSubCatParentName}</Text>
+              <Text className='add-subcat-chevron'>⌄</Text>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <Drawer visible={showAccountDrawer} title='选择账户' onClose={() => setShowAccountDrawer(false)}>
         <View className='account-list'>

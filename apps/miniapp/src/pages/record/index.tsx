@@ -73,8 +73,8 @@ export default function RecordPage() {
   const totalExpense = bills
     .filter(bill => bill.type === 1)
     .reduce((sum, bill) => sum + Number(bill.amount), 0);
-  const totalIncome = bills
-    .filter(bill => bill.type === 2)
+  const todayExpense = bills
+    .filter(bill => bill.type === 1 && bill.billDate.slice(0, 10) === todayStr)
     .reduce((sum, bill) => sum + Number(bill.amount), 0);
 
   return (
@@ -86,7 +86,7 @@ export default function RecordPage() {
           </View>
           <View className='month-title'>
             <Text className='month-text'>{year}年{month}月</Text>
-            <Text className='month-subtitle'>{selectedDate ? '已筛选单日账单' : '本月账单概览'}</Text>
+            <Text className='month-subtitle'>{selectedDate ? '已筛选单日账单' : '每一笔都是生活的印记'}</Text>
           </View>
           <View className='month-nav' onClick={() => changeMonth(1)}>
             <Text className='month-nav-icon'>›</Text>
@@ -94,13 +94,23 @@ export default function RecordPage() {
         </View>
 
         <View className='summary-row'>
-          <View className='summary-pill'>
-            <Text className='summary-label'>支出</Text>
-            <Text className='summary-value'>¥{totalExpense.toFixed(2)}</Text>
+          <View className='summary-card'>
+            <View className='summary-card-top'>
+              <Text className='summary-card-label'>今日支出</Text>
+              <View className='summary-badge summary-badge--expense'>
+                <Text className='summary-badge-icon'>☀️</Text>
+              </View>
+            </View>
+            <Text className='summary-card-amount summary-card-amount--expense'>¥{todayExpense.toFixed(2)}</Text>
           </View>
-          <View className='summary-pill summary-pill--income'>
-            <Text className='summary-label'>收入</Text>
-            <Text className='summary-value'>¥{totalIncome.toFixed(2)}</Text>
+          <View className='summary-card'>
+            <View className='summary-card-top'>
+              <Text className='summary-card-label'>本月支出</Text>
+              <View className='summary-badge summary-badge--expense'>
+                <Text className='summary-badge-icon'>🌿</Text>
+              </View>
+            </View>
+            <Text className='summary-card-amount summary-card-amount--expense'>¥{totalExpense.toFixed(2)}</Text>
           </View>
         </View>
 

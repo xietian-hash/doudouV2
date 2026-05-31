@@ -26,7 +26,10 @@ export default function Modal({
   return (
     <View className='modal-mask' onClick={onCancel}>
       <View className='modal-box' onClick={e => e.stopPropagation()}>
-        <Text className='modal-title'>{title}</Text>
+        <View className='modal-title-row'>
+          <Text className='modal-title'>{title}</Text>
+          <Text className='modal-close' onClick={onCancel}>×</Text>
+        </View>
         {children && <View className='modal-body'>{children}</View>}
         <View className='modal-footer'>
           <View className='modal-btn modal-btn--cancel' onClick={onCancel}>
