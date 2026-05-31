@@ -54,7 +54,8 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
-            docker compose -f ~/${{ env.DEPLOY_DIR_NAME }}/docker-compose.deploy.yml stop api 2>/dev/null || true
+            docker stop ddyq-api 2>/dev/null || true
+            docker rm -f ddyq-api 2>/dev/null || true
             docker rm -f $(docker ps -aq --filter status=exited) 2>/dev/null || true
             docker builder prune --filter until=168h -f 2>/dev/null || true
 
@@ -109,8 +110,35 @@ jobs:
             SERVER_BASE_URL=${SECRET_SERVER_BASE_URL}
             EOF
 
+            # 确保共享网络存在
+            docker network create ddyq-net 2>/dev/null || true
+
+            # 确保 ddyq-mysql 在运行并加入 ddyq-net
+            if docker inspect ddyq-mysql &>/dev/null; then
+              docker start ddyq-mysql 2>/dev/null || true
+              docker network connect ddyq-net ddyq-mysql 2>/dev/null || true
+            else
+              docker run -d \
+                --name ddyq-mysql \
+                --restart unless-stopped \
+                --network ddyq-net \
+                -e MYSQL_ROOT_PASSWORD=root \
+                -e MYSQL_DATABASE=doudouyouqian \
+                -v ddyq_mysql_data:/var/lib/mysql \
+                docker.m.daocloud.io/library/mysql:8.0 \
+                --character-set-server=utf8mb4 \
+                --collation-server=utf8mb4_unicode_ci
+            fi
+
+            # 等待 MySQL 就绪（最多 60s）
+            for i in $(seq 1 30); do
+              if docker exec ddyq-mysql mysqladmin ping -h 127.0.0.1 -proot --silent 2>/dev/null; then
+                break
+              fi
+              sleep 2
+            done
+
             docker compose -f docker-compose.deploy.yml build --pull
-            docker compose -f docker-compose.deploy.yml up -d mysql
             docker compose -f docker-compose.deploy.yml run --rm api \
               node /app/node_modules/.bin/prisma migrate deploy \
               --schema /app/apps/api/prisma/schema.prisma
