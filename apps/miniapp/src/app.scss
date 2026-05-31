@@ -1,0 +1,21 @@
+@import './styles/variables';
+
+page,
+view,
+text,
+image,
+input,
+textarea,
+button,
+scroll-view,
+swiper,
+swiper-item {
+  box-sizing: border-box;
+}
+
+page {
+  background: $color-bg-page;
+  font-family: $font-cn;
+  color: $color-text-main;
+  font-size: 28rpx;
+}

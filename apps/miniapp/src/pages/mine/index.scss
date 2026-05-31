@@ -1,0 +1,113 @@
+@import '../../styles/variables';
+
+.mine-page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding-bottom: calc(112rpx + env(safe-area-inset-bottom));
+}
+
+// 用户信息卡片
+.user-card {
+  margin: $spacing-l;
+  background: $color-surface;
+  border-radius: $radius-xl;
+  border: 2rpx solid $color-divider;
+  padding: $spacing-xl;
+  display: flex;
+  align-items: center;
+  gap: $spacing-l;
+}
+
+.user-avatar-wrap {
+  flex-shrink: 0;
+}
+
+.user-avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  object-fit: cover;
+}
+
+.user-avatar-placeholder {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  background: $color-surface-light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-avatar-icon {
+  font-size: 56rpx;
+}
+
+.user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.user-name {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: $color-text-main;
+}
+
+.user-phone {
+  font-size: 24rpx;
+  color: $color-text-sub;
+}
+
+// 菜单
+.menu-section {
+  margin: 0 $spacing-l;
+}
+
+.menu-card {
+  background: $color-surface;
+  border-radius: $radius-l;
+  border: 2rpx solid $color-divider;
+  overflow: hidden;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: $spacing-l;
+  gap: $spacing-m;
+}
+
+.menu-item--bordered {
+  border-bottom: 2rpx solid $color-divider;
+}
+
+.menu-icon {
+  font-size: 40rpx;
+  width: 52rpx;
+  text-align: center;
+}
+
+.menu-label {
+  flex: 1;
+  font-size: 30rpx;
+  color: $color-text-main;
+}
+
+.menu-arrow {
+  font-size: 36rpx;
+  color: $color-text-weak;
+}
+
+// 版本信息
+.version-info {
+  margin-top: $spacing-xl;
+  text-align: center;
+}
+
+.version-text {
+  font-size: 24rpx;
+  color: $color-text-weak;
+}

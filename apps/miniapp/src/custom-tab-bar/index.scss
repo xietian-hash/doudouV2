@@ -1,0 +1,67 @@
+@import '../styles/variables';
+
+.custom-tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(112rpx + env(safe-area-inset-bottom));
+  background: $color-surface;
+  border-top: 2rpx solid $color-divider;
+  display: flex;
+  align-items: center;
+  z-index: 800;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.ctb-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 112rpx;
+}
+
+.ctb-item--center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ctb-icon {
+  font-size: 44rpx;
+  color: $color-text-weak;
+}
+
+.ctb-icon--active {
+  color: $color-brand;
+}
+
+.ctb-label {
+  font-size: 20rpx;
+  color: $color-text-weak;
+  margin-top: 4rpx;
+}
+
+.ctb-label--active {
+  color: $color-brand;
+}
+
+.ctb-fab {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  background: $color-brand;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -40rpx;
+  box-shadow: 0 8rpx 24rpx rgba(93, 190, 136, 0.44);
+}
+
+.ctb-fab-icon {
+  font-size: 56rpx;
+  color: #fff;
+  line-height: 1;
+}

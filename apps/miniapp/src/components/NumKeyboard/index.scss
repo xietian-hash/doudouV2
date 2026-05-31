@@ -1,0 +1,43 @@
+@import '../../styles/variables';
+
+.keyboard {
+  background: $color-surface;
+  border-top: 2rpx solid $color-divider;
+  padding: $spacing-s;
+}
+
+.keyboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-s;
+}
+
+.key {
+  height: 104rpx;
+  background: $color-surface-ctrl;
+  border-radius: $radius-s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.key-text {
+  font-size: 36rpx;
+  color: $color-text-main;
+  font-family: $font-num;
+}
+
+.key--delete {
+  background: $color-warn-bg;
+}
+
+.key--confirm {
+  background: $color-brand;
+  border-radius: $radius-m;
+  grid-row: span 2;
+}
+
+.key-confirm-text {
+  color: #fff;
+  font-weight: 600;
+}

@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        BigInt    @id @default(autoincrement())
+  openid    String    @unique @db.VarChar(64)
+  nickname  String?   @db.VarChar(50)
+  avatarUrl String?   @db.VarChar(255) @map("avatar_url")
+  phone     String?   @db.VarChar(11)
+  status    Int       @default(1) @db.TinyInt
+  isDeleted Int       @default(0) @db.TinyInt @map("is_deleted")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  accounts  Account[]
+  categories Category[]
+  tags      Tag[]
+  bills     Bill[]
+  @@map("users")
+}
+
+model Account {
+  id        BigInt   @id @default(autoincrement())
+  userId    BigInt   @map("user_id")
+  name      String   @db.VarChar(50)
+  type      Int      @db.TinyInt
+  balance   Decimal  @default(0) @db.Decimal(12, 2)
+  icon      String?  @db.VarChar(50)
+  sort      Int      @default(0)
+  isDefault Int      @default(0) @db.TinyInt @map("is_default")
+  isDeleted Int      @default(0) @db.TinyInt @map("is_deleted")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id])
+  bills     Bill[]
+  @@map("accounts")
+}
+
+model Category {
+  id         BigInt     @id @default(autoincrement())
+  userId     BigInt     @map("user_id")
+  parentId   BigInt?    @map("parent_id")
+  name       String     @db.VarChar(50)
+  type       Int        @db.TinyInt
+  icon       String?    @db.VarChar(50)
+  sort       Int        @default(0)
+  lastUsedAt DateTime?  @map("last_used_at")
+  isDeleted  Int        @default(0) @db.TinyInt @map("is_deleted")
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+  user       User       @relation(fields: [userId], references: [id])
+  parent     Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children   Category[] @relation("CategoryTree")
+  bills      Bill[]
+  @@map("categories")
+}
+
+model CategoryIcon {
+  id        BigInt   @id @default(autoincrement())
+  icon      String   @db.VarChar(20)
+  name      String   @db.VarChar(50)
+  sort      Int      @default(0)
+  isEnabled Int      @default(1) @db.TinyInt @map("is_enabled")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  @@map("category_icons")
+}
+
+model Bill {
+  id         BigInt    @id @default(autoincrement())
+  userId     BigInt    @map("user_id")
+  accountId  BigInt    @map("account_id")
+  categoryId BigInt    @map("category_id")
+  type       Int       @db.TinyInt
+  amount     Decimal   @db.Decimal(12, 2)
+  remark     String?   @db.VarChar(255)
+  billDate   DateTime  @map("bill_date") @db.Date
+  source     Int       @default(1) @db.TinyInt
+  voiceText  String?   @db.VarChar(500) @map("voice_text")
+  isDeleted  Int       @default(0) @db.TinyInt @map("is_deleted")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  user       User      @relation(fields: [userId], references: [id])
+  account    Account   @relation(fields: [accountId], references: [id])
+  category   Category  @relation(fields: [categoryId], references: [id])
+  billTags   BillTag[]
+  @@map("bills")
+}
+
+model Tag {
+  id        BigInt    @id @default(autoincrement())
+  userId    BigInt    @map("user_id")
+  name      String    @db.VarChar(20)
+  isDeleted Int       @default(0) @db.TinyInt @map("is_deleted")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  user      User      @relation(fields: [userId], references: [id])
+  billTags  BillTag[]
+  @@map("tags")
+}
+
+model BillTag {
+  id        BigInt   @id @default(autoincrement())
+  billId    BigInt   @map("bill_id")
+  tagId     BigInt   @map("tag_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  bill      Bill     @relation(fields: [billId], references: [id])
+  tag       Tag      @relation(fields: [tagId], references: [id])
+  @@map("bill_tags")
+}

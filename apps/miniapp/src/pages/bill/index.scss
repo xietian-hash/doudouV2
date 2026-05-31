@@ -1,0 +1,537 @@
+@import '../../styles/variables';
+
+.bill-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: $color-bg-bill;
+  overflow: hidden;
+}
+
+// 收支切换
+.type-switch {
+  display: flex;
+  margin: $spacing-m $spacing-l 0;
+  background: $color-surface-ctrl;
+  border-radius: $radius-pill;
+  padding: 6rpx;
+}
+
+.type-btn {
+  flex: 1;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-pill;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: $color-text-sub;
+  transition: all 0.2s;
+}
+
+.type-btn--active-expense {
+  background: $color-surface;
+  color: $color-text-main;
+  box-shadow: 0 2rpx 8rpx rgba(43, 74, 58, 0.1);
+}
+
+.type-btn--active-income {
+  background: $color-surface;
+  color: $color-income;
+  box-shadow: 0 2rpx 8rpx rgba(43, 74, 58, 0.1);
+}
+
+// 金额显示
+.amount-area {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  padding: $spacing-l $spacing-xl;
+  gap: 8rpx;
+}
+
+.amount-prefix {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: $color-text-main;
+  font-family: $font-num;
+}
+
+.amount-value {
+  font-size: 80rpx;
+  font-weight: 800;
+  color: $color-text-main;
+  font-family: $font-num;
+  line-height: 1;
+}
+
+.amount-value--placeholder {
+  color: $color-text-weak;
+}
+
+.amount-unit {
+  font-size: 28rpx;
+  color: $color-text-sub;
+}
+
+// 分类网格
+.cat-section {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cat-scroll {
+  height: 100%;
+}
+
+.cat-grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding: $spacing-s $spacing-l;
+  gap: $spacing-s;
+}
+
+.cat-item {
+  width: calc((100% - 4 * #{$spacing-s}) / 5);
+  height: 120rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  border-radius: $radius-m;
+  background: transparent;
+}
+
+.cat-item--active {
+  background: $color-surface-light;
+  border: 2rpx solid $color-brand;
+}
+
+.cat-item--add {
+  background: $color-surface-ctrl;
+}
+
+.cat-icon {
+  font-size: 36rpx;
+  line-height: 1;
+}
+
+.cat-name {
+  font-size: 20rpx;
+  color: $color-text-sub;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.cat-item--active .cat-name {
+  color: $color-brand-deep;
+}
+
+// 元信息行
+.meta-row {
+  display: flex;
+  background: $color-surface;
+  border-top: 2rpx solid $color-divider;
+  border-bottom: 2rpx solid $color-divider;
+}
+
+.meta-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-s $spacing-xs;
+  gap: 4rpx;
+}
+
+.meta-label {
+  font-size: 20rpx;
+  color: $color-text-weak;
+}
+
+.meta-value {
+  font-size: 22rpx;
+  color: $color-text-main;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.meta-value--remark {
+  color: $color-text-sub;
+}
+
+.meta-divider {
+  width: 2rpx;
+  background: $color-divider;
+  margin: $spacing-s 0;
+}
+
+// 语音按钮
+.voice-btn-wrap {
+  padding: $spacing-s $spacing-l;
+  background: $color-surface;
+}
+
+.voice-btn {
+  height: 72rpx;
+  background: $color-surface-light;
+  border: 2rpx solid $color-brand;
+  border-radius: $radius-pill;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-s;
+}
+
+.voice-btn--recording {
+  background: $color-income-bg;
+  border-color: $color-income;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(232, 93, 117, 0.4); }
+  70% { box-shadow: 0 0 0 16rpx rgba(232, 93, 117, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(232, 93, 117, 0); }
+}
+
+.voice-btn-icon {
+  font-size: 32rpx;
+}
+
+.voice-btn-text {
+  font-size: 26rpx;
+  color: $color-brand-deep;
+  font-weight: 600;
+}
+
+.voice-btn--recording .voice-btn-text {
+  color: $color-income;
+}
+
+// 账户列表
+.account-list {
+  padding-bottom: $spacing-m;
+}
+
+.account-item {
+  display: flex;
+  align-items: center;
+  padding: $spacing-m 0;
+  gap: $spacing-m;
+  border-bottom: 2rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.account-item--active {
+  .account-name { color: $color-brand; }
+}
+
+.account-icon {
+  font-size: 44rpx;
+}
+
+.account-info {
+  flex: 1;
+}
+
+.account-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: $color-text-main;
+}
+
+.account-balance {
+  font-size: 22rpx;
+  color: $color-text-sub;
+  margin-top: 4rpx;
+}
+
+.account-check {
+  font-size: 36rpx;
+  color: $color-brand;
+}
+
+// 标签列表
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-s;
+  padding-bottom: $spacing-m;
+}
+
+.tag-empty {
+  width: 100%;
+  padding: $spacing-xl 0;
+  text-align: center;
+}
+
+.tag-empty-text {
+  font-size: 26rpx;
+  color: $color-text-weak;
+}
+
+.tag-item {
+  padding: $spacing-xs $spacing-m;
+  background: $color-surface-ctrl;
+  border-radius: $radius-pill;
+  border: 2rpx solid $color-divider;
+  font-size: 26rpx;
+  color: $color-text-sub;
+}
+
+.tag-item--active {
+  background: $color-surface-light;
+  border-color: $color-brand;
+  color: $color-brand-deep;
+}
+
+// 通用确认按钮
+.drawer-confirm-btn {
+  flex: 1;
+  height: 88rpx;
+  background: $color-brand;
+  border-radius: $radius-m;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #fff;
+}
+
+// 日期选择器
+.date-picker {
+  padding-bottom: $spacing-m;
+}
+
+.date-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-m 0;
+}
+
+.date-picker-nav {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44rpx;
+  color: $color-text-sub;
+}
+
+.date-picker-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: $color-text-main;
+}
+
+.date-picker-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: $spacing-xs;
+}
+
+.date-picker-wd {
+  text-align: center;
+  font-size: 22rpx;
+  color: $color-text-weak;
+  padding: 8rpx 0;
+}
+
+.date-picker-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4rpx;
+}
+
+.date-picker-day {
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-s;
+}
+
+.date-picker-day--selected {
+  background: $color-brand;
+  .date-picker-day-num { color: #fff; font-weight: 700; }
+}
+
+.date-picker-day--today {
+  border: 2rpx solid $color-brand;
+}
+
+.date-picker-day-num {
+  font-size: 28rpx;
+  color: $color-text-main;
+  font-family: $font-num;
+}
+
+// 备注输入
+.remark-input-wrap {
+  padding: $spacing-m 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-s;
+}
+
+.remark-input {
+  background: $color-surface-ctrl;
+  border-radius: $radius-m;
+  padding: $spacing-m;
+  font-size: 28rpx;
+  color: $color-text-main;
+  min-height: 120rpx;
+}
+
+.remark-count {
+  font-size: 22rpx;
+  color: $color-text-weak;
+  text-align: right;
+}
+
+// 语音解析结果
+.voice-confirm-footer {
+  display: flex;
+  gap: 20rpx;
+  width: 100%;
+}
+
+.voice-cancel-btn {
+  flex: 1;
+  height: 88rpx;
+  background: $color-surface-ctrl;
+  border-radius: $radius-m;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  color: $color-text-sub;
+}
+
+.voice-save-btn {
+  flex: 2;
+  height: 88rpx;
+  background: $color-brand;
+  border-radius: $radius-m;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #fff;
+}
+
+.voice-save-btn--disabled {
+  opacity: 0.6;
+}
+
+.voice-item {
+  position: relative;
+  background: $color-surface-ctrl;
+  border-radius: $radius-m;
+  padding: $spacing-m;
+  margin-bottom: $spacing-s;
+  padding-right: 80rpx;
+}
+
+.voice-item-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.voice-item-cat {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: $color-text-main;
+}
+
+.voice-item-amount {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: $color-text-main;
+  font-family: $font-num;
+}
+
+.voice-item-remark {
+  font-size: 22rpx;
+  color: $color-text-sub;
+  margin-top: 6rpx;
+}
+
+.voice-item-warn {
+  font-size: 22rpx;
+  color: $color-warn;
+  margin-top: 4rpx;
+}
+
+.voice-item-delete {
+  position: absolute;
+  right: $spacing-m;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text-weak;
+  font-size: 28rpx;
+}
+
+// 录音遮罩
+.recording-mask {
+  position: fixed;
+  inset: 0;
+  background: $color-mask;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.recording-box {
+  background: $color-surface;
+  border-radius: $radius-xl;
+  padding: $spacing-xxl $spacing-xl;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-m;
+  min-width: 360rpx;
+}
+
+.recording-icon {
+  font-size: 80rpx;
+  animation: pulse-icon 1s infinite;
+}
+
+@keyframes pulse-icon {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.recording-text {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: $color-text-main;
+}
+
+.recording-hint {
+  font-size: 24rpx;
+  color: $color-text-sub;
+}

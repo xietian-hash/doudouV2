@@ -1,0 +1,64 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @ddyq/api exec prisma generate
+      - run: pnpm typecheck
+      - run: pnpm lint
+
+  deploy:
+    needs: lint-typecheck
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -f apps/api/Dockerfile -t ddyq-api:${{ github.sha }} .
+
+      - name: Save Docker image
+        run: docker save ddyq-api:${{ github.sha }} | gzip > ddyq-api.tar.gz
+
+      - name: Copy image to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: ddyq-api.tar.gz
+          target: /tmp/
+
+      - name: Deploy on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /opt/ddyq
+            docker load < /tmp/ddyq-api.tar.gz
+            docker tag ddyq-api:${{ github.sha }} ddyq-api:latest
+            docker-compose up -d --no-build api
+            docker exec ddyq-api node -e "
+              const { execSync } = require('child_process');
+              execSync('npx prisma migrate deploy', { cwd: '/app/apps/api', stdio: 'inherit' });
+            "
+            docker image prune -f
+            rm /tmp/ddyq-api.tar.gz

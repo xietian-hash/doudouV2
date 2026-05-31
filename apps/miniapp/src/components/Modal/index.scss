@@ -1,0 +1,66 @@
+@import '../../styles/variables';
+
+.modal-mask {
+  position: fixed;
+  inset: 0;
+  background: $color-mask;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-box {
+  width: 670rpx;
+  background: $color-surface;
+  border-radius: $radius-xl;
+  padding: $spacing-xl;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-l;
+}
+
+.modal-title {
+  font-size: 36rpx;
+  font-weight: 800;
+  color: $color-text-main;
+  text-align: center;
+}
+
+.modal-body {
+  font-size: 28rpx;
+  color: $color-text-sub;
+  text-align: center;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 20rpx;
+}
+
+.modal-btn {
+  flex: 1;
+  height: 84rpx;
+  border-radius: $radius-l;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.modal-btn--cancel {
+  background: $color-surface-meta;
+  color: $color-text-sub;
+  font-weight: normal;
+}
+
+.modal-btn--confirm {
+  background: $color-brand;
+  color: #fff;
+}
+
+.modal-btn--danger {
+  background: $color-error;
+  color: #fff;
+}

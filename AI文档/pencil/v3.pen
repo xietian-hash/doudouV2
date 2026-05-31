@@ -23658,6 +23658,918 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "SFJpc",
+      "x": 6682,
+      "y": 0,
+      "name": "App图标备选",
+      "width": 1180,
+      "height": 700,
+      "fill": "#F8FAF9",
+      "layout": "vertical",
+      "gap": 24,
+      "padding": [
+        36,
+        40
+      ],
+      "children": [
+        {
+          "type": "text",
+          "id": "RmuuD",
+          "name": "标题",
+          "fill": "#2B4A3A",
+          "content": "兜兜有钱 App 图标备选",
+          "fontFamily": "Noto Sans SC",
+          "fontSize": 26,
+          "fontWeight": "800"
+        },
+        {
+          "type": "text",
+          "id": "Y8WsW",
+          "name": "说明",
+          "fill": "#7A9E8E",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "用于微信小程序头像、未来 App 图标和品牌启动图方向评估。图标均采用 v3 清新治愈风，主色 #5DBE88，强调轻量、可信、日常记账。",
+          "fontFamily": "Noto Sans SC",
+          "fontSize": 13,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "y9EdC",
+          "name": "图标行-1",
+          "width": "fill_container",
+          "height": 230,
+          "gap": 20,
+          "children": [
+            {
+              "type": "frame",
+              "id": "I22hP7",
+              "name": "方案-钱袋兜兜",
+              "width": "fill_container",
+              "height": 230,
+              "fill": "#FFFFFF",
+              "cornerRadius": 18,
+              "stroke": "#E8F3EE",
+              "layout": "vertical",
+              "gap": 10,
+              "padding": [
+                16,
+                12
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "tHuaa",
+                  "name": "图标-钱袋兜兜",
+                  "width": 128,
+                  "height": 128,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 180,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#5DBE88",
+                        "position": 0
+                      },
+                      {
+                        "color": "#A8E6C1",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#2B4A3A18",
+                    "offset": {
+                      "x": 0,
+                      "y": 8
+                    },
+                    "blur": 18
+                  },
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "ellipse",
+                      "id": "W3evk",
+                      "x": 78,
+                      "y": 10,
+                      "name": "高光",
+                      "fill": "#FFFFFF55",
+                      "width": 34,
+                      "height": 34
+                    },
+                    {
+                      "type": "frame",
+                      "id": "A5q4fX",
+                      "x": 28,
+                      "y": 36,
+                      "name": "钱袋主体",
+                      "width": 72,
+                      "height": 68,
+                      "fill": "#FFFFFF",
+                      "cornerRadius": [
+                        24,
+                        24,
+                        18,
+                        18
+                      ],
+                      "stroke": "#E8F3EE",
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "wYW3S",
+                          "x": 22,
+                          "y": 17,
+                          "name": "兜",
+                          "fill": "#2B8A57",
+                          "content": "兜",
+                          "fontFamily": "Noto Sans SC",
+                          "fontSize": 28,
+                          "fontWeight": "900"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "KhB6I",
+                      "x": 45,
+                      "y": 29,
+                      "name": "束口",
+                      "fill": "#2B8A57",
+                      "width": 38,
+                      "height": 12
+                    },
+                    {
+                      "type": "text",
+                      "id": "WMyou",
+                      "x": 82,
+                      "y": 74,
+                      "name": "金币",
+                      "fill": "#F5A25A",
+                      "content": "¥",
+                      "fontFamily": "Inter",
+                      "fontSize": 28,
+                      "fontWeight": "800"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "bckwp",
+                  "name": "名称",
+                  "fill": "#2B4A3A",
+                  "content": "钱袋兜兜",
+                  "fontFamily": "Noto Sans SC",
+                  "fontSize": 15,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "IMp7W",
+                  "name": "描述",
+                  "fill": "#7A9E8E",
+                  "textGrowth": "fixed-width",
+                  "width": 140,
+                  "content": "最贴合名称，亲和记忆强",
+                  "textAlign": "center",
+                  "fontFamily": "Noto Sans SC",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ZLPj0",
+              "name": "方案-口袋硬币",
+              "width": "fill_container",
+              "height": 230,
+              "fill": "#FFFFFF",
+              "cornerRadius": 18,
+              "stroke": "#E8F3EE",
+              "layout": "vertical",
+              "gap": 10,
+              "padding": [
+                16,
+                12
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "TCViz",
+                  "name": "图标-口袋硬币",
+                  "width": 128,
+                  "height": 128,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 180,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#4DB87A",
+                        "position": 0
+                      },
+                      {
+                        "color": "#DDF7E8",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#2B4A3A18",
+                    "offset": {
+                      "x": 0,
+                      "y": 8
+                    },
+                    "blur": 18
+                  },
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "path",
+                      "id": "Dye2P",
+                      "x": 26,
+                      "y": 34,
+                      "name": "口袋",
+                      "geometry": "M8 10h64v38c0 20-16 30-32 30-16 0-32-10-32-30z",
+                      "viewBox": [
+                        0,
+                        0,
+                        80,
+                        80
+                      ],
+                      "fill": "#FFFFFF",
+                      "width": 76,
+                      "height": 78,
+                      "stroke": "#E8F3EE",
+                      "strokeWidth": 1.2
+                    },
+                    {
+                      "type": "ellipse",
+                      "id": "cK59V",
+                      "x": 32,
+                      "y": 20,
+                      "name": "硬币1",
+                      "fill": "#F5D66B",
+                      "width": 28,
+                      "height": 28,
+                      "stroke": "#FFFFFF",
+                      "strokeWidth": 3
+                    },
+                    {
+                      "type": "ellipse",
+                      "id": "YobkO",
+                      "x": 58,
+                      "y": 26,
+                      "name": "硬币2",
+                      "fill": "#F5A25A",
+                      "width": 28,
+                      "height": 28,
+                      "stroke": "#FFFFFF",
+                      "strokeWidth": 3
+                    },
+                    {
+                      "type": "text",
+                      "id": "mcb8K",
+                      "x": 51,
+                      "y": 55,
+                      "name": "字标",
+                      "fill": "#2B8A57",
+                      "content": "兜",
+                      "fontFamily": "Noto Sans SC",
+                      "fontSize": 26,
+                      "fontWeight": "900"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "uML0d",
+                  "name": "名称",
+                  "fill": "#2B4A3A",
+                  "content": "口袋硬币",
+                  "fontFamily": "Noto Sans SC",
+                  "fontSize": 15,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "WmuV8",
+                  "name": "描述",
+                  "fill": "#7A9E8E",
+                  "textGrowth": "fixed-width",
+                  "width": 140,
+                  "content": "偏生活化，像把钱放进口袋",
+                  "textAlign": "center",
+                  "fontFamily": "Noto Sans SC",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "qR8qO",
+              "name": "方案-圆润金币",
+              "width": "fill_container",
+              "height": 230,
+              "fill": "#FFFFFF",
+              "cornerRadius": 18,
+              "stroke": "#E8F3EE",
+              "layout": "vertical",
+              "gap": 10,
+              "padding": [
+                16,
+                12
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "FTAVf",
+                  "name": "图标-圆润金币",
+                  "width": 128,
+                  "height": 128,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 180,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#F0FBF5",
+                        "position": 0
+                      },
+                      {
+                        "color": "#FFFFFF",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#2B4A3A18",
+                    "offset": {
+                      "x": 0,
+                      "y": 8
+                    },
+                    "blur": 18
+                  },
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "ellipse",
+                      "id": "J7wg7",
+                      "x": 18,
+                      "y": 18,
+                      "name": "主圆",
+                      "fill": "#5DBE88",
+                      "width": 92,
+                      "height": 92,
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#5DBE8840",
+                        "offset": {
+                          "x": 0,
+                          "y": 4
+                        },
+                        "blur": 12
+                      }
+                    },
+                    {
+                      "type": "ellipse",
+                      "id": "zwOMZ",
+                      "x": 30,
+                      "y": 30,
+                      "name": "内圆",
+                      "fill": "#EAF7EF",
+                      "width": 68,
+                      "height": 68
+                    },
+                    {
+                      "type": "text",
+                      "id": "rbwX6",
+                      "x": 52,
+                      "y": 42,
+                      "name": "金额符",
+                      "fill": "#2B8A57",
+                      "content": "¥",
+                      "fontFamily": "Inter",
+                      "fontSize": 42,
+                      "fontWeight": "900"
+                    },
+                    {
+                      "type": "text",
+                      "id": "PsqSA",
+                      "x": 75,
+                      "y": 76,
+                      "name": "小兜",
+                      "fill": "#5DBE88",
+                      "content": "兜",
+                      "fontFamily": "Noto Sans SC",
+                      "fontSize": 18,
+                      "fontWeight": "900"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "f9nqq",
+                  "name": "名称",
+                  "fill": "#2B4A3A",
+                  "content": "圆润金币",
+                  "fontFamily": "Noto Sans SC",
+                  "fontSize": 15,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "iAVQW",
+                  "name": "描述",
+                  "fill": "#7A9E8E",
+                  "textGrowth": "fixed-width",
+                  "width": 140,
+                  "content": "最简洁，适合小尺寸识别",
+                  "textAlign": "center",
+                  "fontFamily": "Noto Sans SC",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "AKkpL",
+          "name": "图标行-2",
+          "width": "fill_container",
+          "height": 230,
+          "gap": 20,
+          "children": [
+            {
+              "type": "frame",
+              "id": "M0uaN",
+              "name": "方案-语音记账",
+              "width": "fill_container",
+              "height": 230,
+              "fill": "#FFFFFF",
+              "cornerRadius": 18,
+              "stroke": "#E8F3EE",
+              "layout": "vertical",
+              "gap": 10,
+              "padding": [
+                16,
+                12
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "s4HsHU",
+                  "name": "图标-语音记账",
+                  "width": 128,
+                  "height": 128,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 180,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#5DBE88",
+                        "position": 0
+                      },
+                      {
+                        "color": "#77D7A0",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#2B4A3A18",
+                    "offset": {
+                      "x": 0,
+                      "y": 8
+                    },
+                    "blur": 18
+                  },
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "l3oL74",
+                      "x": 34,
+                      "y": 24,
+                      "name": "麦克风底",
+                      "width": 60,
+                      "height": 78,
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 30,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "M5x1F",
+                          "x": 16,
+                          "y": 12,
+                          "name": "麦克风",
+                          "width": 28,
+                          "height": 28,
+                          "icon": "mic",
+                          "library": "lucide",
+                          "fill": "#2B8A57"
+                        },
+                        {
+                          "type": "text",
+                          "id": "ZxdE8",
+                          "x": 17,
+                          "y": 42,
+                          "name": "兜",
+                          "fill": "#2B8A57",
+                          "content": "兜",
+                          "fontFamily": "Noto Sans SC",
+                          "fontSize": 22,
+                          "fontWeight": "900"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 3,
+                      "id": "gySXD",
+                      "x": 22,
+                      "y": 44,
+                      "name": "声波1",
+                      "fill": "#FFFFFFAA",
+                      "width": 5,
+                      "height": 24
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 3,
+                      "id": "M4xPTJ",
+                      "x": 101,
+                      "y": 40,
+                      "name": "声波2",
+                      "fill": "#FFFFFFAA",
+                      "width": 5,
+                      "height": 32
+                    },
+                    {
+                      "type": "ellipse",
+                      "id": "rFaO5",
+                      "x": 82,
+                      "y": 78,
+                      "name": "金币",
+                      "fill": "#F5A25A",
+                      "width": 26,
+                      "height": 26
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "vT6bX",
+                  "name": "名称",
+                  "fill": "#2B4A3A",
+                  "content": "语音记账",
+                  "fontFamily": "Noto Sans SC",
+                  "fontSize": 15,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "cbVyx",
+                  "name": "描述",
+                  "fill": "#7A9E8E",
+                  "textGrowth": "fixed-width",
+                  "width": 140,
+                  "content": "突出语音记账核心差异化",
+                  "textAlign": "center",
+                  "fontFamily": "Noto Sans SC",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "L3RYX",
+              "name": "方案-账本叶子",
+              "width": "fill_container",
+              "height": 230,
+              "fill": "#FFFFFF",
+              "cornerRadius": 18,
+              "stroke": "#E8F3EE",
+              "layout": "vertical",
+              "gap": 10,
+              "padding": [
+                16,
+                12
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "hHZdl",
+                  "name": "图标-账本叶子",
+                  "width": 128,
+                  "height": 128,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 180,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#2B8A57",
+                        "position": 0
+                      },
+                      {
+                        "color": "#5DBE88",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#2B4A3A18",
+                    "offset": {
+                      "x": 0,
+                      "y": 8
+                    },
+                    "blur": 18
+                  },
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "PlRor",
+                      "x": 28,
+                      "y": 24,
+                      "name": "账本",
+                      "width": 72,
+                      "height": 84,
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 16,
+                      "stroke": "#E8F3EE",
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 3,
+                          "id": "w6p6T",
+                          "x": 16,
+                          "y": 22,
+                          "name": "线1",
+                          "fill": "#E8F3EE",
+                          "width": 40,
+                          "height": 5
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 3,
+                          "id": "ZRdzB",
+                          "x": 16,
+                          "y": 36,
+                          "name": "线2",
+                          "fill": "#E8F3EE",
+                          "width": 34,
+                          "height": 5
+                        },
+                        {
+                          "type": "text",
+                          "id": "jN6RH",
+                          "x": 23,
+                          "y": 48,
+                          "name": "兜",
+                          "fill": "#2B8A57",
+                          "content": "兜",
+                          "fontFamily": "Noto Sans SC",
+                          "fontSize": 24,
+                          "fontWeight": "900"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "path",
+                      "id": "T8sYT",
+                      "x": 76,
+                      "y": 16,
+                      "name": "叶子",
+                      "geometry": "M4 18c1-11 14-16 25-14-1 12-9 24-21 23 4-5 10-11 17-18-7 4-14 8-21 9z",
+                      "viewBox": [
+                        0,
+                        0,
+                        32,
+                        32
+                      ],
+                      "fill": "#A8E6C1",
+                      "width": 34,
+                      "height": 34
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "EIsCT",
+                  "name": "名称",
+                  "fill": "#2B4A3A",
+                  "content": "账本叶子",
+                  "fontFamily": "Noto Sans SC",
+                  "fontSize": 15,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "l55X8",
+                  "name": "描述",
+                  "fill": "#7A9E8E",
+                  "textGrowth": "fixed-width",
+                  "width": 140,
+                  "content": "更稳重，适合财务工具感",
+                  "textAlign": "center",
+                  "fontFamily": "Noto Sans SC",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "r4BFWh",
+              "name": "方案-品牌字标",
+              "width": "fill_container",
+              "height": 230,
+              "fill": "#FFFFFF",
+              "cornerRadius": 18,
+              "stroke": "#E8F3EE",
+              "layout": "vertical",
+              "gap": 10,
+              "padding": [
+                16,
+                12
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "jBwQ1",
+                  "name": "图标-品牌字标",
+                  "width": 128,
+                  "height": 128,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 180,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#F0FBF5",
+                        "position": 0
+                      },
+                      {
+                        "color": "#FFFFFF",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#2B4A3A18",
+                    "offset": {
+                      "x": 0,
+                      "y": 8
+                    },
+                    "blur": 18
+                  },
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "cpnIb",
+                      "x": 18,
+                      "y": 18,
+                      "name": "字标圆",
+                      "width": 92,
+                      "height": 92,
+                      "fill": "#5DBE88",
+                      "cornerRadius": 30,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "niXWR",
+                          "x": 22,
+                          "y": 18,
+                          "name": "兜",
+                          "fill": "#FFFFFF",
+                          "content": "兜",
+                          "fontFamily": "Noto Sans SC",
+                          "fontSize": 48,
+                          "fontWeight": "900"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ellipse",
+                      "id": "sVAfs",
+                      "x": 82,
+                      "y": 18,
+                      "name": "右上金币",
+                      "fill": "#F5A25A",
+                      "width": 28,
+                      "height": 28,
+                      "stroke": "#FFFFFF",
+                      "strokeWidth": 4
+                    },
+                    {
+                      "type": "text",
+                      "id": "XCOS1",
+                      "x": 91,
+                      "y": 23,
+                      "name": "金额",
+                      "fill": "#FFFFFF",
+                      "content": "¥",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "900"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "qsLEA",
+                  "name": "名称",
+                  "fill": "#2B4A3A",
+                  "content": "品牌字标",
+                  "fontFamily": "Noto Sans SC",
+                  "fontSize": 15,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "TqZ1n",
+                  "name": "描述",
+                  "fill": "#7A9E8E",
+                  "textGrowth": "fixed-width",
+                  "width": 140,
+                  "content": "最强品牌露出，适合启动页延展",
+                  "textAlign": "center",
+                  "fontFamily": "Noto Sans SC",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

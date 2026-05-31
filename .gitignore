@@ -1,3 +1,27 @@
 密钥/
 .claude/settings.local.json
 AI文档/项目信息.md
+
+node_modules/
+dist/
+.env
+.env.local
+.env.production
+
+# Taro
+apps/miniapp/.taro-cache/
+
+# NestJS
+apps/api/dist/
+
+# Prisma
+apps/api/prisma/migrations/*.sql
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

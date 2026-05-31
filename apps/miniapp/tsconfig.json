@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "lib": ["ES6", "DOM"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@ddyq/shared": ["../../packages/shared/src"]
+    },
+    "module": "CommonJS",
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

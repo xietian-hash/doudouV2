@@ -1,0 +1,118 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
+import { AppException, ErrorCode } from '../../common/errors/business-error';
+
+interface LlmMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
+interface LlmChoice {
+  message: {
+    role: string;
+    content: string;
+  };
+  finish_reason: string;
+}
+
+interface LlmResponse {
+  choices: LlmChoice[];
+}
+
+export interface ParsedBillRaw {
+  type: number;
+  amount: number;
+  categoryName: string;
+  remark: string;
+  billDate: string;
+}
+
+@Injectable()
+export class LlmService {
+  private readonly logger = new Logger(LlmService.name);
+
+  constructor(private readonly configService: ConfigService) {}
+
+  async parseVoiceText(
+    text: string,
+    today: string,
+  ): Promise<ParsedBillRaw[]> {
+    const baseUrl = this.configService.get<string>('LLM_BASE_URL');
+    const model = this.configService.get<string>('LLM_MODEL');
+    const apiKey = this.configService.get<string>('LLM_API_KEY');
+
+    const systemPrompt = `你是一个记账助手，负责从用户的语音文本中提取记账信息。
+今天的日期是 ${today}。
+请将用户描述的消费或收入信息解析成JSON数组，每条记录包含以下字段：
+- type: 数字，1=支出，2=收入
+- amount: 数字，金额（正数）
+- categoryName: 字符串，分类名称（如：餐饮、交通、工资等）
+- remark: 字符串，备注说明
+- billDate: 字符串，账单日期，格式为 YYYY-MM-DD
+
+只返回JSON数组，不要包含任何其他文字或markdown格式。
+如果无法解析出有效信息，返回空数组 []。
+
+示例输入："今天午饭花了15块，打车花了30"
+示例输出：[{"type":1,"amount":15,"categoryName":"餐饮","remark":"午饭","billDate":"${today}"},{"type":1,"amount":30,"categoryName":"交通","remark":"打车","billDate":"${today}"}]`;
+
+    const messages: LlmMessage[] = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: text },
+    ];
+
+    try {
+      const response = await axios.post<LlmResponse>(
+        `${baseUrl}/chat/completions`,
+        {
+          model,
+          messages,
+          temperature: 0.1,
+          max_tokens: 1000,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          timeout: 30000,
+        },
+      );
+
+      const content = response.data.choices[0]?.message?.content ?? '[]';
+      const trimmed = content.trim();
+
+      // 提取JSON数组（处理可能的markdown代码块）
+      const jsonMatch = trimmed.match(/\[[\s\S]*\]/);
+      if (!jsonMatch) {
+        this.logger.warn(`LLM返回格式异常: ${trimmed}`);
+        return [];
+      }
+
+      const parsed = JSON.parse(jsonMatch[0]) as ParsedBillRaw[];
+
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+
+      return parsed.filter(
+        (item) =>
+          typeof item.type === 'number' &&
+          typeof item.amount === 'number' &&
+          item.amount > 0 &&
+          typeof item.categoryName === 'string',
+      );
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        this.logger.error(`LLM API请求失败: ${error.message}`);
+        throw new AppException(ErrorCode.INTERNAL, 'AI服务暂时不可用，请稍后重试');
+      }
+      if (error instanceof SyntaxError) {
+        this.logger.warn('LLM返回的JSON解析失败');
+        return [];
+      }
+      throw error;
+    }
+  }
+}

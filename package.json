@@ -1,0 +1,18 @@
+{
+  "name": "doudouyouqian",
+  "private": true,
+  "scripts": {
+    "dev:api": "pnpm --filter @ddyq/api dev",
+    "dev:miniapp": "pnpm --filter @ddyq/miniapp dev:weapp",
+    "build:api": "pnpm --filter @ddyq/api build",
+    "build:miniapp": "pnpm --filter @ddyq/miniapp build:weapp",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "eslint": "^9.9.0",
+    "typescript": "^5.5.4"
+  }
+}

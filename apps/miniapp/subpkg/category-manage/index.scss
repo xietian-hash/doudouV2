@@ -1,0 +1,253 @@
+@import '../../src/styles/variables';
+
+.cat-manage-page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-bar-custom {
+  display: flex;
+  background: $color-surface;
+  border-bottom: 2rpx solid $color-divider;
+}
+
+.tab-btn {
+  flex: 1;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  color: $color-text-sub;
+  border-bottom: 4rpx solid transparent;
+  font-weight: 600;
+}
+
+.tab-btn--active {
+  color: $color-brand;
+  border-bottom-color: $color-brand;
+}
+
+.page-actions {
+  padding: $spacing-m $spacing-l;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.add-btn {
+  padding: $spacing-xs $spacing-m;
+  background: $color-brand;
+  border-radius: $radius-pill;
+}
+
+.add-btn-text {
+  font-size: 26rpx;
+  color: #fff;
+  font-weight: 600;
+}
+
+.cat-list {
+  flex: 1;
+  padding: 0 $spacing-l;
+}
+
+.list-loading,
+.list-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 0;
+  gap: $spacing-m;
+}
+
+.list-loading-text,
+.list-empty-text {
+  font-size: 28rpx;
+  color: $color-text-weak;
+}
+
+.list-empty-icon {
+  font-size: 80rpx;
+}
+
+.cat-card {
+  background: $color-surface;
+  border-radius: $radius-l;
+  border: 2rpx solid $color-divider;
+  margin-bottom: $spacing-m;
+  overflow: hidden;
+}
+
+.cat-parent-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-m $spacing-l;
+  border-bottom: 2rpx solid $color-divider;
+}
+
+.cat-parent-left {
+  display: flex;
+  align-items: center;
+  gap: $spacing-m;
+  flex: 1;
+  overflow: hidden;
+}
+
+.cat-icon {
+  font-size: 40rpx;
+  flex-shrink: 0;
+}
+
+.cat-parent-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: $color-text-main;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cat-parent-actions {
+  display: flex;
+  gap: $spacing-xs;
+  flex-shrink: 0;
+}
+
+.cat-action-btn {
+  padding: $spacing-xs $spacing-s;
+  background: $color-surface-ctrl;
+  border-radius: $radius-s;
+}
+
+.cat-action-btn--delete {
+  background: $color-income-bg;
+}
+
+.cat-action-text {
+  font-size: 22rpx;
+  color: $color-text-sub;
+}
+
+.cat-action-text--delete {
+  color: $color-error;
+}
+
+.sub-cat-list {
+  padding: $spacing-s 0;
+}
+
+.sub-cat-item {
+  display: flex;
+  align-items: center;
+  padding: $spacing-s $spacing-l;
+  gap: $spacing-m;
+  border-bottom: 2rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.sub-cat-icon {
+  font-size: 32rpx;
+  flex-shrink: 0;
+}
+
+.sub-cat-name {
+  flex: 1;
+  font-size: 26rpx;
+  color: $color-text-main;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sub-cat-actions {
+  display: flex;
+  gap: $spacing-xs;
+  flex-shrink: 0;
+}
+
+// 表单
+.cat-form {
+  padding-bottom: $spacing-m;
+}
+
+.form-row {
+  margin-bottom: $spacing-l;
+}
+
+.form-label {
+  font-size: 26rpx;
+  color: $color-text-sub;
+  margin-bottom: $spacing-s;
+  display: block;
+}
+
+.form-input {
+  background: $color-surface-ctrl;
+  border-radius: $radius-m;
+  padding: $spacing-m;
+  font-size: 28rpx;
+  color: $color-text-main;
+  height: 88rpx;
+}
+
+.icon-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-s;
+  padding-bottom: $spacing-s;
+}
+
+.icon-item {
+  width: calc((100% - 4 * #{$spacing-s}) / 5);
+  height: 100rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+  border-radius: $radius-m;
+  background: $color-surface-ctrl;
+  border: 2rpx solid transparent;
+}
+
+.icon-item--active {
+  background: $color-surface-light;
+  border-color: $color-brand;
+}
+
+.icon-item-text {
+  font-size: 32rpx;
+}
+
+.icon-item-name {
+  font-size: 18rpx;
+  color: $color-text-sub;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.form-save-btn {
+  flex: 1;
+  height: 88rpx;
+  background: $color-brand;
+  border-radius: $radius-m;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #fff;
+}
+
+.form-save-btn--disabled {
+  opacity: 0.6;
+}

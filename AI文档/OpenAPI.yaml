@@ -1,1 +1,1217 @@
-> 接口契约文档（符合OpenAPI 3.0）
+openapi: 3.0.3
+info:
+  title: 兜兜有钱 API
+  version: 0.1.0
+  description: |
+    兜兜有钱微信记账小程序接口契约。
+
+    设计契约：
+    1. 前后端开发前，优先编写并落盘接口契约文档到本文件。
+    2. 所有非登录接口必须明确鉴权方式。
+    3. 所有业务接口必须明确权限点。当前一期权限点以接口权限和当前用户数据权限为主，不引入菜单/RBAC 体系。
+    4. 用户最终通过微信 openid 识别；后端使用 wxCode 换取 openid，创建或识别 users.openid 后签发 JWT。
+servers:
+  - url: /api
+    description: 默认 API 前缀
+tags:
+  - name: Auth
+    description: 登录与当前用户
+  - name: Accounts
+    description: 账户管理
+  - name: Categories
+    description: 分类与分类图标
+  - name: Tags
+    description: 标签管理
+  - name: Bills
+    description: 账单管理
+  - name: Voice
+    description: 语音记账
+  - name: Statistics
+    description: 统计分析
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/wechat-login:
+    post:
+      tags: [Auth]
+      summary: 微信小程序登录
+      description: 后端使用 wxCode 换取微信 openid，并以 users.openid 创建或识别用户后签发 JWT。
+      security: []
+      x-permissions:
+        auth: none
+        interface: auth:wechat-login
+        dataScope: none
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WechatLoginRequest"
+      responses:
+        "200":
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/LoginResult"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+
+  /users/me:
+    get:
+      tags: [Auth]
+      summary: 获取当前用户信息
+      x-permissions:
+        auth: bearer
+        interface: users:read-self
+        dataScope: current-user
+      responses:
+        "200":
+          description: 当前用户信息
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /accounts:
+    get:
+      tags: [Accounts]
+      summary: 查询账户列表
+      x-permissions:
+        auth: bearer
+        interface: accounts:list
+        dataScope: current-user
+      responses:
+        "200":
+          description: 账户列表
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Account"
+    post:
+      tags: [Accounts]
+      summary: 新增账户
+      x-permissions:
+        auth: bearer
+        interface: accounts:create
+        dataScope: current-user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountCreateRequest"
+      responses:
+        "200":
+          description: 新增成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Account"
+        "409":
+          $ref: "#/components/responses/ConflictError"
+
+  /accounts/{accountId}:
+    patch:
+      tags: [Accounts]
+      summary: 编辑账户
+      x-permissions:
+        auth: bearer
+        interface: accounts:update
+        dataScope: current-user-owned-resource
+      parameters:
+        - $ref: "#/components/parameters/AccountId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountUpdateRequest"
+      responses:
+        "200":
+          description: 编辑成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Account"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+    delete:
+      tags: [Accounts]
+      summary: 删除账户
+      x-permissions:
+        auth: bearer
+        interface: accounts:delete
+        dataScope: current-user-owned-resource
+      parameters:
+        - $ref: "#/components/parameters/AccountId"
+      responses:
+        "200":
+          $ref: "#/components/responses/Ok"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "409":
+          $ref: "#/components/responses/ConflictError"
+
+  /accounts/{accountId}/default:
+    post:
+      tags: [Accounts]
+      summary: 设置默认账户
+      x-permissions:
+        auth: bearer
+        interface: accounts:set-default
+        dataScope: current-user-owned-resource
+      parameters:
+        - $ref: "#/components/parameters/AccountId"
+      responses:
+        "200":
+          $ref: "#/components/responses/Ok"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
+  /category-icons:
+    get:
+      tags: [Categories]
+      summary: 查询分类图标库
+      x-permissions:
+        auth: bearer
+        interface: category-icons:list
+        dataScope: shared-enabled-icons
+      responses:
+        "200":
+          description: 分类图标列表
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/CategoryIcon"
+
+  /categories:
+    get:
+      tags: [Categories]
+      summary: 查询分类列表
+      x-permissions:
+        auth: bearer
+        interface: categories:list
+        dataScope: current-user
+      parameters:
+        - name: type
+          in: query
+          required: false
+          description: 分类类型：1支出 2收入
+          schema:
+            $ref: "#/components/schemas/BillType"
+        - name: onlyLeaf
+          in: query
+          required: false
+          description: 是否只返回叶子分类
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: 分类列表
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Category"
+    post:
+      tags: [Categories]
+      summary: 新增分类
+      x-permissions:
+        auth: bearer
+        interface: categories:create
+        dataScope: current-user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryCreateRequest"
+      responses:
+        "200":
+          description: 新增成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Category"
+        "409":
+          $ref: "#/components/responses/ConflictError"
+
+  /categories/{categoryId}:
+    patch:
+      tags: [Categories]
+      summary: 编辑分类
+      x-permissions:
+        auth: bearer
+        interface: categories:update
+        dataScope: current-user-owned-resource
+      parameters:
+        - $ref: "#/components/parameters/CategoryId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryUpdateRequest"
+      responses:
+        "200":
+          description: 编辑成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Category"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+    delete:
+      tags: [Categories]
+      summary: 删除分类
+      x-permissions:
+        auth: bearer
+        interface: categories:delete
+        dataScope: current-user-owned-resource
+      parameters:
+        - $ref: "#/components/parameters/CategoryId"
+      responses:
+        "200":
+          $ref: "#/components/responses/Ok"
+        "409":
+          $ref: "#/components/responses/ConflictError"
+
+  /tags:
+    get:
+      tags: [Tags]
+      summary: 查询标签列表
+      x-permissions:
+        auth: bearer
+        interface: tags:list
+        dataScope: current-user
+      responses:
+        "200":
+          description: 标签列表
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Tag"
+    post:
+      tags: [Tags]
+      summary: 新增标签
+      x-permissions:
+        auth: bearer
+        interface: tags:create
+        dataScope: current-user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TagCreateRequest"
+      responses:
+        "200":
+          description: 新增成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Tag"
+
+  /tags/{tagId}:
+    patch:
+      tags: [Tags]
+      summary: 重命名标签
+      x-permissions:
+        auth: bearer
+        interface: tags:update
+        dataScope: current-user-owned-resource
+      parameters:
+        - $ref: "#/components/parameters/TagId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TagUpdateRequest"
+      responses:
+        "200":
+          description: 编辑成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Tag"
+    delete:
+      tags: [Tags]
+      summary: 删除标签
+      x-permissions:
+        auth: bearer
+        interface: tags:delete
+        dataScope: current-user-owned-resource
+      parameters:
+        - $ref: "#/components/parameters/TagId"
+      responses:
+        "200":
+          $ref: "#/components/responses/Ok"
+
+  /bills:
+    get:
+      tags: [Bills]
+      summary: 查询账单列表
+      x-permissions:
+        auth: bearer
+        interface: bills:list
+        dataScope: current-user
+      parameters:
+        - name: month
+          in: query
+          required: false
+          description: 月份，格式 YYYY-MM
+          schema:
+            type: string
+            pattern: "^\\d{4}-\\d{2}$"
+        - name: date
+          in: query
+          required: false
+          description: 日期，格式 YYYY-MM-DD
+          schema:
+            type: string
+            format: date
+        - $ref: "#/components/parameters/PageNo"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: 账单分页列表
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/BillPage"
+    post:
+      tags: [Bills]
+      summary: 新增账单
+      x-permissions:
+        auth: bearer
+        interface: bills:create
+        dataScope: current-user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BillCreateRequest"
+      responses:
+        "200":
+          description: 新增成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Bill"
+
+  /bills/batch:
+    post:
+      tags: [Bills]
+      summary: 批量新增账单
+      x-permissions:
+        auth: bearer
+        interface: bills:batch-create
+        dataScope: current-user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  minItems: 1
+                  items:
+                    $ref: "#/components/schemas/BillCreateRequest"
+      responses:
+        "200":
+          description: 批量新增成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Bill"
+
+  /bills/{billId}:
+    get:
+      tags: [Bills]
+      summary: 查询账单详情
+      x-permissions:
+        auth: bearer
+        interface: bills:read
+        dataScope: current-user-owned-resource
+      parameters:
+        - $ref: "#/components/parameters/BillId"
+      responses:
+        "200":
+          description: 账单详情
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/BillDetail"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+    patch:
+      tags: [Bills]
+      summary: 编辑账单
+      x-permissions:
+        auth: bearer
+        interface: bills:update
+        dataScope: current-user-owned-resource
+      parameters:
+        - $ref: "#/components/parameters/BillId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BillUpdateRequest"
+      responses:
+        "200":
+          description: 编辑成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Bill"
+    delete:
+      tags: [Bills]
+      summary: 删除账单
+      x-permissions:
+        auth: bearer
+        interface: bills:delete
+        dataScope: current-user-owned-resource
+      parameters:
+        - $ref: "#/components/parameters/BillId"
+      responses:
+        "200":
+          $ref: "#/components/responses/Ok"
+
+  /bills/calendar-summary:
+    get:
+      tags: [Bills]
+      summary: 查询日历每日收支汇总
+      x-permissions:
+        auth: bearer
+        interface: bills:calendar-summary
+        dataScope: current-user
+      parameters:
+        - name: month
+          in: query
+          required: true
+          description: 月份，格式 YYYY-MM
+          schema:
+            type: string
+            pattern: "^\\d{4}-\\d{2}$"
+      responses:
+        "200":
+          description: 日历汇总
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/CalendarSummaryItem"
+
+  /voice/parse:
+    post:
+      tags: [Voice]
+      summary: 解析语音记账文本
+      description: 接收语音识别文本，调用大模型解析为待确认账单数组。
+      x-permissions:
+        auth: bearer
+        interface: voice:parse
+        dataScope: current-user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoiceParseRequest"
+      responses:
+        "200":
+          description: 解析结果
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/VoiceParsedBill"
+
+  /statistics/category-expense:
+    get:
+      tags: [Statistics]
+      summary: 查询支出分类占比
+      x-permissions:
+        auth: bearer
+        interface: statistics:category-expense
+        dataScope: current-user
+      parameters:
+        - name: month
+          in: query
+          required: true
+          description: 月份，格式 YYYY-MM
+          schema:
+            type: string
+            pattern: "^\\d{4}-\\d{2}$"
+      responses:
+        "200":
+          description: 分类支出统计
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/CategoryExpenseStat"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        除微信登录接口外，其他接口均使用 JWT Bearer 鉴权。
+        后端从 JWT 中解析当前 userId，并基于 userId 做当前用户数据隔离。
+
+  parameters:
+    AccountId:
+      name: accountId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    CategoryId:
+      name: categoryId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    TagId:
+      name: tagId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    BillId:
+      name: billId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    PageNo:
+      name: pageNo
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  responses:
+    Ok:
+      description: 操作成功
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SuccessEnvelope"
+    ValidationError:
+      description: 参数错误
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+    UnauthorizedError:
+      description: 未登录或 token 失效
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+    ForbiddenError:
+      description: 无权限或跨用户数据访问
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+    NotFoundError:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+    ConflictError:
+      description: 唯一约束冲突或业务状态冲突
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+
+  schemas:
+    SuccessEnvelope:
+      type: object
+      required: [code, message, traceId]
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: ok
+        data:
+          description: 成功响应数据，不同接口返回不同结构；无数据时可为空对象或 null
+        traceId:
+          type: string
+          example: 018f0d8b9d2c4b91
+
+    ErrorEnvelope:
+      type: object
+      required: [code, message, traceId]
+      properties:
+        code:
+          type: integer
+          example: 10001
+        message:
+          type: string
+          example: VALIDATION_ERROR
+        details:
+          type: object
+          nullable: true
+          additionalProperties: true
+        traceId:
+          type: string
+          example: 018f0d8b9d2c4b91
+
+    WechatLoginRequest:
+      type: object
+      required: [wxCode]
+      properties:
+        wxCode:
+          type: string
+          description: Taro.login 获取的微信登录 code
+        nickname:
+          type: string
+          maxLength: 50
+          nullable: true
+        avatarUrl:
+          type: string
+          maxLength: 255
+          nullable: true
+
+    LoginResult:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+          description: JWT
+        user:
+          $ref: "#/components/schemas/User"
+
+    User:
+      type: object
+      required: [id, openid, status]
+      properties:
+        id:
+          type: integer
+          format: int64
+        openid:
+          type: string
+          description: 微信 openid
+        nickname:
+          type: string
+          nullable: true
+        avatarUrl:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        status:
+          type: integer
+          enum: [0, 1]
+
+    AccountType:
+      type: integer
+      description: 账户类型：1现金 2银行卡 3支付宝 4微信 5其他
+      enum: [1, 2, 3, 4, 5]
+
+    Account:
+      type: object
+      required: [id, name, type, balance, sort, isDefault]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        type:
+          $ref: "#/components/schemas/AccountType"
+        balance:
+          type: string
+          format: decimal
+          example: "100.00"
+        icon:
+          type: string
+          nullable: true
+        sort:
+          type: integer
+        isDefault:
+          type: boolean
+
+    AccountCreateRequest:
+      type: object
+      required: [name, type]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+        type:
+          $ref: "#/components/schemas/AccountType"
+        icon:
+          type: string
+          maxLength: 50
+          nullable: true
+
+    AccountUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+        type:
+          $ref: "#/components/schemas/AccountType"
+        icon:
+          type: string
+          maxLength: 50
+          nullable: true
+
+    BillType:
+      type: integer
+      description: 账单类型：1支出 2收入
+      enum: [1, 2]
+
+    CategoryIcon:
+      type: object
+      required: [id, icon, name, sort]
+      properties:
+        id:
+          type: integer
+          format: int64
+        icon:
+          type: string
+          description: Unicode Emoji
+          example: 🍜
+        name:
+          type: string
+          example: 餐饮
+        sort:
+          type: integer
+
+    Category:
+      type: object
+      required: [id, name, type, sort]
+      properties:
+        id:
+          type: integer
+          format: int64
+        parentId:
+          type: integer
+          format: int64
+          nullable: true
+        name:
+          type: string
+        type:
+          $ref: "#/components/schemas/BillType"
+        icon:
+          type: string
+          nullable: true
+        sort:
+          type: integer
+        lastUsedAt:
+          type: string
+          format: date-time
+          nullable: true
+        children:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
+
+    CategoryCreateRequest:
+      type: object
+      required: [name, type]
+      properties:
+        parentId:
+          type: integer
+          format: int64
+          nullable: true
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+        type:
+          $ref: "#/components/schemas/BillType"
+        icon:
+          type: string
+          maxLength: 20
+          nullable: true
+
+    CategoryUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+        icon:
+          type: string
+          maxLength: 20
+          nullable: true
+
+    Tag:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+
+    TagCreateRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 20
+
+    TagUpdateRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 20
+
+    BillSource:
+      type: integer
+      description: 来源：1手工录入 2语音识别
+      enum: [1, 2]
+
+    BillCreateRequest:
+      type: object
+      required: [accountId, categoryId, type, amount, billDate]
+      properties:
+        accountId:
+          type: integer
+          format: int64
+        categoryId:
+          type: integer
+          format: int64
+        type:
+          $ref: "#/components/schemas/BillType"
+        amount:
+          type: string
+          format: decimal
+          example: "38.00"
+        remark:
+          type: string
+          maxLength: 255
+          nullable: true
+        billDate:
+          type: string
+          format: date
+        tagIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+        source:
+          $ref: "#/components/schemas/BillSource"
+        voiceText:
+          type: string
+          maxLength: 500
+          nullable: true
+
+    BillUpdateRequest:
+      allOf:
+        - $ref: "#/components/schemas/BillCreateRequest"
+
+    Bill:
+      type: object
+      required: [id, accountId, categoryId, type, amount, billDate, source]
+      properties:
+        id:
+          type: integer
+          format: int64
+        accountId:
+          type: integer
+          format: int64
+        accountName:
+          type: string
+        categoryId:
+          type: integer
+          format: int64
+        categoryName:
+          type: string
+          description: 二级分类名称优先
+        categoryIcon:
+          type: string
+          nullable: true
+        type:
+          $ref: "#/components/schemas/BillType"
+        amount:
+          type: string
+          format: decimal
+        remark:
+          type: string
+          nullable: true
+        billDate:
+          type: string
+          format: date
+        source:
+          $ref: "#/components/schemas/BillSource"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
+
+    BillDetail:
+      allOf:
+        - $ref: "#/components/schemas/Bill"
+        - type: object
+          properties:
+            voiceText:
+              type: string
+              nullable: true
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+    BillPage:
+      type: object
+      required: [pageNo, pageSize, total, list]
+      properties:
+        pageNo:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+        list:
+          type: array
+          items:
+            $ref: "#/components/schemas/Bill"
+
+    CalendarSummaryItem:
+      type: object
+      required: [date, expenseAmount, incomeAmount]
+      properties:
+        date:
+          type: string
+          format: date
+        expenseAmount:
+          type: string
+          format: decimal
+          example: "80.00"
+        incomeAmount:
+          type: string
+          format: decimal
+          example: "0.00"
+
+    VoiceParseRequest:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: 语音识别后的原始文本
+
+    VoiceParsedBill:
+      type: object
+      required: [type, amount, confidence]
+      properties:
+        type:
+          $ref: "#/components/schemas/BillType"
+        amount:
+          type: string
+          format: decimal
+        categoryId:
+          type: integer
+          format: int64
+          nullable: true
+        categoryName:
+          type: string
+          nullable: true
+        categoryIcon:
+          type: string
+          nullable: true
+        remark:
+          type: string
+          nullable: true
+        billDate:
+          type: string
+          format: date
+          nullable: true
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        needsConfirm:
+          type: boolean
+          description: 是否需要用户补充或确认
+
+    CategoryExpenseStat:
+      type: object
+      required: [categoryId, categoryName, amount, percent]
+      properties:
+        categoryId:
+          type: integer
+          format: int64
+        categoryName:
+          type: string
+        categoryIcon:
+          type: string
+          nullable: true
+        amount:
+          type: string
+          format: decimal
+        percent:
+          type: number
+          format: float

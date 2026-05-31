@@ -1,0 +1,105 @@
+@import '../../styles/variables';
+
+.cat-manage-page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  display: flex;
+  flex-direction: column;
+}
+
+.type-tabs {
+  display: flex;
+  gap: 16rpx;
+  padding: 24rpx 32rpx;
+  background: $color-surface;
+}
+
+.type-tab {
+  flex: 1;
+  height: 72rpx;
+  border-radius: $radius-m;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  color: $color-text-sub;
+  background: $color-surface-ctrl;
+
+  &--active {
+    background: $color-surface-light;
+    color: $color-brand;
+    font-weight: 600;
+  }
+}
+
+.cat-list {
+  flex: 1;
+  padding: 16rpx 24rpx;
+}
+
+.cat-placeholder {
+  padding: 120rpx 0;
+  display: flex;
+  justify-content: center;
+}
+
+.cat-placeholder-text {
+  font-size: 28rpx;
+  color: $color-text-weak;
+}
+
+.cat-group {
+  margin-bottom: 16rpx;
+  background: $color-surface;
+  border-radius: $radius-l;
+  overflow: hidden;
+}
+
+.cat-row {
+  display: flex;
+  align-items: center;
+  padding: 0 24rpx;
+  border-bottom: 1rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &--child {
+    padding-left: 52rpx;
+    background: $color-bg-bill;
+  }
+}
+
+.cat-row-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 24rpx 0;
+}
+
+.cat-icon {
+  font-size: 36rpx;
+  line-height: 1;
+}
+
+.cat-name {
+  flex: 1;
+  font-size: 28rpx;
+  color: $color-text-main;
+}
+
+.cat-chevron {
+  font-size: 22rpx;
+  color: $color-text-weak;
+}
+
+.cat-del-btn {
+  padding: 24rpx 8rpx 24rpx 16rpx;
+}
+
+.cat-del-icon {
+  font-size: 32rpx;
+  opacity: 0.45;
+}
