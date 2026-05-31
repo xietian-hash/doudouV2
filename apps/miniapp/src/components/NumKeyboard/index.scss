@@ -3,13 +3,38 @@
 .keyboard {
   background: $color-surface;
   border-top: 2rpx solid $color-divider;
-  padding: $spacing-s;
+  padding: 20rpx 32rpx 24rpx;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
-.keyboard-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: $spacing-s;
+.keyboard-main {
+  display: flex;
+  gap: 16rpx;
+}
+
+.keyboard-left {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.keyboard-row {
+  display: flex;
+  gap: 16rpx;
+}
+
+.keyboard-row .key {
+  flex: 1;
+}
+
+.keyboard-right {
+  width: 144rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
 }
 
 .key {
@@ -19,6 +44,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
 }
 
 .key-text {
@@ -31,13 +57,27 @@
   background: $color-warn-bg;
 }
 
+.key-delete-text {
+  font-size: 36rpx;
+  color: $color-warn;
+}
+
 .key--confirm {
+  height: 224rpx;
   background: $color-brand;
   border-radius: $radius-m;
-  grid-row: span 2;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.key-confirm-icon {
+  font-size: 40rpx;
+  line-height: 1;
+  color: #fff;
 }
 
 .key-confirm-text {
   color: #fff;
+  font-size: 26rpx;
   font-weight: 600;
 }

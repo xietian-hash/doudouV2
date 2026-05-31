@@ -11,6 +11,7 @@ import { formatDate, getDaysInMonth, getFirstDayOfWeek } from '../../utils/date'
 import { showToast } from '../../utils/toast';
 import NumKeyboard from '../../components/NumKeyboard';
 import Drawer from '../../components/Drawer';
+import BottomNav from '../../components/BottomNav';
 import './index.scss';
 
 type BillType = 1 | 2;
@@ -21,7 +22,7 @@ interface ParsedItem extends VoiceParsedBill {
   tagIds?: string[];
 }
 
-const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
+const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日'];
 
 export default function BillPage() {
   const [type, setType] = useState<BillType>(1);
@@ -254,6 +255,13 @@ export default function BillPage() {
   };
 
   const selectedTagNames = tags.filter(tag => selectedTagIds.includes(tag.id)).map(tag => tag.name);
+  const displayCategories = categories.length > 8 ? categories.slice(0, 7) : categories.slice(0, 8);
+  const categoryLabel = selectedCat?.name || '选择分类';
+  const categoryIcon = selectedCat?.icon || '📝';
+  const displayDate = (() => {
+    const [, m, d] = billDate.split('-');
+    return m && d ? `${Number(m)}月${Number(d)}日` : billDate;
+  })();
   const calendarDays: (number | null)[] = [
     ...Array(getFirstDayOfWeek(calYear, calMonth)).fill(null),
     ...Array.from({ length: getDaysInMonth(calYear, calMonth) }, (_, i) => i + 1),
@@ -263,75 +271,95 @@ export default function BillPage() {
     <View className='bill-page'>
       <View className='type-switch'>
         <View className={`type-btn${type === 1 ? ' type-btn--active-expense' : ''}`} onClick={() => setType(1)}>
-          <Text>支出</Text>
+          <Text className='type-text'>支出</Text>
+          {type === 1 && <View className='type-underline' />}
         </View>
         <View className={`type-btn${type === 2 ? ' type-btn--active-income' : ''}`} onClick={() => setType(2)}>
-          <Text>收入</Text>
+          <Text className='type-text'>收入</Text>
+          {type === 2 && <View className='type-underline' />}
         </View>
       </View>
 
-      <View className='amount-area'>
-        <Text className='amount-prefix'>{type === 1 ? '-' : '+'}</Text>
-        <Text className={`amount-value${amount === '0' ? ' amount-value--placeholder' : ''}`}>
-          {amount === '0' ? '0.00' : amount}
-        </Text>
-        <Text className='amount-unit'>元</Text>
+      <View className='amount-category-row'>
+        <View className='amount-display'>
+          <Text className='amount-unit'>¥</Text>
+          <Text className={`amount-value${amount === '0' ? ' amount-value--placeholder' : ''}`}>
+            {amount === '0' ? '0.00' : amount}
+          </Text>
+          <View className='amount-cursor' />
+        </View>
+        <View className='selected-category'>
+          <View className='selected-category-icon'>
+            <Text>{categoryIcon}</Text>
+          </View>
+          <View className='selected-category-text'>
+            <Text>{categoryLabel} ▾</Text>
+          </View>
+        </View>
       </View>
 
-      <View className='cat-section'>
-        <ScrollView scrollY className='cat-scroll'>
-          <View className='cat-grid'>
-            {categories.map(cat => (
-              <View
-                key={cat.id}
-                className={`cat-item${selectedCat?.id === cat.id ? ' cat-item--active' : ''}`}
-                onClick={() => setSelectedCat(cat)}
-              >
-                <Text className='cat-icon'>{cat.icon || '□'}</Text>
-                <Text className='cat-name'>{cat.name}</Text>
-              </View>
-            ))}
+      <View className='cat-grid-card'>
+        <View className='cat-grid'>
+          {displayCategories.map(cat => (
+            <View
+              key={cat.id}
+              className={`cat-item${selectedCat?.id === cat.id ? ' cat-item--active' : ''}`}
+              onClick={() => setSelectedCat(cat)}
+            >
+              <Text className='cat-icon'>{cat.icon || '📝'}</Text>
+              <Text className='cat-name'>{cat.name}</Text>
+            </View>
+          ))}
+          {categories.length === 0 && (
+            <View className='cat-empty' onClick={() => Taro.navigateTo({ url: '/subpkg/category-manage/index' })}>
+              <Text className='cat-empty-icon'>＋</Text>
+              <Text className='cat-empty-text'>添加分类</Text>
+            </View>
+          )}
+          {categories.length > 8 && (
             <View className='cat-item cat-item--add' onClick={() => Taro.navigateTo({ url: '/subpkg/category-manage/index' })}>
-              <Text className='cat-icon'>+</Text>
+              <Text className='cat-icon'>＋</Text>
+              <Text className='cat-name'>更多</Text>
+            </View>
+          )}
+          {categories.length > 0 && categories.length < 8 && (
+            <View className='cat-item cat-item--add' onClick={() => Taro.navigateTo({ url: '/subpkg/category-manage/index' })}>
+              <Text className='cat-icon'>＋</Text>
               <Text className='cat-name'>添加</Text>
             </View>
-          </View>
-        </ScrollView>
+          )}
+        </View>
       </View>
+
+      <View className='bill-flex-space' />
 
       <View className='meta-row'>
-        <View className='meta-item' onClick={() => setShowAccountDrawer(true)}>
-          <Text className='meta-label'>账户</Text>
+        <View className='meta-pill' onClick={() => setShowAccountDrawer(true)}>
+          <Text className='meta-icon'>▣</Text>
           <Text className='meta-value'>{selectedAccount?.name || '选择账户'}</Text>
+          <Text className='meta-chev'>⌄</Text>
         </View>
-        <View className='meta-item' onClick={() => setShowDateDrawer(true)}>
-          <Text className='meta-label'>日期</Text>
-          <Text className='meta-value'>{billDate}</Text>
+        <View className='meta-pill' onClick={() => setShowTagDrawer(true)}>
+          <Text className='meta-icon'>⌗</Text>
+          <Text className='meta-value'>{selectedTagNames[0] || '标签'}</Text>
         </View>
-        <View className='meta-item' onClick={() => setShowTagDrawer(true)}>
-          <Text className='meta-label'>标签</Text>
-          <Text className='meta-value'>{selectedTagNames[0] || '无'}</Text>
+        <View className='meta-pill' onClick={() => setShowDateDrawer(true)}>
+          <Text className='meta-icon'>□</Text>
+          <Text className='meta-value'>{displayDate}</Text>
         </View>
-        <View className='meta-item' onClick={() => setShowRemarkDrawer(true)}>
-          <Text className='meta-label'>备注</Text>
-          <Text className='meta-value'>{remark || '无'}</Text>
-        </View>
-      </View>
-
-      <View className='voice-btn-wrap'>
-        <View
-          className={`voice-btn${recording ? ' voice-btn--recording' : ''}`}
-          onTouchStart={startRecording}
-          onTouchEnd={stopRecording}
-        >
-          <Text className='voice-btn-icon'>🎙</Text>
-          <Text className='voice-btn-text'>
-            {recording ? '松开完成录音' : voiceParsing ? '解析中...' : '按住语音记账'}
-          </Text>
+        <View className='meta-pill meta-pill--remark' onClick={() => setShowRemarkDrawer(true)}>
+          <Text className='meta-icon'>✎</Text>
+          <Text className='meta-value'>{remark || '备注'}</Text>
         </View>
       </View>
 
       <NumKeyboard value={amount} onChange={setAmount} onConfirm={handleSave} />
+
+      <BottomNav
+        centerBusy={voiceParsing}
+        onCenterTouchStart={startRecording}
+        onCenterTouchEnd={stopRecording}
+      />
 
       <Drawer visible={showAccountDrawer} title='选择账户' onClose={() => setShowAccountDrawer(false)}>
         <View className='account-list'>

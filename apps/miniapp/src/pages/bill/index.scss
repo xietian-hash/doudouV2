@@ -6,105 +6,149 @@
   height: 100vh;
   background: $color-bg-bill;
   overflow: hidden;
+  padding-bottom: calc(112rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
 }
 
-// 收支切换
 .type-switch {
-  display: flex;
-  margin: $spacing-s 0 0;
+  height: 88rpx;
   background: $color-surface;
-  border-radius: 0;
-  padding: 6rpx;
   border-bottom: 2rpx solid $color-divider;
+  display: flex;
+  justify-content: center;
 }
 
 .type-btn {
-  flex: 1;
-  height: 72rpx;
+  position: relative;
+  width: 254rpx;
+  height: 88rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: $radius-pill;
-  font-size: 28rpx;
-  font-weight: 600;
+}
+
+.type-text {
+  font-size: 30rpx;
   color: $color-text-sub;
-  transition: all 0.2s;
 }
 
-.type-btn--active-expense {
-  background: $color-surface;
-  color: $color-text-main;
-  box-shadow: 0 2rpx 8rpx rgba(43, 74, 58, 0.1);
-}
-
-.type-btn--active-income {
-  background: $color-surface;
-  color: $color-income;
-  box-shadow: 0 2rpx 8rpx rgba(43, 74, 58, 0.1);
-}
-
-// 金额显示
-.amount-area {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  padding: 28rpx $spacing-xl 24rpx;
-  gap: 8rpx;
-}
-
-.amount-prefix {
-  font-size: 44rpx;
+.type-btn--active-expense .type-text,
+.type-btn--active-income .type-text {
+  color: $color-brand;
   font-weight: 700;
-  color: $color-text-main;
-  font-family: $font-num;
 }
 
-.amount-value {
-  font-size: 80rpx;
-  font-weight: 800;
-  color: $color-text-main;
-  font-family: $font-num;
-  line-height: 1;
+.type-underline {
+  position: absolute;
+  left: 50%;
+  bottom: 8rpx;
+  width: 48rpx;
+  height: 6rpx;
+  margin-left: -24rpx;
+  border-radius: 4rpx;
+  background: $color-brand;
 }
 
-.amount-value--placeholder {
-  color: $color-text-weak;
+.amount-category-row {
+  min-height: 144rpx;
+  background: $color-surface;
+  border-bottom: 2rpx solid $color-divider;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 40rpx;
+  box-sizing: border-box;
+}
+
+.amount-display {
+  display: flex;
+  align-items: flex-end;
+  gap: 6rpx;
+  min-width: 0;
 }
 
 .amount-unit {
-  font-size: 28rpx;
+  font-size: 36rpx;
+  line-height: 1.15;
   color: $color-text-sub;
+  font-family: $font-num;
+  font-weight: 600;
 }
 
-// 分类网格
-.cat-section {
-  flex: 1;
-  min-height: 0;
+.amount-value {
+  max-width: 410rpx;
+  font-size: 72rpx;
+  line-height: 1;
+  font-weight: 800;
+  color: $color-text-main;
+  font-family: $font-num;
   overflow: hidden;
-  background: $color-surface;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.cat-scroll {
-  height: 100%;
+.amount-value--placeholder {
+  color: $color-text-main;
+}
+
+.amount-cursor {
+  width: 4rpx;
+  height: 72rpx;
+  margin-bottom: 4rpx;
+  border-radius: 2rpx;
+  background: $color-brand;
+}
+
+.selected-category {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex-shrink: 0;
+}
+
+.selected-category-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 40rpx;
+  background: $color-surface-light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+}
+
+.selected-category-text {
+  max-width: 180rpx;
+  font-size: 36rpx;
+  font-weight: 800;
+  color: $color-brand-deep;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cat-grid-card {
+  background: $color-surface;
+  padding: 20rpx 32rpx 28rpx;
+  box-sizing: border-box;
 }
 
 .cat-grid {
-  display: flex;
-  flex-wrap: wrap;
-  padding: $spacing-s $spacing-l $spacing-m;
-  gap: $spacing-s;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8rpx;
 }
 
-.cat-item {
-  width: calc((100% - 4 * #{$spacing-s}) / 5);
-  height: 120rpx;
+.cat-item,
+.cat-empty {
+  height: 124rpx;
+  border-radius: 18rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6rpx;
-  border-radius: $radius-m;
-  background: transparent;
+  gap: 8rpx;
+  box-sizing: border-box;
 }
 
 .cat-item--active {
@@ -112,113 +156,86 @@
   border: 2rpx solid $color-brand;
 }
 
-.cat-item--add {
+.cat-item--add,
+.cat-empty {
   background: $color-surface-ctrl;
 }
 
-.cat-icon {
-  font-size: 36rpx;
+.cat-icon,
+.cat-empty-icon {
+  font-size: 40rpx;
   line-height: 1;
 }
 
-.cat-name {
-  font-size: 20rpx;
+.cat-name,
+.cat-empty-text {
+  max-width: 100%;
+  font-size: 24rpx;
   color: $color-text-sub;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 100%;
 }
 
 .cat-item--active .cat-name {
   color: $color-brand-deep;
+  font-weight: 700;
 }
 
-// 元信息行
+.bill-flex-space {
+  flex: 1;
+  min-height: 70rpx;
+  background: $color-bg-bill;
+}
+
 .meta-row {
-  display: flex;
   background: $color-surface;
   border-top: 2rpx solid $color-divider;
   border-bottom: 2rpx solid $color-divider;
-}
-
-.meta-item {
-  flex: 1;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: $spacing-s $spacing-xs;
-  gap: 4rpx;
+  justify-content: space-between;
+  gap: 12rpx;
+  padding: 20rpx 40rpx;
+  box-sizing: border-box;
 }
 
-.meta-label {
-  font-size: 20rpx;
-  color: $color-text-weak;
+.meta-pill {
+  min-width: 0;
+  height: 62rpx;
+  border-radius: 20rpx;
+  background: $color-bg-bill;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 0 20rpx;
+  box-sizing: border-box;
+}
+
+.meta-pill:first-child {
+  flex: 1.25;
+}
+
+.meta-pill--remark {
+  flex: 0.85;
+}
+
+.meta-icon,
+.meta-chev {
+  flex-shrink: 0;
+  font-size: 24rpx;
+  color: $color-text-sub;
 }
 
 .meta-value {
-  font-size: 22rpx;
+  min-width: 0;
+  font-size: 26rpx;
   color: $color-text-main;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 100%;
 }
 
-.meta-value--remark {
-  color: $color-text-sub;
-}
-
-.meta-divider {
-  width: 2rpx;
-  background: $color-divider;
-  margin: $spacing-s 0;
-}
-
-// 语音按钮
-.voice-btn-wrap {
-  padding: $spacing-s $spacing-l $spacing-m;
-  background: $color-surface;
-}
-
-.voice-btn {
-  height: 72rpx;
-  background: $color-surface-light;
-  border: 2rpx solid $color-brand;
-  border-radius: $radius-pill;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: $spacing-s;
-}
-
-.voice-btn--recording {
-  background: $color-income-bg;
-  border-color: $color-income;
-  animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(232, 93, 117, 0.4); }
-  70% { box-shadow: 0 0 0 16rpx rgba(232, 93, 117, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(232, 93, 117, 0); }
-}
-
-.voice-btn-icon {
-  font-size: 32rpx;
-}
-
-.voice-btn-text {
-  font-size: 26rpx;
-  color: $color-brand-deep;
-  font-weight: 600;
-}
-
-.voice-btn--recording .voice-btn-text {
-  color: $color-income;
-}
-
-// 账户列表
 .account-list {
   padding-bottom: $spacing-m;
 }
@@ -236,7 +253,9 @@
 }
 
 .account-item--active {
-  .account-name { color: $color-brand; }
+  .account-name {
+    color: $color-brand;
+  }
 }
 
 .account-icon {
@@ -264,23 +283,11 @@
   color: $color-brand;
 }
 
-// 标签列表
 .tag-list {
   display: flex;
   flex-wrap: wrap;
   gap: $spacing-s;
   padding-bottom: $spacing-m;
-}
-
-.tag-empty {
-  width: 100%;
-  padding: $spacing-xl 0;
-  text-align: center;
-}
-
-.tag-empty-text {
-  font-size: 26rpx;
-  color: $color-text-weak;
 }
 
 .tag-item {
@@ -298,7 +305,6 @@
   color: $color-brand-deep;
 }
 
-// 通用确认按钮
 .drawer-confirm-btn {
   flex: 1;
   height: 88rpx;
@@ -312,7 +318,6 @@
   color: #fff;
 }
 
-// 日期选择器
 .date-picker {
   padding-bottom: $spacing-m;
 }
@@ -340,9 +345,13 @@
   color: $color-text-main;
 }
 
-.date-picker-weekdays {
+.date-picker-weekdays,
+.date-picker-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+}
+
+.date-picker-weekdays {
   margin-bottom: $spacing-xs;
 }
 
@@ -354,8 +363,6 @@
 }
 
 .date-picker-days {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
   gap: 4rpx;
 }
 
@@ -369,7 +376,11 @@
 
 .date-picker-day--selected {
   background: $color-brand;
-  .date-picker-day-num { color: #fff; font-weight: 700; }
+
+  .date-picker-day-num {
+    color: #fff;
+    font-weight: 700;
+  }
 }
 
 .date-picker-day--today {
@@ -382,7 +393,6 @@
   font-family: $font-num;
 }
 
-// 备注输入
 .remark-input-wrap {
   padding: $spacing-m 0;
   display: flex;
@@ -405,7 +415,6 @@
   text-align: right;
 }
 
-// 语音解析结果
 .voice-confirm-footer {
   display: flex;
   gap: 20rpx;
@@ -473,16 +482,18 @@
   color: $color-income;
 }
 
-.voice-item-remark {
+.voice-item-remark,
+.voice-item-warn {
   font-size: 22rpx;
-  color: $color-text-sub;
   margin-top: 6rpx;
 }
 
+.voice-item-remark {
+  color: $color-text-sub;
+}
+
 .voice-item-warn {
-  font-size: 22rpx;
   color: $color-warn;
-  margin-top: 4rpx;
 }
 
 .voice-item-delete {
@@ -499,7 +510,6 @@
   font-size: 28rpx;
 }
 
-// 录音遮罩
 .recording-mask {
   position: fixed;
   inset: 0;
@@ -527,8 +537,14 @@
 }
 
 @keyframes pulse-icon {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.15); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
 }
 
 .recording-text {

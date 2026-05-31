@@ -9,11 +9,17 @@ const TABS = [
   { path: '/pages/mine/index', label: '我的', icon: '◉', key: 'mine' },
 ];
 
+interface Props {
+  onCenterTouchStart?: () => void;
+  onCenterTouchEnd?: () => void;
+  centerBusy?: boolean;
+}
+
 interface State {
   selected: number;
 }
 
-export default class BottomNav extends Component<Record<string, never>, State> {
+export default class BottomNav extends Component<Props, State> {
   state: State = { selected: 0 };
 
   componentDidMount() {
@@ -44,11 +50,13 @@ export default class BottomNav extends Component<Record<string, never>, State> {
           <View
             key={tab.path}
             className={`tab-item${tab.isCenter ? ' tab-item--center' : ''}`}
+            onTouchStart={tab.isCenter && selected === idx ? this.props.onCenterTouchStart : undefined}
+            onTouchEnd={tab.isCenter && selected === idx ? this.props.onCenterTouchEnd : undefined}
             onClick={() => this.switchTab(idx, tab.path)}
           >
             {tab.isCenter ? (
               <View className={`fab${selected === idx ? ' fab--active' : ''}`}>
-                <Text className='fab-icon'>{selected === idx ? tab.activeIcon : tab.icon}</Text>
+                <Text className='fab-icon'>{this.props.centerBusy ? '…' : selected === idx ? tab.activeIcon : tab.icon}</Text>
               </View>
             ) : (
               <>

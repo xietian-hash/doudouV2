@@ -8,10 +8,10 @@ interface Props {
 }
 
 const KEYS = [
-  '1', '2', '3',
-  '4', '5', '6',
-  '7', '8', '9',
-  '.', '0', '00',
+  ['1', '2', '3'],
+  ['4', '5', '6'],
+  ['7', '8', '9'],
+  ['.', '0', '00'],
 ];
 
 export default function NumKeyboard({ value, onChange, onConfirm }: Props) {
@@ -35,17 +35,26 @@ export default function NumKeyboard({ value, onChange, onConfirm }: Props) {
 
   return (
     <View className='keyboard'>
-      <View className='keyboard-grid'>
-        {KEYS.map(k => (
-          <View key={k} className='key' onClick={() => handleKey(k)}>
-            <Text className='key-text'>{k}</Text>
-          </View>
-        ))}
-        <View className='key key--delete' onClick={() => handleKey('backspace')}>
-          <Text className='key-text'>⌫</Text>
+      <View className='keyboard-main'>
+        <View className='keyboard-left'>
+          {KEYS.map((row, rowIndex) => (
+            <View key={`row-${rowIndex}`} className='keyboard-row'>
+              {row.map(k => (
+                <View key={k} className='key' onClick={() => handleKey(k)}>
+                  <Text className='key-text'>{k}</Text>
+                </View>
+              ))}
+            </View>
+          ))}
         </View>
-        <View className='key key--confirm' onClick={onConfirm}>
-          <Text className='key-text key-confirm-text'>完成</Text>
+        <View className='keyboard-right'>
+          <View className='key key--delete' onClick={() => handleKey('backspace')}>
+            <Text className='key-delete-text'>⌫</Text>
+          </View>
+          <View className='key key--confirm' onClick={onConfirm}>
+            <Text className='key-confirm-icon'>✓</Text>
+            <Text className='key-confirm-text'>完成</Text>
+          </View>
         </View>
       </View>
     </View>

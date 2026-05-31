@@ -8,7 +8,7 @@ import { formatAmount } from '../../utils/format';
 import BottomNav from '../../components/BottomNav';
 import './index.scss';
 
-const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
+const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日'];
 
 export default function RecordPage() {
   const now = new Date();
