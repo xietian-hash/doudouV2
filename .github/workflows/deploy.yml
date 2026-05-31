@@ -141,7 +141,7 @@ jobs:
             docker pull docker.m.daocloud.io/library/node:22-bookworm-slim 2>/dev/null || true
             docker compose -f docker-compose.deploy.yml build
             docker compose -f docker-compose.deploy.yml run --rm api \
-              node /app/apps/api/node_modules/.bin/prisma migrate deploy \
+              /app/apps/api/node_modules/.bin/prisma migrate deploy \
               --schema /app/apps/api/prisma/schema.prisma
             docker compose -f docker-compose.deploy.yml up -d api
             docker image prune -f
