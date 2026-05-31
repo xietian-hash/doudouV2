@@ -56,7 +56,6 @@ jobs:
           script: |
             docker stop ddyq-api 2>/dev/null || true
             docker rm -f ddyq-api 2>/dev/null || true
-            docker rm -f $(docker ps -aq --filter status=exited) 2>/dev/null || true
             docker builder prune --filter until=168h -f 2>/dev/null || true
 
       - name: Deploy on server
@@ -130,20 +129,32 @@ jobs:
                 --collation-server=utf8mb4_unicode_ci
             fi
 
-            # 等待 MySQL 就绪（最多 60s）
-            for i in $(seq 1 30); do
+            # 等待 MySQL 就绪（最多 5 分钟）
+            echo "Waiting for MySQL..."
+            for i in $(seq 1 150); do
               if docker exec ddyq-mysql mysqladmin ping -h 127.0.0.1 -proot --silent 2>/dev/null; then
+                echo "MySQL ready after ${i} attempts"
                 break
+              fi
+              if [ "$i" -eq 150 ]; then
+                echo "ERROR: MySQL not ready after 5 minutes"
+                docker logs ddyq-mysql --tail 30
+                exit 1
               fi
               sleep 2
             done
 
-            docker pull docker.m.daocloud.io/library/node:22-bookworm-slim 2>/dev/null || true
             docker compose -f docker-compose.deploy.yml build
-            docker compose -f docker-compose.deploy.yml run --rm api \
+
+            # 用 docker run 直接指定网络，避免 compose 外部网络解析问题
+            docker run --rm \
+              --network ddyq-net \
+              --env-file .env.production \
+              api-ddyqv2-api:latest \
               /app/apps/api/node_modules/.bin/prisma migrate deploy \
               --schema /app/apps/api/prisma/schema.prisma
-            docker compose -f docker-compose.deploy.yml up -d api
+
+            COMPOSE_IGNORE_ORPHANS=true docker compose -f docker-compose.deploy.yml up -d api
             docker image prune -f
 
       - name: Sync nginx config
