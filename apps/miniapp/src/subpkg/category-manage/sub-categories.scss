@@ -1,75 +1,55 @@
 @use '../../styles/variables' as *;
 
-.cm-page {
+.sc-page {
   min-height: 100vh;
   background: $color-bg-page;
   display: flex;
   flex-direction: column;
 }
 
-// === Tabs ===
-.cm-tabs {
+.sc-parent-bar {
   display: flex;
-  background: $color-surface;
-  padding: 0 32rpx;
-  border-bottom: 2rpx solid $color-divider;
-}
-
-.cm-tab {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 28rpx 0 24rpx;
-  position: relative;
-
-  &--active::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40rpx;
-    height: 6rpx;
-    border-radius: 3rpx;
-    background: $color-brand;
-  }
+  background: $color-surface;
+  padding: 24rpx 32rpx;
+  border-bottom: 2rpx solid $color-divider;
+  gap: 8rpx;
 }
 
-.cm-tab-text {
-  font-size: 30rpx;
+.sc-parent-label {
+  font-size: 26rpx;
   color: $color-text-sub;
-
-  .cm-tab--active & {
-    color: $color-brand;
-    font-weight: 600;
-  }
 }
 
-// === List ===
-.cm-list {
+.sc-parent-name {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: $color-brand;
+}
+
+.sc-list {
   flex: 1;
   padding: 24rpx 32rpx 0;
 }
 
-.cm-list-bottom {
+.sc-list-bottom {
   height: 160rpx;
 }
 
-.cm-empty {
+.sc-empty {
   padding: 120rpx 0;
   display: flex;
   justify-content: center;
 }
 
-.cm-empty-text {
+.sc-empty-text {
   font-size: 28rpx;
   color: $color-text-weak;
 }
 
 // === Swipe ===
 .swipe-wrap {
-  margin-bottom: 20rpx;
+  margin-bottom: 16rpx;
   border-radius: $radius-l;
   overflow: hidden;
   box-shadow: 0 4rpx 24rpx rgba(43, 74, 58, 0.06);
@@ -86,27 +66,18 @@
   }
 }
 
-// === Card ===
-.cm-card {
+.sc-card {
   flex-shrink: 0;
   min-width: 100%;
   box-sizing: border-box;
   background: $color-surface;
   display: flex;
   align-items: center;
-  padding: 24rpx 28rpx;
+  padding: 28rpx 28rpx;
   gap: 20rpx;
 }
 
-.cm-card-left {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-  min-width: 0;
-}
-
-.cm-icon-circle {
+.sc-icon-circle {
   width: 76rpx;
   height: 76rpx;
   border-radius: 38rpx;
@@ -117,60 +88,18 @@
   flex-shrink: 0;
 }
 
-.cm-icon-text {
+.sc-icon-text {
   font-size: 36rpx;
   line-height: 1;
 }
 
-.cm-card-info {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6rpx;
-}
-
-.cm-cat-name {
+.sc-name {
   font-size: 30rpx;
   font-weight: 600;
   color: $color-text-main;
+  flex: 1;
 }
 
-.cm-cat-sub {
-  font-size: 24rpx;
-  color: $color-text-sub;
-}
-
-.cm-chevron {
-  font-size: 36rpx;
-  color: $color-text-weak;
-  flex-shrink: 0;
-}
-
-// === Pills ===
-.cm-pills {
-  flex-shrink: 0;
-  min-width: 100%;
-  box-sizing: border-box;
-  background: $color-surface;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12rpx;
-  padding: 0 28rpx 24rpx;
-}
-
-.cm-pill {
-  background: $color-bg-page;
-  border-radius: $radius-pill;
-  padding: 8rpx 20rpx;
-}
-
-.cm-pill-text {
-  font-size: 24rpx;
-  color: $color-text-sub;
-}
-
-// === Swipe actions ===
 .swipe-actions {
   flex-shrink: 0;
   width: 288rpx;
@@ -199,7 +128,7 @@
 }
 
 // === FAB ===
-.cm-fab {
+.sc-fab {
   position: fixed;
   right: 48rpx;
   bottom: 80rpx;
@@ -214,7 +143,7 @@
   z-index: 100;
 }
 
-.cm-fab-icon {
+.sc-fab-icon {
   font-size: 56rpx;
   color: #fff;
   line-height: 1;
@@ -280,6 +209,20 @@
   &:first-child {
     margin-top: 0;
   }
+}
+
+.dialog-readonly {
+  height: 88rpx;
+  background: $color-surface-ctrl;
+  border-radius: $radius-m;
+  padding: 0 28rpx;
+  display: flex;
+  align-items: center;
+}
+
+.dialog-readonly-text {
+  font-size: 30rpx;
+  color: $color-text-sub;
 }
 
 .dialog-input {
@@ -361,7 +304,6 @@
   }
 }
 
-// Delete dialog specifics
 .del-icon-circle {
   width: 104rpx;
   height: 104rpx;

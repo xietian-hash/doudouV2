@@ -286,7 +286,7 @@ export default function BillPage() {
   const displayCategories = hasMoreCategories ? categories.slice(0, 23) : categories.slice(0, 24);
   const categorySections = (() => {
     const usedIds = new Set<string>();
-    const sections = categoryTree
+    const sections: { title: string; parentId: string | undefined; items: Category[] }[] = categoryTree
       .filter(parent => !parent.parentId && parent.children?.length)
       .map(parent => {
         const items = (parent.children || [])

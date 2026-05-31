@@ -1,0 +1,249 @@
+@use '../../styles/variables' as *;
+
+.tm-page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  display: flex;
+  flex-direction: column;
+}
+
+.tm-list {
+  flex: 1;
+  padding: 24rpx 32rpx 0;
+}
+
+.tm-list-bottom {
+  height: 160rpx;
+}
+
+.tm-empty {
+  padding: 120rpx 0;
+  display: flex;
+  justify-content: center;
+}
+
+.tm-empty-text {
+  font-size: 28rpx;
+  color: $color-text-weak;
+}
+
+// === Row ===
+.tm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: $color-surface;
+  border-radius: $radius-l;
+  padding: 24rpx 28rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 4rpx 24rpx rgba(43, 74, 58, 0.06);
+}
+
+.tm-row-left {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex: 1;
+  min-width: 0;
+}
+
+.tm-hash {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 32rpx;
+  background: $color-surface-light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tm-hash-text {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: $color-brand;
+}
+
+.tm-name {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: $color-text-main;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tm-actions {
+  display: flex;
+  gap: 8rpx;
+  flex-shrink: 0;
+}
+
+.tm-action-btn {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: $radius-m;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $color-surface-ctrl;
+}
+
+.tm-action-icon {
+  font-size: 32rpx;
+  line-height: 1;
+}
+
+// === FAB ===
+.tm-fab {
+  position: fixed;
+  right: 48rpx;
+  bottom: 80rpx;
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: 52rpx;
+  background: $color-brand;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 32rpx rgba(93, 190, 136, 0.4);
+  z-index: 100;
+}
+
+.tm-fab-icon {
+  font-size: 56rpx;
+  color: #fff;
+  line-height: 1;
+  margin-top: -4rpx;
+}
+
+// === Dialog ===
+.dialog-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(43, 74, 58, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dialog-box {
+  width: 670rpx;
+  background: $color-surface;
+  border-radius: $radius-xl;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  &--delete {
+    padding: 56rpx 48rpx 48rpx;
+    align-items: center;
+    gap: 24rpx;
+  }
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32rpx 40rpx 24rpx;
+}
+
+.dialog-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: $color-text-main;
+}
+
+.dialog-close {
+  font-size: 44rpx;
+  color: $color-text-sub;
+  line-height: 1;
+}
+
+.dialog-body {
+  padding: 0 40rpx 8rpx;
+}
+
+.dialog-input {
+  width: 100%;
+  height: 88rpx;
+  background: $color-surface-ctrl;
+  border-radius: $radius-m;
+  padding: 0 28rpx;
+  font-size: 30rpx;
+  color: $color-text-main;
+  box-sizing: border-box;
+}
+
+.dialog-footer {
+  padding: 24rpx 40rpx 48rpx;
+  display: flex;
+  gap: 24rpx;
+}
+
+.dialog-btn {
+  flex: 1;
+  height: 88rpx;
+  border-radius: $radius-m;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  font-weight: 600;
+
+  &--cancel {
+    background: $color-surface-ctrl;
+    color: $color-text-sub;
+    border: 3rpx solid $color-divider;
+    box-sizing: border-box;
+  }
+
+  &--confirm {
+    background: $color-brand;
+    color: #fff;
+  }
+
+  &--delete {
+    background: $color-error;
+    color: #fff;
+  }
+}
+
+.del-icon-circle {
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: 52rpx;
+  background: $color-surface-light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.del-hash {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: $color-brand;
+}
+
+.del-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: $color-text-main;
+}
+
+.del-msg-box {
+  width: 100%;
+  background: #FFF8F5;
+  border-radius: $radius-m;
+  padding: 24rpx 28rpx;
+  box-sizing: border-box;
+}
+
+.del-msg {
+  font-size: 26rpx;
+  color: $color-text-sub;
+  line-height: 1.7;
+}
