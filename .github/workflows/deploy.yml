@@ -1,64 +1,138 @@
-name: Build & Deploy
+name: Deploy API
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches:
+      - main
+
+concurrency:
+  group: deploy-api
+  cancel-in-progress: true
 
 jobs:
-  lint-typecheck:
+  deploy-api:
     runs-on: ubuntu-latest
+    environment: main
+    env:
+      DEPLOY_DIR_NAME: api-ddyqV2
+      DEPLOY_ARCHIVE: deploy-bundle.tar.gz
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create deploy bundle
+        run: |
+          tar \
+            --exclude=.git \
+            --exclude=.github \
+            --exclude=node_modules \
+            --exclude=apps/miniapp \
+            --exclude=data \
+            --exclude=coverage \
+            --exclude="$DEPLOY_ARCHIVE" \
+            -czf "$DEPLOY_ARCHIVE" . || [ "$?" -eq 1 ]
+
+      - name: Upload deploy bundle
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          PORT: ${{ secrets.DEPLOY_PORT }}
+          USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          KEY_FILE=$(mktemp)
+          echo "$SSH_KEY" > "$KEY_FILE"
+          chmod 600 "$KEY_FILE"
+          scp -i "$KEY_FILE" -P "$PORT" -o StrictHostKeyChecking=no \
+            "$DEPLOY_ARCHIVE" "$USER@$HOST:~/"
+          rm -f "$KEY_FILE"
+
+      - name: Cleanup stale containers on server
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          version: 11
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @ddyq/api exec prisma generate
-      - run: pnpm typecheck
-      - run: pnpm lint
-
-  deploy:
-    needs: lint-typecheck
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build Docker image
-        run: docker build -f apps/api/Dockerfile -t ddyq-api:${{ github.sha }} .
-
-      - name: Save Docker image
-        run: docker save ddyq-api:${{ github.sha }} | gzip > ddyq-api.tar.gz
-
-      - name: Copy image to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          source: ddyq-api.tar.gz
-          target: /tmp/
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            docker compose -f ~/${{ env.DEPLOY_DIR_NAME }}/docker-compose.deploy.yml stop api 2>/dev/null || true
+            docker rm -f $(docker ps -aq --filter status=exited) 2>/dev/null || true
+            docker builder prune --filter until=168h -f 2>/dev/null || true
 
       - name: Deploy on server
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          DEPLOY_DIR_NAME: ${{ env.DEPLOY_DIR_NAME }}
+          DEPLOY_ARCHIVE: ${{ env.DEPLOY_ARCHIVE }}
+          SECRET_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+          SECRET_JWT_SECRET: ${{ secrets.PROD_JWT_SECRET }}
+          SECRET_WECHAT_APP_ID: ${{ secrets.PROD_WECHAT_APP_ID }}
+          SECRET_WECHAT_APP_SECRET: ${{ secrets.PROD_WECHAT_APP_SECRET }}
+          SECRET_LLM_API_KEY: ${{ secrets.PROD_LLM_API_KEY }}
+          SECRET_LLM_MODEL: ${{ secrets.PROD_LLM_MODEL }}
+          SECRET_ASR_API_KEY: ${{ secrets.PROD_ASR_API_KEY }}
+          SECRET_SERVER_BASE_URL: ${{ secrets.PROD_SERVER_BASE_URL }}
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          envs: DEPLOY_DIR_NAME,DEPLOY_ARCHIVE,SECRET_DATABASE_URL,SECRET_JWT_SECRET,SECRET_WECHAT_APP_ID,SECRET_WECHAT_APP_SECRET,SECRET_LLM_API_KEY,SECRET_LLM_MODEL,SECRET_ASR_API_KEY,SECRET_SERVER_BASE_URL
+          command_timeout: 30m
+          script_stop: true
           script: |
-            cd /opt/ddyq
-            docker load < /tmp/ddyq-api.tar.gz
-            docker tag ddyq-api:${{ github.sha }} ddyq-api:latest
-            docker-compose up -d --no-build api
-            docker exec ddyq-api node -e "
-              const { execSync } = require('child_process');
-              execSync('npx prisma migrate deploy', { cwd: '/app/apps/api', stdio: 'inherit' });
-            "
+            set -e
+
+            DEPLOY_DIR="$HOME/$DEPLOY_DIR_NAME"
+            mkdir -p "$DEPLOY_DIR"
+
+            tar -xzf "$HOME/$DEPLOY_ARCHIVE" -C "$DEPLOY_DIR"
+            rm -f "$HOME/$DEPLOY_ARCHIVE"
+
+            cd "$DEPLOY_DIR"
+
+            cat > .env.production <<EOF
+            PORT=3000
+            NODE_ENV=production
+            JWT_EXPIRES_IN=7d
+            DATABASE_URL=${SECRET_DATABASE_URL}
+            JWT_SECRET=${SECRET_JWT_SECRET}
+            WECHAT_APP_ID=${SECRET_WECHAT_APP_ID}
+            WECHAT_APP_SECRET=${SECRET_WECHAT_APP_SECRET}
+            LLM_PROVIDER=doubao
+            LLM_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
+            LLM_MODEL=${SECRET_LLM_MODEL}
+            LLM_API_KEY=${SECRET_LLM_API_KEY}
+            ASR_API_KEY=${SECRET_ASR_API_KEY}
+            ASR_RESOURCE_ID=volc.seedasr.auc
+            ASR_SUBMIT_URL=https://openspeech.bytedance.com/api/v3/auc/bigmodel/submit
+            ASR_QUERY_URL=https://openspeech.bytedance.com/api/v3/auc/bigmodel/query
+            SERVER_BASE_URL=${SECRET_SERVER_BASE_URL}
+            EOF
+
+            docker compose -f docker-compose.deploy.yml build --pull
+            docker compose -f docker-compose.deploy.yml up -d mysql
+            docker compose -f docker-compose.deploy.yml run --rm api \
+              node /app/node_modules/.bin/prisma migrate deploy \
+              --schema /app/apps/api/prisma/schema.prisma
+            docker compose -f docker-compose.deploy.yml up -d api
             docker image prune -f
-            rm /tmp/ddyq-api.tar.gz
+
+      - name: Sync nginx config
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          DEPLOY_DIR_NAME: ${{ env.DEPLOY_DIR_NAME }}
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          envs: DEPLOY_DIR_NAME
+          script: |
+            CERT="/etc/letsencrypt/live/api-accounts.aitrealmaker.top/fullchain.pem"
+            CONF_SRC="$HOME/$DEPLOY_DIR_NAME/deploy/nginx/api-accounts.aitrealmaker.top.conf"
+            CONF_DEST="/etc/nginx/sites-available/api-accounts.aitrealmaker.top"
+            if [ -f "$CERT" ] && [ -f "$CONF_SRC" ]; then
+              cp "$CONF_SRC" "$CONF_DEST"
+              ln -sf "$CONF_DEST" /etc/nginx/sites-enabled/api-accounts.aitrealmaker.top
+              nginx -t && nginx -s reload
+            fi
