@@ -108,16 +108,22 @@ jobs:
             SERVER_BASE_URL=${SECRET_SERVER_BASE_URL}
             EOF
 
-            # 确保共享网络存在，并把 ddyq-mysql 接入（幂等操作）
+            # 诊断：确认 ddyq-mysql 状态
+            echo "=== ddyq-mysql 状态 ==="
+            docker inspect ddyq-mysql --format \
+              'Status={{.State.Status}} Networks={{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' \
+              2>/dev/null || echo "ERROR: ddyq-mysql 容器不存在！"
+
+            # 确保共享网络存在，并把 ddyq-mysql 接入
             docker network create ddyq-net 2>/dev/null || true
             docker network connect ddyq-net ddyq-mysql 2>/dev/null || true
 
             docker compose -f docker-compose.deploy.yml build
 
-            # 用 docker run 直接指定网络，避免 compose 外部网络解析问题
+            # prisma migrate：共享 ddyq-mysql 网络命名空间，用 127.0.0.1 直连，绕开 DNS
             docker run --rm \
-              --network ddyq-net \
-              --env-file .env.production \
+              --network container:ddyq-mysql \
+              -e DATABASE_URL="mysql://root:root@127.0.0.1:3306/doudouyouqian" \
               api-ddyqv2-api:latest \
               /app/apps/api/node_modules/.bin/prisma migrate deploy \
               --schema /app/apps/api/prisma/schema.prisma
