@@ -1,4 +1,5 @@
 import { defineConfig } from '@tarojs/cli';
+
 export default defineConfig({
   projectName: '兜兜有钱',
   date: '2024-01-01',
@@ -18,14 +19,14 @@ export default defineConfig({
     postcss: {
       pxtransform: { enable: true, config: {} },
       url: { enable: true },
-      cssModules: { enable: false }
-    }
+      cssModules: { enable: false },
+    },
   },
   h5: {
     publicPath: '/',
     staticDirectory: 'static',
     postcss: {
-      autoprefixer: { enable: true }
-    }
-  }
+      autoprefixer: { enable: true },
+    },
+  },
 });

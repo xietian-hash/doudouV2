@@ -14,7 +14,7 @@ import Modal from '../../src/components/Modal';
 import Drawer from '../../src/components/Drawer';
 import './index.scss';
 
-type TabType = 1 | 2; // 1=支出 2=收入
+type TabType = 1 | 2;
 
 interface FormData {
   name: string;
@@ -42,16 +42,14 @@ export default function CategoryManagePage() {
     try {
       const [catRes, iconRes] = await Promise.all([
         getCategories({ type: activeTab }),
-        getIcons(),
+        getCategoryIcons(),
       ]);
-      // 只显示顶级分类（parentId === null）
-      const topLevel = catRes.filter(c => !c.parentId);
-      // 附加children
-      const withChildren = topLevel.map(parent => ({
+      setIcons(iconRes);
+      const topLevel = catRes.filter(cat => !cat.parentId);
+      setCategories(topLevel.map(parent => ({
         ...parent,
-        children: catRes.filter(c => c.parentId === parent.id),
-      }));
-      setCategories(withChildren);
+        children: catRes.filter(cat => cat.parentId === parent.id),
+      })));
     } catch (e) {
       console.error(e);
     } finally {
@@ -59,18 +57,7 @@ export default function CategoryManagePage() {
     }
   }, [activeTab]);
 
-  async function getIcons() {
-    if (icons.length > 0) return;
-    try {
-      const data = await getCategoryIcons();
-      setIcons(data);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
   useEffect(() => { loadData(); }, [loadData]);
-
   Taro.useDidShow(() => { loadData(); });
 
   const openAddDrawer = (parentId: string | null = null) => {
@@ -86,26 +73,25 @@ export default function CategoryManagePage() {
   };
 
   const handleSave = async () => {
-    if (!form.name.trim()) { showToast('请输入分类名称', 'error'); return; }
+    const name = form.name.trim();
+    if (!name) { showToast('请输入分类名称', 'error'); return; }
+
     setSaving(true);
     try {
       if (editingId) {
-        await updateCategory(editingId, {
-          name: form.name.trim(),
-          icon: form.icon || null,
-        });
+        await updateCategory(editingId, { name, icon: form.icon || null });
         showToast('修改成功');
       } else {
         await createCategory({
-          name: form.name.trim(),
+          name,
           type: activeTab,
-          parentId: form.parentId || null,
+          parentId: form.parentId,
           icon: form.icon || null,
         });
         showToast('添加成功');
       }
       setShowFormDrawer(false);
-      loadData();
+      await loadData();
     } catch (e) {
       console.error(e);
     } finally {
@@ -125,7 +111,7 @@ export default function CategoryManagePage() {
       await deleteCategory(deletingId);
       showToast('删除成功');
       setShowDeleteModal(false);
-      loadData();
+      await loadData();
     } catch (e) {
       console.error(e);
     } finally {
@@ -142,25 +128,18 @@ export default function CategoryManagePage() {
 
   return (
     <View className='cat-manage-page'>
-      {/* Tab切换 */}
       <View className='tab-bar-custom'>
-        <View
-          className={`tab-btn${activeTab === 1 ? ' tab-btn--active' : ''}`}
-          onClick={() => setActiveTab(1)}
-        >
+        <View className={`tab-btn${activeTab === 1 ? ' tab-btn--active' : ''}`} onClick={() => setActiveTab(1)}>
           <Text>支出分类</Text>
         </View>
-        <View
-          className={`tab-btn${activeTab === 2 ? ' tab-btn--active' : ''}`}
-          onClick={() => setActiveTab(2)}
-        >
+        <View className={`tab-btn${activeTab === 2 ? ' tab-btn--active' : ''}`} onClick={() => setActiveTab(2)}>
           <Text>收入分类</Text>
         </View>
       </View>
 
       <View className='page-actions'>
         <View className='add-btn' onClick={() => openAddDrawer(null)}>
-          <Text className='add-btn-text'>+ 添加顶级分类</Text>
+          <Text className='add-btn-text'>+ 添加一级分类</Text>
         </View>
       </View>
 
@@ -172,37 +151,38 @@ export default function CategoryManagePage() {
         )}
         {!loading && categories.length === 0 && (
           <View className='list-empty'>
-            <Text className='list-empty-icon'>🗂️</Text>
+            <Text className='list-empty-icon'>□</Text>
             <Text className='list-empty-text'>暂无分类</Text>
           </View>
         )}
         {categories.map(cat => (
           <View key={cat.id} className='cat-card'>
-            {/* 顶级分类头部 */}
-            <View className='cat-parent-row'>
+            <View className='cat-parent-row' onClick={() => goSubCategories(cat)}>
               <View className='cat-parent-left'>
-                <Text className='cat-icon'>{cat.icon || '📁'}</Text>
-                <Text className='cat-parent-name'>{cat.name}</Text>
+                <Text className='cat-icon'>{cat.icon || '□'}</Text>
+                <View>
+                  <Text className='cat-parent-name'>{cat.name}</Text>
+                  <Text className='cat-sub-count'>{cat.children?.length || 0} 个子分类</Text>
+                </View>
               </View>
               <View className='cat-parent-actions'>
-                <View className='cat-action-btn' onClick={() => openAddDrawer(cat.id)}>
-                  <Text className='cat-action-text'>+子分类</Text>
+                <View className='cat-action-btn' onClick={e => { e.stopPropagation(); openAddDrawer(cat.id); }}>
+                  <Text className='cat-action-text'>+子类</Text>
                 </View>
-                <View className='cat-action-btn' onClick={() => openEditDrawer(cat)}>
+                <View className='cat-action-btn' onClick={e => { e.stopPropagation(); openEditDrawer(cat); }}>
                   <Text className='cat-action-text'>编辑</Text>
                 </View>
-                <View className='cat-action-btn cat-action-btn--delete' onClick={() => confirmDelete(cat.id)}>
+                <View className='cat-action-btn cat-action-btn--delete' onClick={e => { e.stopPropagation(); confirmDelete(cat.id); }}>
                   <Text className='cat-action-text cat-action-text--delete'>删除</Text>
                 </View>
               </View>
             </View>
 
-            {/* 子分类列表 */}
             {cat.children && cat.children.length > 0 && (
               <View className='sub-cat-list'>
-                {cat.children.map(sub => (
+                {cat.children.slice(0, 6).map(sub => (
                   <View key={sub.id} className='sub-cat-item'>
-                    <Text className='sub-cat-icon'>{sub.icon || '📄'}</Text>
+                    <Text className='sub-cat-icon'>{sub.icon || '□'}</Text>
                     <Text className='sub-cat-name'>{sub.name}</Text>
                     <View className='sub-cat-actions'>
                       <View className='cat-action-btn' onClick={() => openEditDrawer(sub)}>
@@ -214,6 +194,11 @@ export default function CategoryManagePage() {
                     </View>
                   </View>
                 ))}
+                {cat.children.length > 6 && (
+                  <View className='sub-cat-more' onClick={() => goSubCategories(cat)}>
+                    <Text>查看全部 {cat.children.length} 个</Text>
+                  </View>
+                )}
               </View>
             )}
           </View>
@@ -221,16 +206,12 @@ export default function CategoryManagePage() {
         <View style={{ height: '40rpx' }} />
       </ScrollView>
 
-      {/* 添加/编辑抽屉 */}
       <Drawer
         visible={showFormDrawer}
-        title={editingId ? '编辑分类' : (form.parentId ? '添加子分类' : '添加顶级分类')}
+        title={editingId ? '编辑分类' : (form.parentId ? '添加子分类' : '添加一级分类')}
         onClose={() => setShowFormDrawer(false)}
         footer={
-          <View
-            className={`form-save-btn${saving ? ' form-save-btn--disabled' : ''}`}
-            onClick={handleSave}
-          >
+          <View className={`form-save-btn${saving ? ' form-save-btn--disabled' : ''}`} onClick={handleSave}>
             <Text>{saving ? '保存中...' : '保存'}</Text>
           </View>
         }
@@ -241,23 +222,23 @@ export default function CategoryManagePage() {
             <Input
               className='form-input'
               value={form.name}
-              onInput={e => setForm(f => ({ ...f, name: e.detail.value }))}
+              onInput={e => setForm(prev => ({ ...prev, name: e.detail.value }))}
               placeholder='请输入分类名称'
               maxlength={20}
             />
           </View>
           <View className='form-row'>
-            <Text className='form-label'>选择图标（可选）</Text>
+            <Text className='form-label'>选择图标</Text>
             <ScrollView scrollY style={{ maxHeight: '320rpx' }}>
               <View className='icon-grid'>
-                {icons.map(ic => (
+                {icons.map(icon => (
                   <View
-                    key={ic.id}
-                    className={`icon-item${form.icon === ic.icon ? ' icon-item--active' : ''}`}
-                    onClick={() => setForm(f => ({ ...f, icon: ic.icon }))}
+                    key={icon.id}
+                    className={`icon-item${form.icon === icon.icon ? ' icon-item--active' : ''}`}
+                    onClick={() => setForm(prev => ({ ...prev, icon: icon.icon }))}
                   >
-                    <Text className='icon-item-text'>{ic.icon}</Text>
-                    <Text className='icon-item-name'>{ic.name}</Text>
+                    <Text className='icon-item-text'>{icon.icon}</Text>
+                    <Text className='icon-item-name'>{icon.name}</Text>
                   </View>
                 ))}
               </View>
@@ -266,7 +247,6 @@ export default function CategoryManagePage() {
         </View>
       </Drawer>
 
-      {/* 删除确认弹窗 */}
       <Modal
         visible={showDeleteModal}
         title='确认删除'
@@ -275,7 +255,7 @@ export default function CategoryManagePage() {
         onCancel={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
       >
-        <Text>删除后，该分类下的账单将保留历史记录，确认删除？</Text>
+        <Text>有子分类或关联账单时，分类可能无法删除，请确认是否继续。</Text>
       </Modal>
     </View>
   );

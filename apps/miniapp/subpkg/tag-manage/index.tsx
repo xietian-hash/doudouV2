@@ -23,8 +23,7 @@ export default function TagManagePage() {
   async function loadTags() {
     setLoading(true);
     try {
-      const data = await getTags();
-      setTags(data);
+      setTags(await getTags());
     } catch (e) {
       console.error(e);
     } finally {
@@ -47,9 +46,10 @@ export default function TagManagePage() {
   const handleSave = async () => {
     const name = formName.trim();
     if (!name) { showToast('请输入标签名称', 'error'); return; }
-    // 重名校验
-    const isDuplicate = tags.some(t => t.name === name && t.id !== editingId);
-    if (isDuplicate) { showToast('标签名称已存在', 'error'); return; }
+    if (tags.some(tag => tag.name === name && tag.id !== editingId)) {
+      showToast('标签名称已存在', 'error');
+      return;
+    }
 
     setSaving(true);
     try {
@@ -61,7 +61,7 @@ export default function TagManagePage() {
         showToast('添加成功');
       }
       setShowFormDrawer(false);
-      loadTags();
+      await loadTags();
     } catch (e) {
       console.error(e);
     } finally {
@@ -81,7 +81,7 @@ export default function TagManagePage() {
       await deleteTag(deletingId);
       showToast('删除成功');
       setShowDeleteModal(false);
-      loadTags();
+      await loadTags();
     } catch (e) {
       console.error(e);
     } finally {
@@ -107,7 +107,7 @@ export default function TagManagePage() {
         )}
         {!loading && tags.length === 0 && (
           <View className='list-empty'>
-            <Text className='list-empty-icon'>🏷️</Text>
+            <Text className='list-empty-icon'>#</Text>
             <Text className='list-empty-text'>暂无标签，点击右上角添加</Text>
           </View>
         )}
@@ -129,16 +129,12 @@ export default function TagManagePage() {
         <View style={{ height: '40rpx' }} />
       </ScrollView>
 
-      {/* 添加/编辑抽屉 */}
       <Drawer
         visible={showFormDrawer}
         title={editingId ? '编辑标签' : '添加标签'}
         onClose={() => setShowFormDrawer(false)}
         footer={
-          <View
-            className={`form-save-btn${saving ? ' form-save-btn--disabled' : ''}`}
-            onClick={handleSave}
-          >
+          <View className={`form-save-btn${saving ? ' form-save-btn--disabled' : ''}`} onClick={handleSave}>
             <Text>{saving ? '保存中...' : '保存'}</Text>
           </View>
         }
@@ -150,7 +146,7 @@ export default function TagManagePage() {
               className='form-input'
               value={formName}
               onInput={e => setFormName(e.detail.value)}
-              placeholder='请输入标签名称（最多10字）'
+              placeholder='请输入标签名称，最多 10 字'
               maxlength={10}
               focus={showFormDrawer}
             />
@@ -159,7 +155,6 @@ export default function TagManagePage() {
         </View>
       </Drawer>
 
-      {/* 删除确认弹窗 */}
       <Modal
         visible={showDeleteModal}
         title='确认删除'
@@ -168,7 +163,7 @@ export default function TagManagePage() {
         onCancel={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
       >
-        <Text>删除标签后，已标记该标签的账单不受影响，确认删除？</Text>
+        <Text>删除标签后，已标记该标签的账单不受影响，请确认是否删除。</Text>
       </Modal>
     </View>
   );

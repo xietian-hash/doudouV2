@@ -8,15 +8,15 @@ interface Props {
 }
 
 const KEYS = [
-  '1','2','3',
-  '4','5','6',
-  '7','8','9',
-  '.','0','00',
+  '1', '2', '3',
+  '4', '5', '6',
+  '7', '8', '9',
+  '.', '0', '00',
 ];
 
 export default function NumKeyboard({ value, onChange, onConfirm }: Props) {
   const handleKey = (key: string) => {
-    if (key === '←') {
+    if (key === 'backspace') {
       onChange(value.length <= 1 ? '0' : value.slice(0, -1));
       return;
     }
@@ -25,10 +25,11 @@ export default function NumKeyboard({ value, onChange, onConfirm }: Props) {
       return;
     }
     if (key === '.' && value.includes('.')) return;
+
     const next = value + key;
-    const parts = next.split('.');
-    if (parts[1] && parts[1].length > 2) return;
-    if (parts[0].length > 8) return;
+    const [integer, decimal] = next.split('.');
+    if (decimal && decimal.length > 2) return;
+    if (integer.length > 8) return;
     onChange(next);
   };
 
@@ -40,7 +41,7 @@ export default function NumKeyboard({ value, onChange, onConfirm }: Props) {
             <Text className='key-text'>{k}</Text>
           </View>
         ))}
-        <View className='key key--delete' onClick={() => handleKey('←')}>
+        <View className='key key--delete' onClick={() => handleKey('backspace')}>
           <Text className='key-text'>⌫</Text>
         </View>
         <View className='key key--confirm' onClick={onConfirm}>

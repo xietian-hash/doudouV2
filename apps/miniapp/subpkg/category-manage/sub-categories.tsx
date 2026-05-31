@@ -19,45 +19,40 @@ interface FormData {
   icon: string;
 }
 
-const DEFAULT_FORM: FormData = { name: '', icon: '' };
-
 export default function SubCategoriesPage() {
   const [parentId, setParentId] = useState('');
-  const [parentName, setParentName] = useState('');
-  const [type, setType] = useState(1);
-  const [subCategories, setSubCategories] = useState<Category[]>([]);
+  const [parentName, setParentName] = useState('子分类');
+  const [type, setType] = useState<1 | 2>(1);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [icons, setIcons] = useState<CategoryIcon[]>([]);
   const [loading, setLoading] = useState(true);
   const [showFormDrawer, setShowFormDrawer] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [form, setForm] = useState<FormData>(DEFAULT_FORM);
+  const [form, setForm] = useState<FormData>({ name: '', icon: '' });
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const pages = Taro.getCurrentPages();
     const curr = pages[pages.length - 1];
-    const options = (curr as unknown as { options: Record<string, string> }).options;
-    if (options?.parentId) {
-      setParentId(options.parentId);
-      setParentName(decodeURIComponent(options.parentName || ''));
-      setType(Number(options.type) || 1);
-    }
+    const options = (curr as unknown as { options: Record<string, string> }).options || {};
+    setParentId(options.parentId || '');
+    setParentName(decodeURIComponent(options.parentName || '子分类'));
+    setType(Number(options.type || 1) as 1 | 2);
   }, []);
 
   const loadData = useCallback(async () => {
     if (!parentId) return;
     setLoading(true);
     try {
-      const [cats, iconData] = await Promise.all([
+      const [catRes, iconRes] = await Promise.all([
         getCategories({ type }),
         getCategoryIcons(),
       ]);
-      const subs = cats.filter(c => c.parentId === parentId);
-      setSubCategories(subs);
-      setIcons(iconData);
+      setIcons(iconRes);
+      setCategories(catRes.filter(cat => cat.parentId === parentId));
     } catch (e) {
       console.error(e);
     } finally {
@@ -69,7 +64,7 @@ export default function SubCategoriesPage() {
 
   const openAddDrawer = () => {
     setEditingId(null);
-    setForm(DEFAULT_FORM);
+    setForm({ name: '', icon: '' });
     setShowFormDrawer(true);
   };
 
@@ -80,18 +75,16 @@ export default function SubCategoriesPage() {
   };
 
   const handleSave = async () => {
-    if (!form.name.trim()) { showToast('请输入分类名称', 'error'); return; }
+    const name = form.name.trim();
+    if (!name) { showToast('请输入分类名称', 'error'); return; }
     setSaving(true);
     try {
       if (editingId) {
-        await updateCategory(editingId, {
-          name: form.name.trim(),
-          icon: form.icon || null,
-        });
+        await updateCategory(editingId, { name, icon: form.icon || null });
         showToast('修改成功');
       } else {
         await createCategory({
-          name: form.name.trim(),
+          name,
           type,
           parentId,
           icon: form.icon || null,
@@ -99,7 +92,7 @@ export default function SubCategoriesPage() {
         showToast('添加成功');
       }
       setShowFormDrawer(false);
-      loadData();
+      await loadData();
     } catch (e) {
       console.error(e);
     } finally {
@@ -119,7 +112,7 @@ export default function SubCategoriesPage() {
       await deleteCategory(deletingId);
       showToast('删除成功');
       setShowDeleteModal(false);
-      loadData();
+      await loadData();
     } catch (e) {
       console.error(e);
     } finally {
@@ -131,7 +124,10 @@ export default function SubCategoriesPage() {
   return (
     <View className='sub-cat-page'>
       <View className='page-header'>
-        <Text className='page-title'>{parentName} · 子分类</Text>
+        <View>
+          <Text className='page-title'>{parentName}</Text>
+          <Text className='page-subtitle'>{type === 1 ? '支出' : '收入'}子分类</Text>
+        </View>
         <View className='add-btn' onClick={openAddDrawer}>
           <Text className='add-btn-text'>+ 添加</Text>
         </View>
@@ -140,20 +136,22 @@ export default function SubCategoriesPage() {
       <ScrollView scrollY className='sub-cat-list'>
         {loading && (
           <View className='list-loading'>
-            <Text>加载中...</Text>
+            <Text className='list-loading-text'>加载中...</Text>
           </View>
         )}
-        {!loading && subCategories.length === 0 && (
+        {!loading && categories.length === 0 && (
           <View className='list-empty'>
-            <Text className='list-empty-icon'>📂</Text>
+            <Text className='list-empty-icon'>□</Text>
             <Text className='list-empty-text'>暂无子分类</Text>
           </View>
         )}
-        {subCategories.map(cat => (
-          <View key={cat.id} className='sub-item'>
-            <Text className='sub-item-icon'>{cat.icon || '📄'}</Text>
-            <Text className='sub-item-name'>{cat.name}</Text>
-            <View className='sub-item-actions'>
+        {categories.map(cat => (
+          <View key={cat.id} className='sub-cat-card'>
+            <View className='sub-cat-left'>
+              <Text className='sub-cat-icon'>{cat.icon || '□'}</Text>
+              <Text className='sub-cat-name'>{cat.name}</Text>
+            </View>
+            <View className='sub-cat-actions'>
               <View className='action-btn' onClick={() => openEditDrawer(cat)}>
                 <Text className='action-text'>编辑</Text>
               </View>
@@ -166,43 +164,39 @@ export default function SubCategoriesPage() {
         <View style={{ height: '40rpx' }} />
       </ScrollView>
 
-      {/* 添加/编辑抽屉 */}
       <Drawer
         visible={showFormDrawer}
         title={editingId ? '编辑子分类' : '添加子分类'}
         onClose={() => setShowFormDrawer(false)}
         footer={
-          <View
-            className={`form-save-btn${saving ? ' form-save-btn--disabled' : ''}`}
-            onClick={handleSave}
-          >
+          <View className={`form-save-btn${saving ? ' form-save-btn--disabled' : ''}`} onClick={handleSave}>
             <Text>{saving ? '保存中...' : '保存'}</Text>
           </View>
         }
       >
-        <View className='cat-form'>
+        <View className='sub-cat-form'>
           <View className='form-row'>
             <Text className='form-label'>分类名称</Text>
             <Input
               className='form-input'
               value={form.name}
-              onInput={e => setForm(f => ({ ...f, name: e.detail.value }))}
-              placeholder='请输入分类名称'
+              onInput={e => setForm(prev => ({ ...prev, name: e.detail.value }))}
+              placeholder='请输入子分类名称'
               maxlength={20}
             />
           </View>
           <View className='form-row'>
-            <Text className='form-label'>选择图标（可选）</Text>
-            <ScrollView scrollY style={{ maxHeight: '300rpx' }}>
+            <Text className='form-label'>选择图标</Text>
+            <ScrollView scrollY style={{ maxHeight: '320rpx' }}>
               <View className='icon-grid'>
-                {icons.map(ic => (
+                {icons.map(icon => (
                   <View
-                    key={ic.id}
-                    className={`icon-item${form.icon === ic.icon ? ' icon-item--active' : ''}`}
-                    onClick={() => setForm(f => ({ ...f, icon: ic.icon }))}
+                    key={icon.id}
+                    className={`icon-item${form.icon === icon.icon ? ' icon-item--active' : ''}`}
+                    onClick={() => setForm(prev => ({ ...prev, icon: icon.icon }))}
                   >
-                    <Text className='icon-item-text'>{ic.icon}</Text>
-                    <Text className='icon-item-name'>{ic.name}</Text>
+                    <Text className='icon-item-text'>{icon.icon}</Text>
+                    <Text className='icon-item-name'>{icon.name}</Text>
                   </View>
                 ))}
               </View>
@@ -211,7 +205,6 @@ export default function SubCategoriesPage() {
         </View>
       </Drawer>
 
-      {/* 删除确认弹窗 */}
       <Modal
         visible={showDeleteModal}
         title='确认删除'
@@ -220,7 +213,7 @@ export default function SubCategoriesPage() {
         onCancel={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
       >
-        <Text>确认删除该子分类？删除后历史账单保留。</Text>
+        <Text>有关联账单时，子分类可能无法删除，请确认是否继续。</Text>
       </Modal>
     </View>
   );

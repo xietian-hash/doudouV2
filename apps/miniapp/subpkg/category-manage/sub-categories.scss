@@ -1,4 +1,4 @@
-@import '../../src/styles/variables';
+@use '../../src/styles/variables' as *;
 
 .sub-cat-page {
   min-height: 100vh;
@@ -17,6 +17,7 @@
 }
 
 .page-title {
+  display: block;
   font-size: 32rpx;
   font-weight: 700;
   color: $color-text-main;
@@ -24,6 +25,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.page-subtitle {
+  display: block;
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: $color-text-sub;
 }
 
 .add-btn {
@@ -63,7 +71,7 @@
   color: $color-text-weak;
 }
 
-.sub-item {
+.sub-cat-card {
   background: $color-surface;
   border-radius: $radius-m;
   border: 2rpx solid $color-divider;
@@ -74,12 +82,20 @@
   gap: $spacing-m;
 }
 
-.sub-item-icon {
+.sub-cat-left {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: $spacing-m;
+}
+
+.sub-cat-icon {
   font-size: 40rpx;
   flex-shrink: 0;
 }
 
-.sub-item-name {
+.sub-cat-name {
   flex: 1;
   font-size: 28rpx;
   color: $color-text-main;
@@ -88,7 +104,7 @@
   white-space: nowrap;
 }
 
-.sub-item-actions {
+.sub-cat-actions {
   display: flex;
   gap: $spacing-xs;
   flex-shrink: 0;
@@ -114,7 +130,7 @@
 }
 
 // 表单
-.cat-form {
+.sub-cat-form {
   padding-bottom: $spacing-m;
 }
 

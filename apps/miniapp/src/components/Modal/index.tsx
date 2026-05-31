@@ -13,8 +13,14 @@ interface Props {
 }
 
 export default function Modal({
-  visible, title, children, cancelText = '取消', confirmText = '确认',
-  confirmDanger, onCancel, onConfirm
+  visible,
+  title,
+  children,
+  cancelText = '取消',
+  confirmText = '确认',
+  confirmDanger,
+  onCancel,
+  onConfirm,
 }: Props) {
   if (!visible) return null;
   return (

@@ -1,4 +1,4 @@
-@import '../../styles/variables';
+@use '../../styles/variables' as *;
 
 .bill-page {
   display: flex;
@@ -11,10 +11,11 @@
 // 收支切换
 .type-switch {
   display: flex;
-  margin: $spacing-m $spacing-l 0;
-  background: $color-surface-ctrl;
-  border-radius: $radius-pill;
+  margin: $spacing-s 0 0;
+  background: $color-surface;
+  border-radius: 0;
   padding: 6rpx;
+  border-bottom: 2rpx solid $color-divider;
 }
 
 .type-btn {
@@ -47,7 +48,7 @@
   display: flex;
   align-items: baseline;
   justify-content: center;
-  padding: $spacing-l $spacing-xl;
+  padding: 28rpx $spacing-xl 24rpx;
   gap: 8rpx;
 }
 
@@ -80,6 +81,7 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  background: $color-surface;
 }
 
 .cat-scroll {
@@ -89,7 +91,7 @@
 .cat-grid {
   display: flex;
   flex-wrap: wrap;
-  padding: $spacing-s $spacing-l;
+  padding: $spacing-s $spacing-l $spacing-m;
   gap: $spacing-s;
 }
 
@@ -175,7 +177,7 @@
 
 // 语音按钮
 .voice-btn-wrap {
-  padding: $spacing-s $spacing-l;
+  padding: $spacing-s $spacing-l $spacing-m;
   background: $color-surface;
 }
 
@@ -465,6 +467,10 @@
   font-weight: 700;
   color: $color-text-main;
   font-family: $font-num;
+}
+
+.voice-item-amount--income {
+  color: $color-income;
 }
 
 .voice-item-remark {

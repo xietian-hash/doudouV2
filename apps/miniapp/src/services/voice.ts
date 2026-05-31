@@ -33,7 +33,7 @@ export async function uploadAudioAndParse(
             reject(new Error(envelope.message || '语音解析失败'));
           }
         } catch {
-          reject(new Error('语音解析结果解析失败'));
+          reject(new Error('语音解析结果读取失败'));
         }
       },
       fail: (err) => {

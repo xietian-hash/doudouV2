@@ -1,4 +1,4 @@
-@import '../../src/styles/variables';
+@use '../../src/styles/variables' as *;
 
 .cat-manage-page {
   min-height: 100vh;
@@ -103,12 +103,20 @@
 }
 
 .cat-parent-name {
+  display: block;
   font-size: 30rpx;
   font-weight: 600;
   color: $color-text-main;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.cat-sub-count {
+  display: block;
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: $color-text-sub;
 }
 
 .cat-parent-actions {
@@ -170,6 +178,13 @@
   display: flex;
   gap: $spacing-xs;
   flex-shrink: 0;
+}
+
+.sub-cat-more {
+  padding: $spacing-s $spacing-l;
+  font-size: 24rpx;
+  color: $color-brand;
+  text-align: center;
 }
 
 // 表单

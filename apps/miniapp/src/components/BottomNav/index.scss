@@ -1,4 +1,4 @@
-@import '../../styles/variables';
+@use '../../styles/variables' as *;
 
 .tab-bar {
   position: fixed;
@@ -8,6 +8,7 @@
   height: calc(112rpx + env(safe-area-inset-bottom));
   background: $color-surface;
   border-top: 2rpx solid $color-divider;
+  box-shadow: 0 -4rpx 24rpx rgba(43, 74, 58, 0.06);
   display: flex;
   align-items: center;
   z-index: 800;
@@ -16,22 +17,21 @@
 
 .tab-item {
   flex: 1;
+  height: 112rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 112rpx;
   position: relative;
 }
 
-.tab-item--center {
+.tab-icon {
+  width: 44rpx;
+  height: 44rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.tab-icon {
-  font-size: 44rpx;
+  font-size: 40rpx;
   color: $color-text-weak;
 }
 
@@ -61,8 +61,12 @@
   box-shadow: 0 8rpx 24rpx rgba(93, 190, 136, 0.44);
 }
 
+.fab--active {
+  box-shadow: 0 10rpx 28rpx rgba(93, 190, 136, 0.52);
+}
+
 .fab-icon {
-  font-size: 56rpx;
+  font-size: 52rpx;
   color: #fff;
   line-height: 1;
 }

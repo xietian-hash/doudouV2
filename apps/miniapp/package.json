@@ -1,9 +1,9 @@
 {
   "name": "@ddyq/miniapp",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "scripts": {
-    "dev:weapp": "taro build --type weapp --watch",
-    "build:weapp": "taro build --type weapp",
+    "dev:weapp": "node --disable-warning=DEP0040 ./node_modules/@tarojs/cli/bin/taro build --type weapp --watch",
+    "build:weapp": "node --disable-warning=DEP0040 ./node_modules/@tarojs/cli/bin/taro build --type weapp",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx"
   },
