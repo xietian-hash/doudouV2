@@ -173,17 +173,24 @@ export class BillsRepo {
     const start = new Date(year, (mon ?? 1) - 1, 1);
     const end = new Date(year, mon ?? 1, 1);
 
-    const results = await this.prisma.bill.groupBy({
-      by: ['billDate', 'type'],
-      where: {
-        userId,
-        isDeleted: 0,
-        billDate: { gte: start, lt: end },
-      },
-      _sum: { amount: true },
-    });
+    // 用 DATE() 按天聚合，兼容 bill_date 存储了精确时间的情况
+    const rows = await this.prisma.$queryRaw<
+      Array<{ bill_date: Date | string; type: number; amount: string }>
+    >`
+      SELECT DATE(bill_date) AS bill_date, type, SUM(amount) AS amount
+      FROM bills
+      WHERE user_id = ${userId}
+        AND is_deleted = 0
+        AND bill_date >= ${start}
+        AND bill_date < ${end}
+      GROUP BY DATE(bill_date), type
+    `;
 
-    return results;
+    return rows.map((row) => ({
+      billDate: new Date(row.bill_date),
+      type: Number(row.type),
+      _sum: { amount: new Prisma.Decimal(row.amount ?? '0') },
+    }));
   }
 
   get $transaction() {

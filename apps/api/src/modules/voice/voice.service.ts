@@ -63,21 +63,24 @@ export class VoiceService {
 
   async parseText(text: string, userId: bigint): Promise<VoiceParsedBill[]> {
     const today = getTodayStr();
+    this.logger.log(`开始解析语音文本 userId=${userId} text="${text}"`);
 
     // 获取用户的叶子分类
     const leafCategories = await this.categoriesRepo.findLeafCategories(userId);
+    this.logger.log(`叶子分类数量=${leafCategories.length} names=${leafCategories.map((c) => c.name).join(',')}`);
 
     // 调用LLM解析
     const rawBills = await this.llmService.parseVoiceText(text, today);
 
     if (rawBills.length === 0) {
-      this.logger.warn(`LLM解析无结果 userId=${userId} text=${text}`);
+      this.logger.warn(`LLM解析无结果 userId=${userId} text="${text}"`);
       return [];
     }
 
     // 匹配分类
     const results: VoiceParsedBill[] = rawBills.map((raw) => {
       const matched = findBestCategory(raw.categoryName, leafCategories);
+      this.logger.log(`分类匹配 llm分类="${raw.categoryName}" 匹配结果=${matched ? `"${matched.name}"(id=${matched.id})` : '未匹配'}`);
       return {
         type: raw.type === 2 ? 2 : 1,
         amount: raw.amount,
@@ -90,6 +93,7 @@ export class VoiceService {
       };
     });
 
+    this.logger.log(`解析完成 返回账单数=${results.length}`);
     return results;
   }
 }

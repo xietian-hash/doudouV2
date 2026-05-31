@@ -42,7 +42,11 @@ export default function RecordPage() {
   }, [monthStr, selectedDate]);
 
   useEffect(() => { loadData(); }, [loadData]);
-  Taro.useDidShow(() => { loadData(); });
+  Taro.useDidShow(() => {
+    Taro.eventCenter.trigger('tabBar:sync', 'record');
+    Taro.eventCenter.trigger('tabBar:show');
+    loadData();
+  });
 
   const changeMonth = (step: number) => {
     const next = new Date(year, month - 1 + step, 1);

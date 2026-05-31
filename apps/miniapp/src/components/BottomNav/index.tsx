@@ -25,11 +25,13 @@ export default class BottomNav extends Component<Props, State> {
 
   componentDidMount() {
     this.syncSelected();
+    Taro.eventCenter.on('tabBar:sync', this.syncSelected);
     Taro.eventCenter.on('tabBar:hide', this.hide);
     Taro.eventCenter.on('tabBar:show', this.show);
   }
 
   componentWillUnmount() {
+    Taro.eventCenter.off('tabBar:sync', this.syncSelected);
     Taro.eventCenter.off('tabBar:hide', this.hide);
     Taro.eventCenter.off('tabBar:show', this.show);
   }
@@ -46,12 +48,12 @@ export default class BottomNav extends Component<Props, State> {
     this.setState({ hidden: false });
   };
 
-  syncSelected() {
+  syncSelected = (key?: string) => {
     const pages = Taro.getCurrentPages();
-    const curr = pages[pages.length - 1]?.route || '';
+    const curr = key || pages[pages.length - 1]?.route || '';
     const idx = TABS.findIndex(t => curr.includes(t.key));
     this.setState({ selected: idx >= 0 ? idx : 0 });
-  }
+  };
 
   switchTab(index: number, path: string) {
     this.setState({ selected: index });

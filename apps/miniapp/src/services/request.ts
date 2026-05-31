@@ -4,6 +4,7 @@ import { showToast } from '../utils/toast';
 
 declare const TARO_APP_API_URL: string;
 export const BASE_URL = TARO_APP_API_URL;
+console.log('[API] BASE_URL:', BASE_URL);
 
 function generateTraceId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);

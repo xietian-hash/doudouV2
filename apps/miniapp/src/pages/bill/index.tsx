@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, ScrollView, Input } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { getCategories, createCategory } from '../../services/categories';
@@ -105,6 +105,11 @@ export default function BillPage() {
     loadCategories();
   }, [type]);
 
+  Taro.useDidShow(() => {
+    Taro.eventCenter.trigger('tabBar:sync', 'bill');
+    Taro.eventCenter.trigger('tabBar:show');
+  });
+
   async function loadBaseData() {
     try {
       const [accRes, tagRes] = await Promise.all([getAccounts(), getTags()]);
@@ -160,6 +165,10 @@ export default function BillPage() {
       setVoiceParsing(true);
       try {
         const parsed = await uploadAudioAndParse(res.tempFilePath);
+        if (parsed.length === 0) {
+          showToast('未识别到记账信息，请重试', 'error');
+          return;
+        }
         const items = parsed.map((item, index) => ({
           ...item,
           _localId: `voice_${Date.now()}_${index}`,
@@ -182,7 +191,7 @@ export default function BillPage() {
     });
   }
 
-  const startRecording = () => {
+  const startRecording = useCallback(() => {
     if (!recorderRef.current || voiceParsing) return;
     setRecording(true);
     recorderRef.current.start({
@@ -192,12 +201,21 @@ export default function BillPage() {
       encodeBitRate: 48000,
       format: 'mp3',
     });
-  };
+  }, [voiceParsing]);
 
-  const stopRecording = () => {
+  const stopRecording = useCallback(() => {
     if (!recorderRef.current || !recording) return;
     recorderRef.current.stop();
-  };
+  }, [recording]);
+
+  useEffect(() => {
+    Taro.eventCenter.on('voiceRecord:start', startRecording);
+    Taro.eventCenter.on('voiceRecord:stop', stopRecording);
+    return () => {
+      Taro.eventCenter.off('voiceRecord:start', startRecording);
+      Taro.eventCenter.off('voiceRecord:stop', stopRecording);
+    };
+  }, [startRecording, stopRecording]);
 
   const handleSave = async () => {
     if (!selectedAccount) { showToast('请选择账户', 'error'); return; }
@@ -224,7 +242,6 @@ export default function BillPage() {
         showToast('记账成功');
       }
       resetForm();
-      Taro.switchTab({ url: '/pages/record/index' });
     } catch (e) {
       console.error(e);
     } finally {
@@ -377,6 +394,7 @@ export default function BillPage() {
   };
 
   const selectedTagNames = tags.filter(tag => selectedTagIds.includes(tag.id)).map(tag => tag.name);
+  const hasSelectionDrawerOpen = showCategoryDrawer || showAccountDrawer || showTagDrawer || showDateDrawer;
   const hasMoreCategories = categories.length > 24;
   const displayCategories = hasMoreCategories ? categories.slice(0, 23) : categories.slice(0, 24);
   const categorySections = (() => {
@@ -431,6 +449,14 @@ export default function BillPage() {
     ...Array(getFirstDayOfWeek(calYear, calMonth)).fill(null),
     ...Array.from({ length: getDaysInMonth(calYear, calMonth) }, (_, i) => i + 1),
   ];
+
+  useEffect(() => {
+    if (hasSelectionDrawerOpen) {
+      hideTabBar();
+      return;
+    }
+    showTabBar();
+  }, [hasSelectionDrawerOpen]);
 
   return (
     <View className='bill-page'>
@@ -527,11 +553,13 @@ export default function BillPage() {
         <NumKeyboard value={amount} onChange={setAmount} onConfirm={handleSave} />
       </View>
 
-      <BottomNav
-        centerBusy={voiceParsing}
-        onCenterTouchStart={startRecording}
-        onCenterTouchEnd={stopRecording}
-      />
+      {!hasSelectionDrawerOpen && (
+        <BottomNav
+          centerBusy={voiceParsing}
+          onCenterTouchStart={startRecording}
+          onCenterTouchEnd={stopRecording}
+        />
+      )}
 
       {showCategoryDrawer && (
         <View className='category-sheet-mask' onClick={() => closeCategoryDrawer()}>

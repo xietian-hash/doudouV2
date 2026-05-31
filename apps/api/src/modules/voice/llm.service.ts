@@ -62,6 +62,8 @@ export class LlmService {
       { role: 'user', content: text },
     ];
 
+    this.logger.log(`LLM请求 model=${model} url=${baseUrl}/chat/completions text="${text.slice(0, 100)}"`);
+
     try {
       const response = await axios.post<LlmResponse>(
         `${baseUrl}/chat/completions`,
@@ -82,6 +84,7 @@ export class LlmService {
 
       const content = response.data.choices[0]?.message?.content ?? '[]';
       const trimmed = content.trim();
+      this.logger.log(`LLM响应 status=${response.status} content="${trimmed.slice(0, 200)}"`);
 
       // 提取JSON数组（处理可能的markdown代码块）
       const jsonMatch = trimmed.match(/\[[\s\S]*\]/);
@@ -93,19 +96,24 @@ export class LlmService {
       const parsed = JSON.parse(jsonMatch[0]) as ParsedBillRaw[];
 
       if (!Array.isArray(parsed)) {
+        this.logger.warn(`LLM解析结果非数组: ${JSON.stringify(parsed)}`);
         return [];
       }
 
-      return parsed.filter(
+      const filtered = parsed.filter(
         (item) =>
           typeof item.type === 'number' &&
           typeof item.amount === 'number' &&
           item.amount > 0 &&
           typeof item.categoryName === 'string',
       );
+      this.logger.log(`LLM解析完成 原始条数=${parsed.length} 有效条数=${filtered.length} 结果=${JSON.stringify(filtered)}`);
+      return filtered;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        this.logger.error(`LLM API请求失败: ${error.message}`);
+        this.logger.error(
+          `LLM请求失败 status=${error.response?.status} message=${error.message} body=${JSON.stringify(error.response?.data)}`,
+        );
         throw new AppException(ErrorCode.INTERNAL, 'AI服务暂时不可用，请稍后重试');
       }
       if (error instanceof SyntaxError) {

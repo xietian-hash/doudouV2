@@ -78,14 +78,18 @@ export class AsrService {
       this.configService.get<string>('ASR_SUBMIT_URL') ??
       'https://openspeech.bytedance.com/api/v3/auc/bigmodel/submit';
 
+    this.logger.log(`ASR 提交请求 url=${submitUrl} requestId=${requestId} audioUrl=${audioUrl} format=${format}`);
     try {
-      await axios.post(submitUrl, body, {
+      const res = await axios.post(submitUrl, body, {
         headers: this.buildHeaders(apiKey, resourceId, requestId, true),
         timeout: 15000,
       });
+      this.logger.log(`ASR 提交成功 status=${res.status} body=${JSON.stringify(res.data)}`);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        this.logger.error(`ASR 提交失败: ${error.message}`, error.response?.data);
+        this.logger.error(
+          `ASR 提交失败 status=${error.response?.status} message=${error.message} body=${JSON.stringify(error.response?.data)}`,
+        );
         throw new AppException(ErrorCode.INTERNAL, '语音识别服务暂时不可用，请稍后重试');
       }
       throw error;
@@ -117,16 +121,19 @@ export class AsrService {
           },
         );
         data = res.data;
+        this.logger.log(`ASR 查询响应 attempt=${i + 1} status=${res.status} body=${JSON.stringify(data)}`);
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          this.logger.warn(`ASR 查询请求失败 attempt=${i + 1}: ${error.message}`);
+          this.logger.warn(
+            `ASR 查询请求失败 attempt=${i + 1} status=${error.response?.status} message=${error.message} body=${JSON.stringify(error.response?.data)}`,
+          );
           continue;
         }
         throw error;
       }
 
-      // 成功：result.text 有值
-      if (data.result?.text != null) {
+      // 成功：result.text 有非空内容（空字符串表示识别仍在进行中）
+      if (data.result?.text) {
         return data.result.text;
       }
 
@@ -139,7 +146,7 @@ export class AsrService {
       }
 
       // 空响应：任务仍在处理中
-      this.logger.debug(`ASR 进行中 attempt=${i + 1}`);
+      this.logger.log(`ASR 进行中 attempt=${i + 1}`);
     }
 
     throw new AppException(ErrorCode.INTERNAL, '语音识别超时（60s），请重试');

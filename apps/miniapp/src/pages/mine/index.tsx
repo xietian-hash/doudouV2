@@ -27,6 +27,11 @@ export default function MinePage() {
   const displayName = user?.nickname || '微信用户';
   const avatarUrl = user?.avatarUrl || '';
 
+  Taro.useDidShow(() => {
+    Taro.eventCenter.trigger('tabBar:sync', 'mine');
+    Taro.eventCenter.trigger('tabBar:show');
+  });
+
   return (
     <View className='mine-page'>
       <View className='user-header'>

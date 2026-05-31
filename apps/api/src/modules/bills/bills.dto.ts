@@ -68,7 +68,7 @@ export class CreateBillDto {
   @MaxLength(255)
   remark?: string;
 
-  @IsDateString({}, { message: 'billDate 格式无效，请使用 YYYY-MM-DD' })
+  @IsDateString({}, { message: 'billDate 格式无效，请使用 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm:ss' })
   billDate!: string;
 
   @IsOptional()
@@ -122,7 +122,7 @@ export class UpdateBillDto {
   remark?: string;
 
   @IsOptional()
-  @IsDateString({}, { message: 'billDate 格式无效，请使用 YYYY-MM-DD' })
+  @IsDateString({}, { message: 'billDate 格式无效，请使用 YYYY-MM-DD 或 YYYY-MM-DDTHH:mm:ss' })
   billDate?: string;
 
   @IsOptional()

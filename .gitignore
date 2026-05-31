@@ -22,6 +22,13 @@ apps/api/prisma/migrations/*.sql
 npm-debug.log*
 pnpm-debug.log*
 
+# Upload temp files
+apps/api/uploads/
+
+# Test files
+AI文档/*.mp3
+AI文档/*.wav
+
 # OS
 .DS_Store
 Thumbs.db

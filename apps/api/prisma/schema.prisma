@@ -79,7 +79,7 @@ model Bill {
   type       Int       @db.TinyInt
   amount     Decimal   @db.Decimal(12, 2)
   remark     String?   @db.VarChar(255)
-  billDate   DateTime  @map("bill_date") @db.Date
+  billDate   DateTime  @map("bill_date") @db.DateTime(0)
   source     Int       @default(1) @db.TinyInt
   voiceText  String?   @db.VarChar(500) @map("voice_text")
   isDeleted  Int       @default(0) @db.TinyInt @map("is_deleted")

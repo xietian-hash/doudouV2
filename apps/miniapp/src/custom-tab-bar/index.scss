@@ -65,3 +65,53 @@
   color: #fff;
   line-height: 1;
 }
+
+.ctb-mic-icon {
+  position: relative;
+  width: 56rpx;
+  height: 56rpx;
+}
+
+.ctb-mic-head {
+  position: absolute;
+  left: 16rpx;
+  top: 4rpx;
+  width: 24rpx;
+  height: 34rpx;
+  border: 4rpx solid #fff;
+  border-radius: 14rpx;
+  box-sizing: border-box;
+}
+
+.ctb-mic-head::after {
+  content: '';
+  position: absolute;
+  left: -12rpx;
+  top: 16rpx;
+  width: 40rpx;
+  height: 24rpx;
+  border: 4rpx solid #fff;
+  border-top: none;
+  border-radius: 0 0 24rpx 24rpx;
+  box-sizing: border-box;
+}
+
+.ctb-mic-stem {
+  position: absolute;
+  left: 26rpx;
+  top: 40rpx;
+  width: 4rpx;
+  height: 10rpx;
+  border-radius: 2rpx;
+  background: #fff;
+}
+
+.ctb-mic-base {
+  position: absolute;
+  left: 16rpx;
+  top: 48rpx;
+  width: 24rpx;
+  height: 4rpx;
+  border-radius: 2rpx;
+  background: #fff;
+}
