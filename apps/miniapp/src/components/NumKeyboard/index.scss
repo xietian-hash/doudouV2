@@ -3,7 +3,7 @@
 .keyboard {
   background: $color-surface;
   border-top: 2rpx solid $color-divider;
-  padding: 20rpx 32rpx 24rpx;
+  padding: 14rpx 32rpx 17rpx;
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -18,7 +18,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
+  gap: 11rpx;
 }
 
 .keyboard-row {
@@ -34,11 +34,11 @@
   width: 144rpx;
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
+  gap: 11rpx;
 }
 
 .key {
-  height: 104rpx;
+  height: 73rpx;
   background: $color-surface-ctrl;
   border-radius: $radius-s;
   display: flex;
@@ -63,7 +63,7 @@
 }
 
 .key--confirm {
-  height: 224rpx;
+  height: 157rpx;
   background: $color-brand;
   border-radius: $radius-m;
   flex-direction: column;

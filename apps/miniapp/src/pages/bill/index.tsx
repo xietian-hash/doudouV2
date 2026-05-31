@@ -367,62 +367,63 @@ export default function BillPage() {
         </View>
       </View>
 
-      <View className='cat-grid-card'>
-        <View className='cat-grid'>
-          {displayCategories.map(cat => (
-            <View
-              key={cat.id}
-              className={`cat-item${selectedCat?.id === cat.id ? ' cat-item--active' : ''}`}
-              onClick={() => setSelectedCat(cat)}
-            >
-              <Text className='cat-icon'>{cat.icon || '📝'}</Text>
-              <Text className='cat-name'>{cat.name}</Text>
-            </View>
-          ))}
-          {categories.length === 0 && (
-            <View className='cat-empty' onClick={() => Taro.navigateTo({ url: '/subpkg/category-manage/index' })}>
-              <Text className='cat-empty-icon'>＋</Text>
-              <Text className='cat-empty-text'>添加分类</Text>
-            </View>
-          )}
-          {hasMoreCategories && (
-            <View className='cat-item cat-item--add' onClick={() => openCategoryDrawer()}>
-              <Text className='cat-icon'>＋</Text>
-              <Text className='cat-name'>更多</Text>
-            </View>
-          )}
-          {categories.length > 0 && categories.length < 24 && (
-            <View className='cat-item cat-item--add' onClick={() => Taro.navigateTo({ url: '/subpkg/category-manage/index' })}>
-              <Text className='cat-icon'>＋</Text>
-              <Text className='cat-name'>添加</Text>
-            </View>
-          )}
+      <ScrollView scrollY className='cat-scroll-area'>
+        <View className='cat-grid-card'>
+          <View className='cat-grid'>
+            {displayCategories.map(cat => (
+              <View
+                key={cat.id}
+                className={`cat-item${selectedCat?.id === cat.id ? ' cat-item--active' : ''}`}
+                onClick={() => setSelectedCat(cat)}
+              >
+                <Text className='cat-icon'>{cat.icon || '📝'}</Text>
+                <Text className='cat-name'>{cat.name}</Text>
+              </View>
+            ))}
+            {categories.length === 0 && (
+              <View className='cat-empty' onClick={() => Taro.navigateTo({ url: '/subpkg/category-manage/index' })}>
+                <Text className='cat-empty-icon'>＋</Text>
+                <Text className='cat-empty-text'>添加分类</Text>
+              </View>
+            )}
+            {hasMoreCategories && (
+              <View className='cat-item cat-item--add' onClick={() => openCategoryDrawer()}>
+                <Text className='cat-icon'>＋</Text>
+                <Text className='cat-name'>更多</Text>
+              </View>
+            )}
+            {categories.length > 0 && categories.length < 24 && (
+              <View className='cat-item cat-item--add' onClick={() => Taro.navigateTo({ url: '/subpkg/category-manage/index' })}>
+                <Text className='cat-icon'>＋</Text>
+                <Text className='cat-name'>添加</Text>
+              </View>
+            )}
+          </View>
         </View>
+      </ScrollView>
+
+      <View className='bill-bottom-bar'>
+        <View className='meta-row'>
+          <View className='meta-pill' onClick={() => setShowAccountDrawer(true)}>
+            <Text className='meta-icon'>▣</Text>
+            <Text className='meta-value'>{selectedAccount?.name || '选择账户'}</Text>
+            <Text className='meta-chev'>⌄</Text>
+          </View>
+          <View className='meta-pill' onClick={() => setShowTagDrawer(true)}>
+            <Text className='meta-icon'>⌗</Text>
+            <Text className='meta-value'>{selectedTagNames[0] || '标签'}</Text>
+          </View>
+          <View className='meta-pill' onClick={() => setShowDateDrawer(true)}>
+            <Text className='meta-icon'>□</Text>
+            <Text className='meta-value'>{displayDate}</Text>
+          </View>
+          <View className='meta-pill meta-pill--remark' onClick={() => setShowRemarkDrawer(true)}>
+            <Text className='meta-icon'>✎</Text>
+            <Text className='meta-value'>{remark || '备注'}</Text>
+          </View>
+        </View>
+        <NumKeyboard value={amount} onChange={setAmount} onConfirm={handleSave} />
       </View>
-
-      <View className='bill-flex-space' />
-
-      <View className='meta-row'>
-        <View className='meta-pill' onClick={() => setShowAccountDrawer(true)}>
-          <Text className='meta-icon'>▣</Text>
-          <Text className='meta-value'>{selectedAccount?.name || '选择账户'}</Text>
-          <Text className='meta-chev'>⌄</Text>
-        </View>
-        <View className='meta-pill' onClick={() => setShowTagDrawer(true)}>
-          <Text className='meta-icon'>⌗</Text>
-          <Text className='meta-value'>{selectedTagNames[0] || '标签'}</Text>
-        </View>
-        <View className='meta-pill' onClick={() => setShowDateDrawer(true)}>
-          <Text className='meta-icon'>□</Text>
-          <Text className='meta-value'>{displayDate}</Text>
-        </View>
-        <View className='meta-pill meta-pill--remark' onClick={() => setShowRemarkDrawer(true)}>
-          <Text className='meta-icon'>✎</Text>
-          <Text className='meta-value'>{remark || '备注'}</Text>
-        </View>
-      </View>
-
-      <NumKeyboard value={amount} onChange={setAmount} onConfirm={handleSave} />
 
       <BottomNav
         centerBusy={voiceParsing}

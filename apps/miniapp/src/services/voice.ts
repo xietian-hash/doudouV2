@@ -1,9 +1,7 @@
 import Taro from '@tarojs/taro';
-import { post } from './request';
+import { post, BASE_URL } from './request';
 import { useAuthStore } from '../stores/auth';
 import type { VoiceParsedBill } from './types';
-
-const BASE_URL = process.env.TARO_APP_API_URL || 'http://localhost:3000';
 
 export const parseVoice = (text: string) =>
   post<VoiceParsedBill[]>('/api/voice/parse', { text });

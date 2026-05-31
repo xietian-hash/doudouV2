@@ -5,8 +5,7 @@
   flex-direction: column;
   height: 100vh;
   background: $color-bg-bill;
-  overflow: hidden;
-  padding-bottom: calc(112rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(466rpx + 112rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 
@@ -120,6 +119,11 @@
   white-space: nowrap;
 }
 
+.cat-scroll-area {
+  flex: 1;
+  min-height: 0;
+}
+
 .cat-grid-card {
   background: $color-surface;
   padding: 16rpx 32rpx 20rpx;
@@ -129,13 +133,12 @@
 .cat-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(6, 1fr);
   gap: 6rpx;
 }
 
 .cat-item,
 .cat-empty {
-  height: 84rpx;
+  aspect-ratio: 1;
   border-radius: 16rpx;
   display: flex;
   flex-direction: column;
@@ -178,14 +181,21 @@
 
 .bill-flex-space {
   flex: 1;
-  min-height: 70rpx;
   background: $color-bg-bill;
+}
+
+.bill-bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(112rpx + env(safe-area-inset-bottom));
+  background: $color-surface;
+  z-index: 100;
 }
 
 .meta-row {
   background: $color-surface;
   border-top: 2rpx solid $color-divider;
-  border-bottom: 2rpx solid $color-divider;
   display: flex;
   align-items: center;
   justify-content: space-between;
