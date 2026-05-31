@@ -271,9 +271,11 @@
 }
 
 .dialog-footer {
+  width: 100%;
   padding: 24rpx 40rpx 48rpx;
   display: flex;
   gap: 24rpx;
+  box-sizing: border-box;
 }
 
 .dialog-btn {

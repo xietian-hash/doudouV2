@@ -1,10 +1,11 @@
 @use '../../styles/variables' as *;
 
 .mine-page {
-  min-height: 100vh;
+  height: 100vh;
   background: $color-bg-page;
-  padding-bottom: calc(112rpx + env(safe-area-inset-bottom));
-  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .user-header {
@@ -57,12 +58,13 @@
 }
 
 .mine-content {
+  flex: 1;
   margin-top: -32rpx;
-  min-height: calc(100vh - 288rpx);
   background: $color-bg-page;
   border-radius: $radius-xl $radius-xl 0 0;
-  padding: 32rpx;
+  padding: 32rpx 32rpx calc(32rpx + 112rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .menu-card {

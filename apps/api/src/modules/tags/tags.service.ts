@@ -5,6 +5,8 @@ import {
   NotFoundException,
   ForbiddenException,
   ConflictException,
+  AppException,
+  ErrorCode,
 } from '../../common/errors/business-error';
 
 function serializeTag(tag: {
@@ -66,6 +68,14 @@ export class TagsService {
     }
     if (tag.userId !== userId) {
       throw new ForbiddenException('无权操作该标签');
+    }
+
+    const billCount = await this.repo.getBillCount(id);
+    if (billCount > 0) {
+      throw new AppException(
+        ErrorCode.TAG_HAS_BILLS,
+        `该标签已关联 ${billCount} 条账单，无法删除`,
+      );
     }
 
     await this.repo.softDeleteWithBillTags(id);

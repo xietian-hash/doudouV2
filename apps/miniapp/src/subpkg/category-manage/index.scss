@@ -86,12 +86,18 @@
   }
 }
 
-// === Card ===
-.cm-card {
+// === Card wrapper（swipe-track 里的主体，占满一屏宽）===
+.cm-card-wrap {
   flex-shrink: 0;
   min-width: 100%;
   box-sizing: border-box;
   background: $color-surface;
+  display: flex;
+  flex-direction: column;
+}
+
+// === Card ===
+.cm-card {
   display: flex;
   align-items: center;
   padding: 24rpx 28rpx;
@@ -145,29 +151,6 @@
   font-size: 36rpx;
   color: $color-text-weak;
   flex-shrink: 0;
-}
-
-// === Pills ===
-.cm-pills {
-  flex-shrink: 0;
-  min-width: 100%;
-  box-sizing: border-box;
-  background: $color-surface;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12rpx;
-  padding: 0 28rpx 24rpx;
-}
-
-.cm-pill {
-  background: $color-bg-page;
-  border-radius: $radius-pill;
-  padding: 8rpx 20rpx;
-}
-
-.cm-pill-text {
-  font-size: 24rpx;
-  color: $color-text-sub;
 }
 
 // === Swipe actions ===
@@ -328,9 +311,11 @@
 }
 
 .dialog-footer {
+  width: 100%;
   padding: 24rpx 40rpx 48rpx;
   display: flex;
   gap: 24rpx;
+  box-sizing: border-box;
 }
 
 .dialog-btn {

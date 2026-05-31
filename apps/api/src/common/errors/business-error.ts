@@ -9,6 +9,7 @@ export enum ErrorCode {
   RATE_LIMIT = 10006,
   INTERNAL = 10007,
   CATEGORY_HAS_BILLS = 10008,
+  TAG_HAS_BILLS = 10009,
 }
 
 export interface AppErrorResponse {
@@ -48,6 +49,7 @@ export class AppException extends HttpException {
         return HttpStatus.NOT_FOUND;
       case ErrorCode.CONFLICT:
       case ErrorCode.CATEGORY_HAS_BILLS:
+      case ErrorCode.TAG_HAS_BILLS:
         return HttpStatus.CONFLICT;
       case ErrorCode.RATE_LIMIT:
         return HttpStatus.TOO_MANY_REQUESTS;

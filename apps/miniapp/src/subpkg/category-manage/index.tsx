@@ -20,7 +20,6 @@ interface DialogState {
   id: string;
   name: string;
   icon: string;
-  hasSubCategories?: boolean;
 }
 
 const INIT_DIALOG: DialogState = { mode: null, id: '', name: '', icon: '' };
@@ -71,13 +70,11 @@ export default function CategoryManage() {
   function openDelete(cat: Category, e: any) {
     e.stopPropagation();
     setActiveSwipeId(null);
-    setDialog({
-      mode: 'delete',
-      id: cat.id,
-      name: cat.name,
-      icon: cat.icon || '',
-      hasSubCategories: (cat.children?.length ?? 0) > 0,
-    });
+    if ((cat.children?.length ?? 0) > 0) {
+      showToast('请先删除该分类下的所有子分类', 'error');
+      return;
+    }
+    setDialog({ mode: 'delete', id: cat.id, name: cat.name, icon: cat.icon || '' });
   }
 
   async function handleSubmit() {
@@ -180,38 +177,24 @@ export default function CategoryManage() {
               onTouchStart={e => onTouchStart(cat.id, e)}
               onTouchEnd={e => onTouchEnd(cat.id, e)}
             >
-              {/* card */}
-              <View className='cm-card' onClick={() => goToSub(cat)}>
-                <View className='cm-card-left'>
-                  <View className='cm-icon-circle'>
-                    <Text className='cm-icon-text'>{cat.icon || '📁'}</Text>
+              <View className='cm-card-wrap' onClick={() => goToSub(cat)}>
+                <View className='cm-card'>
+                  <View className='cm-card-left'>
+                    <View className='cm-icon-circle'>
+                      <Text className='cm-icon-text'>{cat.icon || '📁'}</Text>
+                    </View>
+                    <View className='cm-card-info'>
+                      <Text className='cm-cat-name'>{cat.name}</Text>
+                      <Text className='cm-cat-sub'>
+                        {(cat.children?.length ?? 0) > 0
+                          ? `${cat.children!.length}个子分类`
+                          : '无子分类'}
+                      </Text>
+                    </View>
                   </View>
-                  <View className='cm-card-info'>
-                    <Text className='cm-cat-name'>{cat.name}</Text>
-                    <Text className='cm-cat-sub'>
-                      {(cat.children?.length ?? 0) > 0
-                        ? `${cat.children!.length}个子分类`
-                        : '无子分类'}
-                    </Text>
-                  </View>
+                  <Text className='cm-chevron'>›</Text>
                 </View>
-                <Text className='cm-chevron'>›</Text>
               </View>
-              {/* pills row */}
-              {(cat.children?.length ?? 0) > 0 && (
-                <View className='cm-pills'>
-                  {cat.children!.slice(0, 6).map(child => (
-                    <View key={child.id} className='cm-pill'>
-                      <Text className='cm-pill-text'>{child.icon || ''} {child.name}</Text>
-                    </View>
-                  ))}
-                  {cat.children!.length > 6 && (
-                    <View className='cm-pill'>
-                      <Text className='cm-pill-text'>+{cat.children!.length - 6}</Text>
-                    </View>
-                  )}
-                </View>
-              )}
               {/* swipe actions */}
               <View className='swipe-actions'>
                 <View className='swipe-btn swipe-btn--edit' onClick={e => openEdit(cat, e)}>
@@ -288,9 +271,7 @@ export default function CategoryManage() {
             <Text className='del-title'>删除分类</Text>
             <View className='del-msg-box'>
               <Text className='del-msg'>
-                确认删除「{dialog.name}」？
-                {dialog.hasSubCategories ? '该分类包含子分类，删除后子分类也将一并删除。' : ''}
-                删除后相关账单的分类将丢失。
+                确认删除「{dialog.name}」？删除后该分类将不可用，已有账单的分类信息不受影响。
               </Text>
             </View>
             <View className='dialog-footer'>

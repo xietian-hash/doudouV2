@@ -244,7 +244,7 @@ export default function SubCategories() {
             <Text className='del-title'>删除子分类</Text>
             <View className='del-msg-box'>
               <Text className='del-msg'>
-                确认删除「{dialog.name}」？删除后相关账单的分类将丢失。
+                确认删除「{dialog.name}」？删除后该分类将不可用，已有账单的分类信息不受影响。
               </Text>
             </View>
             <View className='dialog-footer'>

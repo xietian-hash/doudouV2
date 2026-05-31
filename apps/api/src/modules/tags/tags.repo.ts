@@ -41,6 +41,10 @@ export class TagsRepo {
     return this.prisma.tag.update({ where: { id }, data });
   }
 
+  async getBillCount(tagId: bigint) {
+    return this.prisma.billTag.count({ where: { tagId } });
+  }
+
   async softDeleteWithBillTags(id: bigint) {
     return this.prisma.$transaction([
       this.prisma.billTag.deleteMany({ where: { tagId: id } }),

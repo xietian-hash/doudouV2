@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { View, Text, ScrollView, Input } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { getTags, createTag, updateTag, deleteTag } from '../../services/tags';
@@ -22,6 +22,9 @@ export default function TagManage() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [dialog, setDialog] = useState<DialogState>(INIT_DIALOG);
+  const [activeSwipeId, setActiveSwipeId] = useState<string | null>(null);
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
 
   useEffect(() => {
     Taro.setNavigationBarTitle({ title: '标签管理' });
@@ -41,16 +44,36 @@ export default function TagManage() {
   }
 
   function openAdd() {
+    setActiveSwipeId(null);
     setDialog({ mode: 'add', id: '', name: '' });
   }
 
-  function openEdit(tag: Tag) {
+  function openEdit(tag: Tag, e: any) {
+    e.stopPropagation();
+    setActiveSwipeId(null);
     setDialog({ mode: 'edit', id: tag.id, name: tag.name });
   }
 
-  function openDelete(tag: Tag) {
+  function openDelete(tag: Tag, e: any) {
+    e.stopPropagation();
+    setActiveSwipeId(null);
     setDialog({ mode: 'delete', id: tag.id, name: tag.name });
   }
+
+  function onTouchStart(id: string, e: any) {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }
+
+  function onTouchEnd(id: string, e: any) {
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(dx) < Math.abs(dy)) return;
+    if (dx < -50) setActiveSwipeId(id);
+    else if (dx > 20) setActiveSwipeId(null);
+  }
+
+  const isSwiped = (id: string) => activeSwipeId === id;
 
   async function handleSubmit() {
     if (submitting) return;
@@ -86,7 +109,9 @@ export default function TagManage() {
       setDialog(INIT_DIALOG);
       await loadTags();
     } catch (e) {
-      if (e instanceof ApiError) showToast(e.message, 'error');
+      if (e instanceof ApiError && e.code === 10009) {
+        showToast(e.message, 'error');
+      }
       setDialog(INIT_DIALOG);
     } finally {
       setSubmitting(false);
@@ -95,7 +120,7 @@ export default function TagManage() {
 
   return (
     <View className='tm-page'>
-      <ScrollView scrollY className='tm-list'>
+      <ScrollView scrollY className='tm-list' onClick={() => setActiveSwipeId(null)}>
         {loading && (
           <View className='tm-empty'><Text className='tm-empty-text'>加载中...</Text></View>
         )}
@@ -103,19 +128,25 @@ export default function TagManage() {
           <View className='tm-empty'><Text className='tm-empty-text'>暂无标签，点击 + 添加</Text></View>
         )}
         {!loading && tags.map(tag => (
-          <View key={tag.id} className='tm-row'>
-            <View className='tm-row-left'>
-              <View className='tm-hash'>
-                <Text className='tm-hash-text'>#</Text>
+          <View key={tag.id} className='swipe-wrap'>
+            <View
+              className={`swipe-track${isSwiped(tag.id) ? ' swipe-track--swiped' : ''}`}
+              onTouchStart={e => onTouchStart(tag.id, e)}
+              onTouchEnd={e => onTouchEnd(tag.id, e)}
+            >
+              <View className='tm-card'>
+                <View className='tm-hash'>
+                  <Text className='tm-hash-text'>#</Text>
+                </View>
+                <Text className='tm-name'>{tag.name}</Text>
               </View>
-              <Text className='tm-name'>{tag.name}</Text>
-            </View>
-            <View className='tm-actions'>
-              <View className='tm-action-btn' onClick={() => openEdit(tag)}>
-                <Text className='tm-action-icon'>✏️</Text>
-              </View>
-              <View className='tm-action-btn' onClick={() => openDelete(tag)}>
-                <Text className='tm-action-icon'>🗑️</Text>
+              <View className='swipe-actions'>
+                <View className='swipe-btn swipe-btn--edit' onClick={e => openEdit(tag, e)}>
+                  <Text className='swipe-btn-text'>编辑</Text>
+                </View>
+                <View className='swipe-btn swipe-btn--delete' onClick={e => openDelete(tag, e)}>
+                  <Text className='swipe-btn-text'>删除</Text>
+                </View>
               </View>
             </View>
           </View>

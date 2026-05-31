@@ -27,24 +27,35 @@
   color: $color-text-weak;
 }
 
-// === Row ===
-.tm-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: $color-surface;
-  border-radius: $radius-l;
-  padding: 24rpx 28rpx;
+// === Swipe ===
+.swipe-wrap {
   margin-bottom: 16rpx;
+  border-radius: $radius-l;
+  overflow: hidden;
   box-shadow: 0 4rpx 24rpx rgba(43, 74, 58, 0.06);
 }
 
-.tm-row-left {
+.swipe-track {
+  display: flex;
+  flex-direction: row;
+  transform: translateX(0);
+  transition: transform 0.25s ease;
+
+  &--swiped {
+    transform: translateX(-288rpx);
+  }
+}
+
+// === Card ===
+.tm-card {
+  flex-shrink: 0;
+  min-width: 100%;
+  box-sizing: border-box;
+  background: $color-surface;
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  flex: 1;
-  min-width: 0;
+  padding: 28rpx;
+  gap: 20rpx;
 }
 
 .tm-hash {
@@ -74,25 +85,32 @@
   white-space: nowrap;
 }
 
-.tm-actions {
-  display: flex;
-  gap: 8rpx;
+// === Swipe actions ===
+.swipe-actions {
   flex-shrink: 0;
+  width: 288rpx;
+  display: flex;
 }
 
-.tm-action-btn {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: $radius-m;
+.swipe-btn {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: $color-surface-ctrl;
+
+  &--edit {
+    background: $color-brand;
+  }
+
+  &--delete {
+    background: $color-error;
+  }
 }
 
-.tm-action-icon {
-  font-size: 32rpx;
-  line-height: 1;
+.swipe-btn-text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #fff;
 }
 
 // === FAB ===
@@ -179,9 +197,11 @@
 }
 
 .dialog-footer {
+  width: 100%;
   padding: 24rpx 40rpx 48rpx;
   display: flex;
   gap: 24rpx;
+  box-sizing: border-box;
 }
 
 .dialog-btn {
