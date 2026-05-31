@@ -108,10 +108,8 @@ jobs:
             SERVER_BASE_URL=${SECRET_SERVER_BASE_URL}
             EOF
 
-            # 清理悬空镜像，减少 overlay 初始化时间
-            docker image prune -f
-
-            DOCKER_BUILDKIT=0 docker compose -f docker-compose.deploy.yml build
+            # 禁用 Compose bake（需要 buildx），保留 BuildKit 自身缓存不受 prune 影响
+            COMPOSE_BAKE=false docker compose -f docker-compose.deploy.yml build
 
             # 用临时容器（sleep）执行 migrate：
             # 避免 NestJS 启动崩溃导致无法 exec，sleep 保持容器稳定运行
@@ -136,12 +134,14 @@ jobs:
             docker rm -f ddyq-api-migrate 2>/dev/null || true
 
             # 启动真正的 api，并打印启动日志供调试
-            DOCKER_BUILDKIT=0 COMPOSE_IGNORE_ORPHANS=true docker compose -f docker-compose.deploy.yml up -d api
+            COMPOSE_IGNORE_ORPHANS=true docker compose -f docker-compose.deploy.yml up -d api
+
+            # 构建完新镜像后再清理悬空旧层，加速后续容器 overlay 初始化
+            docker image prune -f
+
             sleep 10
             echo "=== api 启动日志 ==="
             docker logs ddyq-api --tail 30 2>&1 || true
-
-            docker image prune -f
 
       - name: Sync nginx config
         uses: appleboy/ssh-action@v1.0.3
