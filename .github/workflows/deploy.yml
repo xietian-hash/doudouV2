@@ -108,25 +108,34 @@ jobs:
             SERVER_BASE_URL=${SECRET_SERVER_BASE_URL}
             EOF
 
-            # 诊断
-            echo "=== ddyq-mysql 状态 ==="
-            docker inspect ddyq-mysql --format \
-              'Status={{.State.Status}} Networks={{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' \
-              2>/dev/null || echo "ERROR: ddyq-mysql 不存在"
-            echo "=== MySQL 连通性 ==="
-            docker exec ddyq-mysql mysqladmin ping -h 127.0.0.1 -proot 2>&1 || echo "MySQL ping 失败"
-            echo "=== 磁盘 ==="
-            df -h /
+            # 清理悬空镜像，避免 overlay 层积累导致容器启动缓慢
+            docker image prune -f
 
             docker compose -f docker-compose.deploy.yml build
 
-            # prisma migrate：用 compose 项目默认网络（api-ddyqv2_default），
-            # ddyq-mysql 从一开始就在这个网络，DNS 最可靠
-            docker compose -f docker-compose.deploy.yml run --rm api \
+            # 先启动 api 容器（NestJS Prisma 懒连接，无表也能启动）
+            COMPOSE_IGNORE_ORPHANS=true docker compose -f docker-compose.deploy.yml up -d api
+
+            # 等待容器进入 running 状态（最多 60s）
+            for i in $(seq 1 30); do
+              if [ "$(docker inspect ddyq-api --format '{{.State.Running}}' 2>/dev/null)" = "true" ]; then
+                echo "api 容器已启动（第 ${i} 次检查）"
+                break
+              fi
+              if [ "$i" -eq 30 ]; then
+                echo "ERROR: api 容器 60s 内未启动"
+                docker logs ddyq-api --tail 20
+                exit 1
+              fi
+              sleep 2
+            done
+
+            # 在已运行的容器内执行迁移，无需启动新容器，无 overlay 初始化开销
+            DB_URL=$(grep '^DATABASE_URL=' .env.production | cut -d= -f2-)
+            docker exec -e DATABASE_URL="$DB_URL" ddyq-api \
               /app/apps/api/node_modules/.bin/prisma migrate deploy \
               --schema /app/apps/api/prisma/schema.prisma
 
-            COMPOSE_IGNORE_ORPHANS=true docker compose -f docker-compose.deploy.yml up -d api
             docker image prune -f
 
       - name: Sync nginx config
