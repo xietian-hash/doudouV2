@@ -116,7 +116,7 @@ jobs:
             docker rm -f ddyq-api-migrate 2>/dev/null || true
             docker run -d \
               --name ddyq-api-migrate \
-              --network api-ddyqv2_default \
+              --network api-todofairyv2_default \
               --env-file .env.production \
               api-ddyqv2-api:latest \
               sleep 120

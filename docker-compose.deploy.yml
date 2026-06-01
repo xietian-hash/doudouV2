@@ -11,6 +11,8 @@ services:
       - uploads_data:/app/apps/api/uploads
     ports:
       - "3001:3000"
+    networks:
+      - todofairy
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/api/accounts',{headers:{Authorization:'x'}},r=>process.exit(r.statusCode===401?0:1)).on('error',()=>process.exit(1))"]
       interval: 30s
@@ -20,3 +22,8 @@ services:
 
 volumes:
   uploads_data:
+
+networks:
+  todofairy:
+    external: true
+    name: api-todofairyv2_default
