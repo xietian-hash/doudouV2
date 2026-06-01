@@ -28,16 +28,4 @@ export default defineAppConfig({
     navigationBarTitleText: '兜兜有钱',
     navigationBarTextStyle: 'black',
   },
-  tabBar: {
-    custom: true,
-    color: '#B5D0C6',
-    selectedColor: '#5DBE88',
-    backgroundColor: '#FFFFFF',
-    borderStyle: 'white',
-    list: [
-      { pagePath: 'pages/record/index', text: '记录' },
-      { pagePath: 'pages/bill/index', text: '记账' },
-      { pagePath: 'pages/mine/index', text: '我的' },
-    ],
-  },
 });

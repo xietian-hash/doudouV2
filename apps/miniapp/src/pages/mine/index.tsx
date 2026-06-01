@@ -1,6 +1,7 @@
 import { View, Text, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useAuthStore } from '../../stores/auth';
+import BottomNav from '../../components/BottomNav';
 import './index.scss';
 
 interface MenuItem {
@@ -73,6 +74,7 @@ export default function MinePage() {
         </View>
       </View>
 
+      <BottomNav />
     </View>
   );
 }

@@ -57,7 +57,7 @@ export default class BottomNav extends Component<Props, State> {
 
   switchTab(index: number, path: string) {
     this.setState({ selected: index });
-    Taro.switchTab({ url: path });
+    Taro.reLaunch({ url: path });
   }
 
   render() {

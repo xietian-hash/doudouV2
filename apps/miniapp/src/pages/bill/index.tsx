@@ -12,6 +12,7 @@ import { showToast } from '../../utils/toast';
 import NumKeyboard from '../../components/NumKeyboard';
 import Drawer from '../../components/Drawer';
 import Modal from '../../components/Modal';
+import BottomNav from '../../components/BottomNav';
 import './index.scss';
 
 function hideTabBar() {
@@ -905,6 +906,14 @@ export default function BillPage() {
             <Text className='recording-hint'>松开手指完成录音</Text>
           </View>
         </View>
+      )}
+
+      {!hasSelectionDrawerOpen && (
+        <BottomNav
+          centerBusy={voiceParsing}
+          onCenterTouchStart={startRecording}
+          onCenterTouchEnd={stopRecording}
+        />
       )}
     </View>
   );
