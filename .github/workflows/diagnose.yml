@@ -1,0 +1,42 @@
+name: Diagnose Server
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    environment: main
+    steps:
+      - name: Check server status
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          command_timeout: 2m
+          script: |
+            echo "=== 系统负载 ==="
+            uptime
+
+            echo "=== 磁盘使用 ==="
+            df -h /
+
+            echo "=== 内存使用 ==="
+            free -h
+
+            echo "=== 运行中的容器 ==="
+            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+            echo "=== 所有容器（含停止）==="
+            docker ps -a --format "table {{.Names}}\t{{.Status}}"
+
+            echo "=== Docker 镜像占用 ==="
+            docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"
+
+            echo "=== Nginx 状态 ==="
+            systemctl is-active nginx || true
+
+            echo "=== 监听端口 ==="
+            ss -tlnp | grep -E '3000|3001|80|443|22'
