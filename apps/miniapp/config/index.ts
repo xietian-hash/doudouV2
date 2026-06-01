@@ -10,13 +10,13 @@ export default defineConfig({
   plugins: [],
   defineConstants: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
-    TARO_APP_API_URL: JSON.stringify(
-      process.env.NODE_ENV === 'production'
-        ? 'https://api-accounts.aitrealmaker.top'
-        : 'http://192.168.1.84:3000'
-    ),
   },
-  copy: { patterns: [], options: {} },
+  copy: {
+    patterns: [
+      { from: 'src/assets/icons', to: 'dist/assets/icons' },
+    ],
+    options: {},
+  },
   framework: 'react',
   compiler: 'webpack5',
   mini: {

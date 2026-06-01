@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, ScrollView, Input } from '@tarojs/components';
+import { View, Text, ScrollView, Input, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { getCategories, createCategory } from '../../services/categories';
 import { getAccounts, createAccount } from '../../services/accounts';
@@ -12,24 +12,10 @@ import { showToast } from '../../utils/toast';
 import NumKeyboard from '../../components/NumKeyboard';
 import Drawer from '../../components/Drawer';
 import Modal from '../../components/Modal';
-import BottomNav from '../../components/BottomNav';
 import './index.scss';
 
-function hideTabBar() {
-  const pages = Taro.getCurrentPages();
-  const page = pages[pages.length - 1] as any;
-  Taro.hideTabBar({ animation: false }).catch(() => undefined);
-  page?.getTabBar?.()?.setState?.({ hidden: true });
-  Taro.eventCenter.trigger('tabBar:hide');
-}
-
-function showTabBar() {
-  const pages = Taro.getCurrentPages();
-  const page = pages[pages.length - 1] as any;
-  Taro.showTabBar({ animation: false }).catch(() => undefined);
-  page?.getTabBar?.()?.setState?.({ hidden: false });
-  Taro.eventCenter.trigger('tabBar:show');
-}
+function hideTabBar() {}
+function showTabBar() {}
 
 type BillType = 1 | 2;
 
@@ -96,6 +82,7 @@ export default function BillPage() {
   const recorderRef = useRef<Taro.RecorderManager | null>(null);
 
   useEffect(() => {
+    Taro.hideTabBar({ animation: false }).catch(() => undefined);
     loadBaseData();
     initRecorder();
     loadEditDraft();
@@ -106,8 +93,11 @@ export default function BillPage() {
   }, [type]);
 
   Taro.useDidShow(() => {
-    Taro.eventCenter.trigger('tabBar:sync', 'bill');
-    Taro.eventCenter.trigger('tabBar:show');
+    Taro.hideTabBar({ animation: false }).catch(() => undefined);
+  });
+
+  Taro.useDidHide(() => {
+    Taro.showTabBar({ animation: false }).catch(() => undefined);
   });
 
   async function loadBaseData() {
@@ -553,13 +543,6 @@ export default function BillPage() {
         <NumKeyboard value={amount} onChange={setAmount} onConfirm={handleSave} />
       </View>
 
-      {!hasSelectionDrawerOpen && (
-        <BottomNav
-          centerBusy={voiceParsing}
-          onCenterTouchStart={startRecording}
-          onCenterTouchEnd={stopRecording}
-        />
-      )}
 
       {showCategoryDrawer && (
         <View className='category-sheet-mask' onClick={() => closeCategoryDrawer()}>
@@ -914,6 +897,38 @@ export default function BillPage() {
           </View>
         </View>
       )}
+
+      {!hasSelectionDrawerOpen && (
+        <View className='bill-bottom-nav'>
+          <View className='bill-bn-tab' onClick={() => Taro.switchTab({ url: '/pages/record/index' })}>
+            <Image className='bill-bn-icon' src='/assets/icons/record-normal.png' mode='aspectFit' />
+            <Text className='bill-bn-label'>记录</Text>
+          </View>
+          <View className='bill-bn-center'>
+            <View
+              className={`bill-bn-fab${voiceParsing ? ' bill-bn-fab--busy' : ''}`}
+              onTouchStart={startRecording}
+              onTouchEnd={stopRecording}
+              onTouchCancel={stopRecording}
+            >
+              {voiceParsing ? (
+                <Text className='bill-bn-busy-icon'>…</Text>
+              ) : (
+                <View className='bill-bn-mic'>
+                  <View className='bill-bn-mic-head' />
+                  <View className='bill-bn-mic-stem' />
+                  <View className='bill-bn-mic-base' />
+                </View>
+              )}
+            </View>
+          </View>
+          <View className='bill-bn-tab' onClick={() => Taro.switchTab({ url: '/pages/mine/index' })}>
+            <Image className='bill-bn-icon' src='/assets/icons/mine-normal.png' mode='aspectFit' />
+            <Text className='bill-bn-label'>我的</Text>
+          </View>
+        </View>
+      )}
+
     </View>
   );
 }

@@ -5,7 +5,6 @@ import { getBills, getCalendarSummary } from '../../services/bills';
 import type { Bill, CalendarSummaryItem } from '../../services/types';
 import { formatDate, getDaysInMonth, getFirstDayOfWeek } from '../../utils/date';
 import { formatAmount } from '../../utils/format';
-import BottomNav from '../../components/BottomNav';
 import './index.scss';
 
 const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日'];
@@ -43,8 +42,7 @@ export default function RecordPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
   Taro.useDidShow(() => {
-    Taro.eventCenter.trigger('tabBar:sync', 'record');
-    Taro.eventCenter.trigger('tabBar:show');
+    Taro.showTabBar({ animation: false }).catch(() => undefined);
     loadData();
   });
 
@@ -199,7 +197,6 @@ export default function RecordPage() {
         </ScrollView>
       </View>
 
-      <BottomNav />
     </View>
   );
 }
