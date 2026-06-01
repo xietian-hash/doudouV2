@@ -2,12 +2,19 @@ import Taro from '@tarojs/taro';
 import { useAuthStore } from '../stores/auth';
 import { showToast } from '../utils/toast';
 
-const { miniProgram } = Taro.getAccountInfoSync();
-export const BASE_URL =
-  miniProgram.envVersion === 'develop'
-    ? 'http://192.168.1.84:3000'
-    : 'https://api-accounts.aitrealmaker.top';
-console.log('[API] BASE_URL:', BASE_URL, '| envVersion:', miniProgram.envVersion);
+function resolveBaseUrl(): string {
+  try {
+    const { miniProgram } = Taro.getAccountInfoSync();
+    const url = miniProgram.envVersion === 'develop'
+      ? 'http://192.168.1.84:3000'
+      : 'https://api-accounts.aitrealmaker.top';
+    console.log('[API] envVersion:', miniProgram.envVersion, '| url:', url);
+    return url;
+  } catch {
+    return 'https://api-accounts.aitrealmaker.top';
+  }
+}
+export const BASE_URL = resolveBaseUrl();
 
 function generateTraceId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
