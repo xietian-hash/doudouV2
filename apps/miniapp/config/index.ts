@@ -11,7 +11,12 @@ export default defineConfig({
   defineConstants: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
   },
-  copy: { patterns: [], options: {} },
+  copy: {
+    patterns: [
+      { from: 'src/custom-tab-bar/index.json', to: 'dist/custom-tab-bar/index.json' },
+    ],
+    options: {},
+  },
   framework: 'react',
   compiler: 'webpack5',
   mini: {
