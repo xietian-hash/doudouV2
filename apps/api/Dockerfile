@@ -53,4 +53,4 @@ RUN pnpm --filter @ddyq/api exec prisma generate && \
 
 EXPOSE 3000
 
-CMD ["node", "apps/api/dist/main"]
+CMD ["node", "apps/api/dist/src/main"]
