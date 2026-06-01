@@ -17,8 +17,14 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           command_timeout: 2m
           script: |
-            echo "=== 内存总览 ==="
-            free -h
+            echo "=== todo-fairy-mysql 所在网络 ==="
+            docker inspect todo-fairy-mysql --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{"\n"}}{{end}}'
 
-            echo "=== 各容器内存占用 ==="
-            docker stats --no-stream --format "table {{.Name}}\t{{.MemUsage}}\t{{.MemPerc}}"
+            echo "=== ddyq-mysql 所在网络 ==="
+            docker inspect ddyq-mysql --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{"\n"}}{{end}}'
+
+            echo "=== todo-fairy-mysql 环境变量（密码）==="
+            docker inspect todo-fairy-mysql --format '{{range .Config.Env}}{{.}}{{"\n"}}{{end}}' | grep -i "mysql_root\|mysql_pass\|mysql_user\|mysql_data"
+
+            echo "=== todo-fairy-mysql 现有数据库 ==="
+            docker exec todo-fairy-mysql mysql -uroot -p$(docker inspect todo-fairy-mysql --format '{{range .Config.Env}}{{.}}{{"\n"}}{{end}}' | grep MYSQL_ROOT_PASSWORD | cut -d= -f2) -e "SHOW DATABASES;" 2>/dev/null || echo "无法查询（密码不对或无权限）"
