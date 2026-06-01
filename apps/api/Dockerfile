@@ -17,6 +17,10 @@ RUN pnpm install --frozen-lockfile --registry https://registry.npmmirror.com
 COPY packages/shared ./packages/shared
 COPY apps/api ./apps/api
 
+# 每次部署传入时间戳，强制从编译步骤开始刷新缓存，保留 pnpm install 缓存
+ARG CACHE_BUST=1
+RUN echo "cache bust: $CACHE_BUST"
+
 RUN pnpm --filter @ddyq/api exec prisma generate
 RUN pnpm --filter @ddyq/api build
 

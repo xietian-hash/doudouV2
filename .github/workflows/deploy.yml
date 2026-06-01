@@ -109,7 +109,7 @@ jobs:
             EOF
 
             # 禁用 Compose bake（需要 buildx），保留 BuildKit 自身缓存不受 prune 影响
-            COMPOSE_BAKE=false docker compose -f docker-compose.deploy.yml build
+            COMPOSE_BAKE=false docker compose -f docker-compose.deploy.yml build --build-arg CACHE_BUST=$(date +%s)
 
             # 用临时容器（sleep）执行 migrate：
             # 避免 NestJS 启动崩溃导致无法 exec，sleep 保持容器稳定运行
