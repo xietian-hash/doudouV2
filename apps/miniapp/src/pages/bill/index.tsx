@@ -12,7 +12,6 @@ import { showToast } from '../../utils/toast';
 import NumKeyboard from '../../components/NumKeyboard';
 import Drawer from '../../components/Drawer';
 import Modal from '../../components/Modal';
-import BottomNav from '../../components/BottomNav';
 import './index.scss';
 
 function hideTabBar() {
@@ -553,13 +552,6 @@ export default function BillPage() {
         <NumKeyboard value={amount} onChange={setAmount} onConfirm={handleSave} />
       </View>
 
-      {!hasSelectionDrawerOpen && (
-        <BottomNav
-          centerBusy={voiceParsing}
-          onCenterTouchStart={startRecording}
-          onCenterTouchEnd={stopRecording}
-        />
-      )}
 
       {showCategoryDrawer && (
         <View className='category-sheet-mask' onClick={() => closeCategoryDrawer()}>
