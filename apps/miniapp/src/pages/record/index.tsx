@@ -42,8 +42,7 @@ export default function RecordPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
   Taro.useDidShow(() => {
-    Taro.eventCenter.trigger('tabBar:sync', 'record');
-    Taro.eventCenter.trigger('tabBar:show');
+    Taro.showTabBar({ animation: false }).catch(() => undefined);
     loadData();
   });
 

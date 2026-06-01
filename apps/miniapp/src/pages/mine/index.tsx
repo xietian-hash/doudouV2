@@ -27,8 +27,7 @@ export default function MinePage() {
   const avatarUrl = user?.avatarUrl || '';
 
   Taro.useDidShow(() => {
-    Taro.eventCenter.trigger('tabBar:sync', 'mine');
-    Taro.eventCenter.trigger('tabBar:show');
+    Taro.showTabBar({ animation: false }).catch(() => undefined);
   });
 
   return (
@@ -69,7 +68,7 @@ export default function MinePage() {
         ))}
 
         <View className='version-info'>
-          <Text className='version-text'>兜兜有钱 v0.1.3</Text>
+          <Text className='version-text'>兜兜有钱 v0.1.4</Text>
         </View>
       </View>
 

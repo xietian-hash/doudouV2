@@ -35,7 +35,7 @@ export default defineAppConfig({
     borderStyle: 'white',
     list: [
       { pagePath: 'pages/record/index', text: '记录', iconPath: 'assets/icons/record-normal.png', selectedIconPath: 'assets/icons/record-active.png' },
-      { pagePath: 'pages/bill/index', text: '' },
+      { pagePath: 'pages/bill/index', text: '记账', iconPath: 'assets/icons/bill-normal.png', selectedIconPath: 'assets/icons/bill-active.png' },
       { pagePath: 'pages/mine/index', text: '我的', iconPath: 'assets/icons/mine-normal.png', selectedIconPath: 'assets/icons/mine-active.png' },
     ],
   },
