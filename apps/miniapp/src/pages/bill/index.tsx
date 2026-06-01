@@ -12,7 +12,6 @@ import { showToast } from '../../utils/toast';
 import NumKeyboard from '../../components/NumKeyboard';
 import Drawer from '../../components/Drawer';
 import Modal from '../../components/Modal';
-import BottomNav from '../../components/BottomNav';
 import './index.scss';
 
 function hideTabBar() {
@@ -909,12 +908,24 @@ export default function BillPage() {
       )}
 
       {!hasSelectionDrawerOpen && (
-        <BottomNav
-          centerBusy={voiceParsing}
-          onCenterTouchStart={startRecording}
-          onCenterTouchEnd={stopRecording}
-        />
+        <View
+          className={`bill-fab${voiceParsing ? ' bill-fab--busy' : ''}`}
+          onTouchStart={startRecording}
+          onTouchEnd={stopRecording}
+          onTouchCancel={stopRecording}
+        >
+          {voiceParsing ? (
+            <Text className='bill-fab-busy-icon'>…</Text>
+          ) : (
+            <View className='bill-fab-mic'>
+              <View className='bill-fab-mic-head' />
+              <View className='bill-fab-mic-stem' />
+              <View className='bill-fab-mic-base' />
+            </View>
+          )}
+        </View>
       )}
+
     </View>
   );
 }

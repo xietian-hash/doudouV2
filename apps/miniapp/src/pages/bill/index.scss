@@ -1133,3 +1133,79 @@
   color: $color-brand-deep;
   font-weight: 600;
 }
+
+.bill-fab {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 56rpx;
+  background: $color-brand;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 24rpx rgba(93, 190, 136, 0.44);
+  z-index: 999;
+}
+
+.bill-fab--busy {
+  background: $color-text-weak;
+}
+
+.bill-fab-busy-icon {
+  font-size: 48rpx;
+  color: #fff;
+  line-height: 1;
+}
+
+.bill-fab-mic {
+  position: relative;
+  width: 52rpx;
+  height: 52rpx;
+}
+
+.bill-fab-mic-head {
+  position: absolute;
+  left: 14rpx;
+  top: 2rpx;
+  width: 24rpx;
+  height: 32rpx;
+  border: 4rpx solid #fff;
+  border-radius: 14rpx;
+  box-sizing: border-box;
+}
+
+.bill-fab-mic-head::after {
+  content: '';
+  position: absolute;
+  left: -12rpx;
+  top: 14rpx;
+  width: 40rpx;
+  height: 22rpx;
+  border: 4rpx solid #fff;
+  border-top: none;
+  border-radius: 0 0 22rpx 22rpx;
+  box-sizing: border-box;
+}
+
+.bill-fab-mic-stem {
+  position: absolute;
+  left: 24rpx;
+  top: 38rpx;
+  width: 4rpx;
+  height: 10rpx;
+  border-radius: 2rpx;
+  background: #fff;
+}
+
+.bill-fab-mic-base {
+  position: absolute;
+  left: 14rpx;
+  top: 46rpx;
+  width: 24rpx;
+  height: 4rpx;
+  border-radius: 2rpx;
+  background: #fff;
+}

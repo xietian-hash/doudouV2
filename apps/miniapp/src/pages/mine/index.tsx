@@ -1,7 +1,6 @@
 import { View, Text, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useAuthStore } from '../../stores/auth';
-import BottomNav from '../../components/BottomNav';
 import './index.scss';
 
 interface MenuItem {
@@ -70,11 +69,10 @@ export default function MinePage() {
         ))}
 
         <View className='version-info'>
-          <Text className='version-text'>兜兜有钱 v0.1.2</Text>
+          <Text className='version-text'>兜兜有钱 v0.1.3</Text>
         </View>
       </View>
 
-      <BottomNav />
     </View>
   );
 }

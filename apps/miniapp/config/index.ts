@@ -11,7 +11,12 @@ export default defineConfig({
   defineConstants: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
   },
-  copy: { patterns: [], options: {} },
+  copy: {
+    patterns: [
+      { from: 'src/assets/icons', to: 'dist/assets/icons' },
+    ],
+    options: {},
+  },
   framework: 'react',
   compiler: 'webpack5',
   mini: {
