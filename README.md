@@ -66,6 +66,7 @@ pnpm --filter api dev
 
 # 5. 构建小程序（另开终端）
 pnpm --filter miniapp dev:weapp
+pnpm --filter @ddyq/miniapp build:weapp
 ```
 
 用微信开发者工具导入 `apps/miniapp/dist` 目录，AppID 填 `wxf979ecffe6e916fd`。
