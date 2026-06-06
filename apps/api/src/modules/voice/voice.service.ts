@@ -15,6 +15,18 @@ function calcConfidence(matched: boolean): number {
   return matched ? 0.9 : 0.5;
 }
 
+function similarityScore(a: string, b: string): number {
+  if (!a || !b) return 0;
+  if (a === b) return 1;
+  const shorter = a.length <= b.length ? a : b;
+  const longer = a.length <= b.length ? b : a;
+  let hits = 0;
+  for (const ch of shorter) {
+    if (longer.includes(ch)) hits += 1;
+  }
+  return hits / shorter.length;
+}
+
 function findBestCategory(
   categoryName: string,
   categories: Array<{
@@ -26,7 +38,7 @@ function findBestCategory(
 ): { id: string; icon: string | null; name: string } | null {
   if (!categoryName) return null;
 
-  // 精确匹配
+  // 精确匹配（LLM 已被白名单约束，绝大多数走这里）
   const exact = categories.find((c) => c.name === categoryName);
   if (exact) {
     return {
@@ -36,18 +48,17 @@ function findBestCategory(
     };
   }
 
-  // 模糊匹配（包含）
-  const fuzzy = categories.find(
-    (c) =>
-      c.name.includes(categoryName) || categoryName.includes(c.name),
-  );
-  if (fuzzy) {
-    return {
-      id: fuzzy.id.toString(),
-      icon: fuzzy.icon,
-      name: fuzzy.name,
-    };
+  // 兜底：字符重叠度评分，挑选得分最高且 ≥0.6 的叶子分类
+  let best: { id: string; icon: string | null; name: string } | null = null;
+  let bestScore = 0;
+  for (const c of categories) {
+    const score = similarityScore(categoryName, c.name);
+    if (score > bestScore) {
+      bestScore = score;
+      best = { id: c.id.toString(), icon: c.icon, name: c.name };
+    }
   }
+  if (bestScore >= 0.6) return best;
 
   return null;
 }
@@ -69,8 +80,9 @@ export class VoiceService {
     const leafCategories = await this.categoriesRepo.findLeafCategories(userId);
     this.logger.log(`叶子分类数量=${leafCategories.length} names=${leafCategories.map((c) => c.name).join(',')}`);
 
-    // 调用LLM解析
-    const rawBills = await this.llmService.parseVoiceText(text, today);
+    // 调用LLM解析（将叶子分类白名单注入 prompt，强约束 LLM 只能从中选择）
+    const leafNames = leafCategories.map((c) => c.name);
+    const rawBills = await this.llmService.parseVoiceText(text, today, leafNames);
 
     if (rawBills.length === 0) {
       this.logger.warn(`LLM解析无结果 userId=${userId} text="${text}"`);

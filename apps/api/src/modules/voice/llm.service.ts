@@ -37,25 +37,43 @@ export class LlmService {
   async parseVoiceText(
     text: string,
     today: string,
+    categoryNames: string[] = [],
   ): Promise<ParsedBillRaw[]> {
     const baseUrl = this.configService.get<string>('LLM_BASE_URL');
     const model = this.configService.get<string>('LLM_MODEL');
     const apiKey = this.configService.get<string>('LLM_API_KEY');
 
+    const categoryList = categoryNames.length
+      ? categoryNames.join('、')
+      : '早餐、午餐、晚餐、打车、公交地铁、日用品、工资、其他';
+    const exampleCategory1 =
+      categoryNames.find((name) => name.includes('午餐')) ||
+      categoryNames[0] ||
+      '午餐';
+    const exampleCategory2 =
+      categoryNames.find((name) => name.includes('打车')) ||
+      categoryNames.find((name) => name.includes('交通')) ||
+      categoryNames[1] ||
+      '打车';
+
     const systemPrompt = `你是一个记账助手，负责从用户的语音文本中提取记账信息。
 今天的日期是 ${today}。
-请将用户描述的消费或收入信息解析成JSON数组，每条记录包含以下字段：
+
+【可用分类清单】（共 ${categoryNames.length} 个，必须严格从中选择，禁止返回清单外的名称、禁止返回父级大类名）：
+${categoryList}
+
+请将用户描述的消费或收入信息解析成 JSON 数组，每条记录包含以下字段：
 - type: 数字，1=支出，2=收入
 - amount: 数字，金额（正数）
-- categoryName: 字符串，分类名称（如：餐饮、交通、工资等）
-- remark: 字符串，备注说明
+- categoryName: 字符串，**必须是上面【可用分类清单】中的一个名称**，原样照抄，不要改写、不要返回近义词、不要返回父级大类
+- remark: 字符串，备注说明（保留用户原始描述的关键信息）
 - billDate: 字符串，账单日期，格式为 YYYY-MM-DD
 
-只返回JSON数组，不要包含任何其他文字或markdown格式。
-如果无法解析出有效信息，返回空数组 []。
+只返回 JSON 数组，不要包含任何其他文字或 markdown 格式。
+如果用户描述无法对应到清单中的任何分类，请挑选语义最接近的；如果完全无法解析出有效记账信息，返回空数组 []。
 
 示例输入："今天午饭花了15块，打车花了30"
-示例输出：[{"type":1,"amount":15,"categoryName":"餐饮","remark":"午饭","billDate":"${today}"},{"type":1,"amount":30,"categoryName":"交通","remark":"打车","billDate":"${today}"}]`;
+示例输出：[{"type":1,"amount":15,"categoryName":"${exampleCategory1}","remark":"午饭","billDate":"${today}"},{"type":1,"amount":30,"categoryName":"${exampleCategory2}","remark":"打车","billDate":"${today}"}]`;
 
     const messages: LlmMessage[] = [
       { role: 'system', content: systemPrompt },
