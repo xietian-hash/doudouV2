@@ -1,0 +1,74 @@
+<view class="page record-page">
+  <view class="month-header">
+    <view class="month-nav" bindtap="prevMonth">‹</view>
+    <view class="month-title">
+      <text class="month-text">{{year}}年{{month}}月</text>
+      <text class="month-sub">{{selectedDate ? '已筛选单日账单' : '每一笔都是生活的印记'}}</text>
+    </view>
+    <view class="month-nav" bindtap="nextMonth">›</view>
+  </view>
+
+  <view class="summary-row">
+    <view class="summary-card card">
+      <view class="summary-label">今日支出</view>
+      <view class="summary-value">¥{{todayExpense}}</view>
+    </view>
+    <view class="summary-card card">
+      <view class="summary-label">本月支出</view>
+      <view class="summary-value">¥{{monthExpense}}</view>
+    </view>
+  </view>
+
+  <view class="calendar card">
+    <view class="week-row">
+      <text wx:for="{{weekdays}}" wx:key="*this" class="week-cell">{{item}}</text>
+    </view>
+    <view class="day-grid">
+      <view
+        wx:for="{{calendarDays}}"
+        wx:key="key"
+        class="day-cell {{item.empty ? 'day-cell--empty' : ''}} {{item.selected ? 'day-cell--selected' : ''}} {{item.today ? 'day-cell--today' : ''}}"
+        data-date="{{item.date}}"
+        bindtap="selectDate"
+      >
+        <text class="day-num">{{item.day}}</text>
+        <text wx:if="{{item.expense}}" class="day-expense">-{{item.expense}}</text>
+        <text wx:if="{{item.income}}" class="day-income">+{{item.income}}</text>
+      </view>
+    </view>
+  </view>
+
+  <scroll-view scroll-y class="bill-list">
+    <view wx:if="{{groups.length === 0 && !loading}}" class="empty card">
+      <image class="empty-icon" src="/assets/images/empty.png" mode="aspectFit" />
+      <text>暂无账单</text>
+    </view>
+    <view wx:for="{{groups}}" wx:key="date" class="bill-group">
+      <view class="group-head">
+        <text class="group-date">{{item.title}}</text>
+        <view class="group-total">
+          <text wx:if="{{item.expense > 0}}" class="expense-text">支出 ¥{{item.expenseText}}</text>
+          <text wx:if="{{item.income > 0}}" class="income-text">收入 ¥{{item.incomeText}}</text>
+        </view>
+      </view>
+      <view class="bill-group-card card">
+        <view
+          wx:for="{{item.items}}"
+          wx:for-item="bill"
+          wx:key="id"
+          class="bill-item"
+          data-id="{{bill.id}}"
+          bindtap="openDetail"
+        >
+          <view class="bill-icon">{{bill.categoryIcon || '□'}}</view>
+          <view class="bill-main">
+            <text class="bill-name">{{bill.categoryName}}</text>
+            <text class="bill-meta">{{bill.remark || bill.accountName}}</text>
+            <text wx:if="{{bill.remark}}" class="bill-account">{{bill.accountName}}</text>
+          </view>
+          <text class="bill-amount {{bill.type === 2 ? 'bill-amount--income' : ''}}">{{bill.sign}}{{bill.amountText}}</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</view>

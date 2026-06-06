@@ -1,0 +1,24 @@
+@import "../../styles/manage.wxss";
+
+.tag-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.tag-item {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 20rpx;
+  border-radius: 999rpx;
+  background: var(--color-selected);
+  color: var(--color-brand-deep);
+  font-weight: 700;
+}
+
+.tag-delete {
+  margin-left: 14rpx;
+  color: var(--color-error);
+  font-size: 34rpx;
+  line-height: 28rpx;
+}

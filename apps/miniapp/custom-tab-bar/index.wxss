@@ -1,0 +1,161 @@
+.tab-shell {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  height: calc(136rpx + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: transparent;
+}
+
+.tab-shell--hidden {
+  display: none;
+}
+
+.tab-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: env(safe-area-inset-bottom);
+  height: 112rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: #ffffff;
+  border-top: 1rpx solid #e8f3ee;
+  box-shadow: 0 -10rpx 30rpx rgba(43, 74, 58, 0.06);
+}
+
+.tab-item,
+.tab-center {
+  width: 180rpx;
+  height: 112rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #b5d0c6;
+}
+
+.tab-item--active {
+  color: #5dbe88;
+}
+
+.tab-icon {
+  font-size: 42rpx;
+  line-height: 44rpx;
+}
+
+.tab-icon--mine {
+  width: 44rpx;
+  height: 44rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+}
+
+.mine-head {
+  width: 14rpx;
+  height: 14rpx;
+  border: 5rpx solid currentColor;
+  border-radius: 999rpx;
+}
+
+.mine-body {
+  width: 30rpx;
+  height: 14rpx;
+  border: 5rpx solid currentColor;
+  border-bottom: 0;
+  border-radius: 18rpx 18rpx 0 0;
+}
+
+.tab-label {
+  margin-top: 4rpx;
+  font-size: 20rpx;
+  line-height: 26rpx;
+}
+
+.tab-label--center {
+  margin-top: 54rpx;
+  color: #5dbe88;
+}
+
+.tab-fab {
+  position: absolute;
+  top: -17rpx;
+  width: 120rpx;
+  height: 120rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999rpx;
+  background: #5dbe88;
+  color: #ffffff;
+  box-shadow: 0 16rpx 34rpx rgba(93, 190, 136, 0.44);
+}
+
+.tab-fab--mic {
+  transform: scale(1.02);
+}
+
+.tab-fab-icon {
+  font-size: 46rpx;
+  font-weight: 700;
+}
+
+.tab-fab-icon--voice {
+  width: 56rpx;
+  height: 56rpx;
+  position: relative;
+  font-size: 0;
+  font-weight: normal;
+}
+
+.mic-head {
+  position: absolute;
+  left: 17rpx;
+  top: 4rpx;
+  width: 22rpx;
+  height: 32rpx;
+  border: 5rpx solid #ffffff;
+  border-radius: 16rpx;
+}
+
+.mic-arc {
+  position: absolute;
+  left: 8rpx;
+  top: 22rpx;
+  width: 40rpx;
+  height: 26rpx;
+  border: 5rpx solid #ffffff;
+  border-top: 0;
+  border-radius: 0 0 24rpx 24rpx;
+}
+
+.mic-stem {
+  position: absolute;
+  left: 25rpx;
+  top: 46rpx;
+  width: 6rpx;
+  height: 8rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+}
+
+.mic-base {
+  position: absolute;
+  left: 15rpx;
+  bottom: 0;
+  width: 26rpx;
+  height: 5rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+}
+
+.tab-fab-icon--plus {
+  font-size: 92rpx;
+  line-height: 92rpx;
+}

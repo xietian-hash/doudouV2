@@ -813,7 +813,7 @@ components:
       properties:
         wxCode:
           type: string
-          description: Taro.login 获取的微信登录 code
+          description: wx.login 获取的微信登录 code
         nickname:
           type: string
           maxLength: 50

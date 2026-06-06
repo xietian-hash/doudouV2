@@ -1,0 +1,220 @@
+<view class="page bill-page">
+  <view class="type-switch">
+    <view class="type-btn {{type === 1 ? 'type-btn--active' : ''}}" data-type="1" bindtap="switchType">支出</view>
+    <view class="type-btn {{type === 2 ? 'type-btn--active type-btn--income' : ''}}" data-type="2" bindtap="switchType">收入</view>
+  </view>
+
+  <view class="amount-panel">
+    <view class="amount-main">
+      <text class="amount-unit">¥</text>
+      <text class="amount-value">{{amount === '0' ? '0.00' : amount}}</text>
+      <text class="amount-cursor"></text>
+    </view>
+    <view class="selected-cat" bindtap="openCategorySheet">
+      <text class="selected-cat-icon">{{selectedCategory.icon || '📝'}}</text>
+      <text class="selected-cat-name">{{selectedCategory.name || '选择分类'}}</text>
+      <text class="chev">⌄</text>
+    </view>
+  </view>
+
+  <scroll-view scroll-y class="category-scroll">
+    <view class="category-grid">
+      <view
+        wx:for="{{displayCategories}}"
+        wx:key="id"
+        class="category-item {{selectedCategory.id === item.id ? 'category-item--active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="selectCategory"
+      >
+        <text class="category-icon">{{item.icon || '📝'}}</text>
+        <text class="category-name">{{item.name}}</text>
+      </view>
+      <view class="category-item category-item--add" bindtap="openCategoryManage">
+        <text class="category-icon">＋</text>
+        <text class="category-name">添加</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{!recording}}" class="bill-bottom">
+    <view class="meta-row">
+      <view class="meta-pill" bindtap="openAccountSheet">
+        <text>▣</text>
+        <text class="meta-text">{{selectedAccount.name || '账户'}}</text>
+      </view>
+      <view class="meta-pill" bindtap="openTagSheet">
+        <text>#</text>
+        <text class="meta-text">{{selectedTag.name || '标签'}}</text>
+      </view>
+      <view class="meta-pill" bindtap="openDateSheet">
+        <text>□</text>
+        <text class="meta-text">{{displayDate}}</text>
+      </view>
+      <view class="meta-pill" bindtap="openRemarkModal">
+        <text>✎</text>
+        <text class="meta-text">{{remark || '备注'}}</text>
+      </view>
+    </view>
+
+    <view class="keyboard">
+      <view class="keyboard-left">
+        <view wx:for="{{keyRows}}" wx:for-item="row" wx:for-index="rowIndex" wx:key="rowIndex" class="key-row">
+          <view wx:for="{{row}}" wx:key="*this" class="key" data-key="{{item}}" bindtap="handleKey">{{item}}</view>
+        </view>
+      </view>
+      <view class="keyboard-right">
+        <view class="key key--delete" data-key="⌫" bindtap="handleKey">⌫</view>
+        <view class="key key--done" data-key="完成" bindtap="handleKey">
+          <text class="done-mark">✓</text>
+          <text>完成</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{sheet === 'category'}}" class="sheet-mask" bindtap="closeSheet">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <text class="sheet-title">选择分类</text>
+        <text class="sheet-close" bindtap="closeSheet">×</text>
+      </view>
+      <scroll-view scroll-y class="sheet-scroll">
+        <view wx:for="{{categorySections}}" wx:key="title" class="category-section">
+          <view class="section-title">{{item.title}}</view>
+          <view class="section-grid">
+            <view
+              wx:for="{{item.items}}"
+              wx:for-item="cat"
+              wx:key="id"
+              class="category-item {{selectedCategory.id === cat.id ? 'category-item--active' : ''}}"
+              data-id="{{cat.id}}"
+              bindtap="selectCategoryFromSheet"
+            >
+              <text class="category-icon">{{cat.icon || '📝'}}</text>
+              <text class="category-name">{{cat.name}}</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+      <view class="sheet-footer">
+        <view class="secondary-btn" bindtap="closeSheet">取消</view>
+        <view class="primary-btn" bindtap="openCategoryManage">管理分类</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{sheet === 'account'}}" class="sheet-mask" bindtap="closeSheet">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <text class="sheet-title">选择账户</text>
+        <text class="sheet-close" bindtap="closeSheet">×</text>
+      </view>
+      <scroll-view scroll-y class="sheet-scroll sheet-scroll--small">
+        <view wx:for="{{accounts}}" wx:key="id" class="account-item {{selectedAccount.id === item.id ? 'account-item--active' : ''}}" data-id="{{item.id}}" bindtap="selectAccount">
+          <text class="account-icon">{{item.icon || '💳'}}</text>
+          <view class="account-main">
+            <text class="account-name">{{item.name}}</text>
+            <text class="account-sub">{{item.isDefault ? '默认账户' : '余额 ¥' + item.balance}}</text>
+          </view>
+          <text wx:if="{{selectedAccount.id === item.id}}" class="check">✓</text>
+        </view>
+      </scroll-view>
+      <view class="sheet-footer">
+        <view class="secondary-btn" bindtap="closeSheet">取消</view>
+        <view class="primary-btn" bindtap="openAccountManage">管理账户</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{sheet === 'tag'}}" class="sheet-mask" bindtap="closeSheet">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <text class="sheet-title">选择标签</text>
+        <text class="sheet-close" bindtap="closeSheet">×</text>
+      </view>
+      <view class="tag-grid">
+        <view class="tag-item {{!selectedTag.id ? 'tag-item--active' : ''}}" bindtap="clearTag">不选择标签</view>
+        <view wx:for="{{tags}}" wx:key="id" class="tag-item {{selectedTag.id === item.id ? 'tag-item--active' : ''}}" data-id="{{item.id}}" bindtap="selectTag">{{item.name}}</view>
+      </view>
+      <view class="sheet-footer">
+        <view class="secondary-btn" bindtap="closeSheet">取消</view>
+        <view class="primary-btn" bindtap="openTagManage">管理标签</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{sheet === 'date'}}" class="sheet-mask" bindtap="closeSheet">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <text class="sheet-title">选择日期</text>
+        <text class="sheet-close" bindtap="closeSheet">×</text>
+      </view>
+      <view class="date-head">
+        <text bindtap="prevCalMonth">‹</text>
+        <text>{{calYear}}年{{calMonth}}月</text>
+        <text bindtap="nextCalMonth">›</text>
+      </view>
+      <view class="date-week">
+        <text wx:for="{{weekdays}}" wx:key="*this">{{item}}</text>
+      </view>
+      <view class="date-grid">
+        <view wx:for="{{dateDays}}" wx:key="key" class="date-day {{item.selected ? 'date-day--selected' : ''}}" data-date="{{item.date}}" bindtap="selectDate">
+          {{item.day}}
+        </view>
+      </view>
+      <view class="sheet-footer">
+        <view class="secondary-btn" bindtap="closeSheet">取消</view>
+        <view class="primary-btn" bindtap="selectToday">今天</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{voiceConfirmVisible}}" class="sheet-mask" bindtap="closeVoiceConfirm">
+    <view class="sheet sheet--voice" catchtap="noop">
+      <view class="sheet-head">
+        <text class="sheet-title">确认记账</text>
+        <text class="sheet-close" bindtap="closeVoiceConfirm">×</text>
+      </view>
+      <scroll-view scroll-y class="voice-list">
+        <view wx:for="{{voiceItems}}" wx:key="_localId" class="voice-item">
+          <view class="voice-row">
+            <text class="voice-cat">{{item.categoryIcon || '□'}} {{item.categoryName || '未匹配分类'}}</text>
+            <text class="voice-amount {{item.type === 2 ? 'voice-amount--income' : ''}}">{{item.type === 1 ? '-' : '+'}}{{item.amount}}</text>
+          </view>
+          <text wx:if="{{item.remark}}" class="voice-remark">{{item.remark}}</text>
+          <text wx:if="{{item.needsConfirm}}" class="voice-warn">需要确认分类或金额</text>
+          <text class="voice-delete" data-id="{{item._localId}}" bindtap="removeVoiceItem">×</text>
+        </view>
+      </scroll-view>
+      <view class="sheet-footer">
+        <view class="secondary-btn" bindtap="closeVoiceConfirm">取消</view>
+        <view class="primary-btn" bindtap="saveVoiceItems">确认保存</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{recording}}" class="recording-panel">
+    <view class="wave-box">
+      <view class="wave-bar wave-bar--1"></view>
+      <view class="wave-bar wave-bar--2"></view>
+      <view class="wave-bar wave-bar--3"></view>
+      <view class="wave-bar wave-bar--4"></view>
+      <view class="wave-bar wave-bar--5"></view>
+      <view class="wave-bar wave-bar--6"></view>
+      <view class="wave-bar wave-bar--7"></view>
+      <view class="wave-bar wave-bar--8"></view>
+      <view class="wave-bar wave-bar--9"></view>
+      <view class="wave-bar wave-bar--10"></view>
+    </view>
+    <view class="recording-tips">
+      <view class="recording-tip recording-tip--cancel">
+        <view class="recording-icon-arrow"></view>
+        <text>上滑取消</text>
+      </view>
+      <view class="recording-tip recording-tip--done">
+        <view class="recording-icon-check"></view>
+        <text>松开完成</text>
+      </view>
+    </view>
+  </view>
+</view>

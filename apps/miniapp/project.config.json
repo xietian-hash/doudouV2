@@ -1,15 +1,22 @@
 {
-  "miniprogramRoot": "dist/",
+  "miniprogramRoot": "./",
   "projectname": "兜兜有钱",
   "description": "兜兜有钱记账小程序",
-  "appid": "placeholder_wechat_app_id",
+  "appid": "wxf979ecffe6e916fd",
   "setting": {
     "urlCheck": false,
     "es6": false,
     "enhance": false,
     "postcss": false,
     "minified": false,
-    "newFeature": true
+    "newFeature": true,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true
   },
   "compileType": "miniprogram",
   "condition": {}

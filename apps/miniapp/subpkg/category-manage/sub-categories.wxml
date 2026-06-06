@@ -1,0 +1,26 @@
+<view class="page category-page">
+  <view class="head-row">
+    <text class="title">{{parentName}}</text>
+    <view class="primary-small" bindtap="openCreate">新增子分类</view>
+  </view>
+  <view wx:for="{{children}}" wx:key="id" class="item card">
+    <text class="item-icon">{{item.icon || '📝'}}</text>
+    <view class="item-main">
+      <text class="item-title">{{item.name}}</text>
+      <text class="item-sub">记账时可直接选择</text>
+    </view>
+    <text class="item-delete" data-id="{{item.id}}" bindtap="remove">删除</text>
+  </view>
+
+  <view wx:if="{{dialogVisible}}" class="dialog-mask">
+    <view class="dialog card">
+      <text class="dialog-title">新增子分类</text>
+      <input class="input" value="{{form.name}}" bindinput="onNameInput" placeholder="分类名称" />
+      <input class="input input--mt" value="{{form.icon}}" bindinput="onIconInput" placeholder="图标 Emoji，可不填" />
+      <view class="dialog-actions">
+        <view class="secondary-btn" bindtap="closeDialog">取消</view>
+        <view class="primary-btn" bindtap="save">确认</view>
+      </view>
+    </view>
+  </view>
+</view>
