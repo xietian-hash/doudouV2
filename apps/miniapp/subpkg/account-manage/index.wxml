@@ -1,31 +1,99 @@
-<view class="page manage-page">
-  <view class="head-row">
-    <text class="title">账户</text>
-    <view class="primary-small" bindtap="openCreate">新增账户</view>
+<view class="manage-page">
+  <view class="manage-nav">
+    <view class="nav-back" bindtap="goBack">‹</view>
+    <view class="nav-title">账户管理</view>
+    <view class="nav-spacer"></view>
   </view>
-  <view wx:for="{{accounts}}" wx:key="id" class="item card">
-    <text class="item-icon">{{item.icon || '💳'}}</text>
-    <view class="item-main">
-      <text class="item-title">{{item.name}}</text>
-      <text class="item-sub">{{item.isDefault ? '默认账户 · ' : ''}}余额 ¥{{item.balance}}</text>
+
+  <scroll-view class="manage-list manage-list--no-tabs" scroll-y enhanced show-scrollbar="{{false}}">
+    <view class="manage-list-inner">
+      <view class="summary-row">
+        <text class="summary-label">净资产</text>
+        <text class="summary-value">¥{{totalBalance}}</text>
+      </view>
+
+      <view
+        wx:for="{{accounts}}"
+        wx:key="id"
+        class="swipe-row"
+        data-index="{{index}}"
+        bindtouchstart="onTouchStart"
+        bindtouchmove="onTouchMove"
+        bindtouchend="onTouchEnd"
+        bindtouchcancel="onTouchEnd"
+      >
+        <view class="swipe-actions">
+          <view class="swipe-action swipe-action--edit" data-id="{{item.id}}" catchtap="openEdit">编辑</view>
+          <view class="swipe-action swipe-action--delete" data-id="{{item.id}}" data-name="{{item.name}}" catchtap="askDelete">删除</view>
+        </view>
+        <view class="swipe-content" style="transform: translateX({{item.slideX || 0}}rpx);">
+          <view class="manage-card" data-id="{{item.id}}" bindtap="openEdit">
+            <view class="card-icon">{{item.icon || '💳'}}</view>
+            <view class="card-main">
+              <view class="card-title-row">
+                <text class="card-title">{{item.name}}</text>
+                <text wx:if="{{item.isDefault}}" class="default-badge">默认</text>
+              </view>
+              <text class="card-sub">{{item.typeLabel}}</text>
+            </view>
+            <text class="card-value {{item.balanceNumber < 0 ? 'card-value--warning' : ''}}">¥{{item.balanceText}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{!accounts.length}}" class="empty-state">暂无账户</view>
     </view>
-    <text class="item-action" data-id="{{item.id}}" bindtap="setDefault">默认</text>
-    <text class="item-delete" data-id="{{item.id}}" bindtap="remove">删除</text>
+  </scroll-view>
+
+  <view class="bottom-add">
+    <view class="bottom-add-btn" bindtap="openCreate">
+      <text class="bottom-add-plus">+</text>
+      <text>添加账户</text>
+    </view>
   </view>
 
   <view wx:if="{{dialogVisible}}" class="dialog-mask">
-    <view class="dialog card">
-      <text class="dialog-title">新增账户</text>
-      <input class="input" value="{{form.name}}" bindinput="onNameInput" placeholder="账户名称" />
-      <view class="type-grid">
-        <view wx:for="{{types}}" wx:key="value" class="type-item {{form.type === item.value ? 'type-item--active' : ''}}" data-type="{{item.value}}" bindtap="selectType">
-          <text>{{item.icon}}</text>
-          <text>{{item.label}}</text>
+    <view class="dialog">
+      <view class="dialog-head">
+        <text class="dialog-title">{{editingId ? '编辑账户' : '添加账户'}}</text>
+        <text class="dialog-close" bindtap="closeDialog">×</text>
+      </view>
+      <view class="dialog-body">
+        <view class="field">
+          <text class="field-label">账户类型</text>
+          <view class="type-grid">
+            <view
+              wx:for="{{types}}"
+              wx:key="value"
+              class="type-item {{form.type === item.value ? 'type-item--active' : ''}}"
+              data-type="{{item.value}}"
+              bindtap="selectType"
+            >
+              <text class="type-icon">{{item.icon}}</text>
+              <text>{{item.label}}</text>
+            </view>
+          </view>
+        </view>
+        <view class="field">
+          <text class="field-label">账户名称</text>
+          <input class="field-input" value="{{form.name}}" bindinput="onNameInput" placeholder="请输入账户名称" />
         </view>
       </view>
       <view class="dialog-actions">
-        <view class="secondary-btn" bindtap="closeDialog">取消</view>
-        <view class="primary-btn" bindtap="save">确认</view>
+        <view class="dialog-btn dialog-btn--secondary" bindtap="closeDialog">取消</view>
+        <view class="dialog-btn dialog-btn--primary" bindtap="save">确认</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{confirmVisible}}" class="dialog-mask">
+    <view class="confirm-dialog">
+      <view class="confirm-icon">!</view>
+      <text class="confirm-title">删除账户</text>
+      <text class="confirm-text">有关联账单的账户不可删除。确认删除“{{pendingDeleteName}}”？</text>
+      <view class="dialog-actions">
+        <view class="dialog-btn dialog-btn--secondary" bindtap="closeConfirm">取消</view>
+        <view class="dialog-btn dialog-btn--danger" bindtap="confirmDelete">确认删除</view>
       </view>
     </view>
   </view>

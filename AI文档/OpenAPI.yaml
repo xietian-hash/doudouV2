@@ -28,6 +28,8 @@ tags:
     description: 语音记账
   - name: Statistics
     description: 统计分析
+  - name: Feedback
+    description: 意见反馈
 
 security:
   - bearerAuth: []
@@ -677,6 +679,70 @@ paths:
                         items:
                           $ref: "#/components/schemas/CategoryExpenseStat"
 
+  /feedback/images:
+    post:
+      tags: [Feedback]
+      summary: 上传反馈照片
+      description: 上传单张反馈照片，前端最多上传 3 张后随反馈内容提交 URL。
+      x-permissions:
+        auth: bearer
+        interface: feedback:upload-image
+        dataScope: current-user
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: 上传成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/FeedbackImageUploadResult"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+
+  /feedback:
+    post:
+      tags: [Feedback]
+      summary: 提交意见反馈
+      x-permissions:
+        auth: bearer
+        interface: feedback:create
+        dataScope: current-user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackCreateRequest"
+      responses:
+        "200":
+          description: 提交成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/FeedbackCreateResult"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1215,3 +1281,37 @@ components:
         percent:
           type: number
           format: float
+
+    FeedbackImageUploadResult:
+      type: object
+      required: [url]
+      properties:
+        url:
+          type: string
+          format: uri
+
+    FeedbackCreateRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        imageUrls:
+          type: array
+          maxItems: 3
+          items:
+            type: string
+            format: uri
+
+    FeedbackCreateResult:
+      type: object
+      required: [id, createdAt]
+      properties:
+        id:
+          type: string
+          description: feedbacks.id 的字符串形式
+        createdAt:
+          type: string
+          format: date-time

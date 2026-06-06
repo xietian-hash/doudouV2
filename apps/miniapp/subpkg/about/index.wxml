@@ -1,0 +1,72 @@
+<view class="about-page">
+  <view class="about-nav">
+    <view class="nav-back" bindtap="goBack">‹</view>
+    <view class="nav-title">关于应用</view>
+    <view class="nav-spacer"></view>
+  </view>
+
+  <scroll-view class="about-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+    <view class="brand-card">
+      <view class="brand-mark">兜</view>
+      <text class="brand-name">兜兜有钱</text>
+      <text class="brand-slogan">把生活里的每一笔流动，记得轻一点，看得清一点。</text>
+      <view class="version-pill">v{{version}}</view>
+    </view>
+
+    <view class="section-card">
+      <view class="section-head">
+        <text class="section-kicker">定位</text>
+        <text class="section-title">一个更像生活备忘录的记账工具</text>
+      </view>
+      <text class="section-text">兜兜有钱不是为了让你每天盯着数字紧张，而是帮你用更低成本留下财务轨迹。它适合记录日常开销、家庭账、报销、临时支出和那些容易忘掉的小钱。</text>
+    </view>
+
+    <view class="section-card">
+      <view class="section-head">
+        <text class="section-kicker">正在支持</text>
+        <text class="section-title">现在能做什么</text>
+      </view>
+      <view class="feature-grid">
+        <view wx:for="{{features}}" wx:key="*this" class="feature-chip">{{item}}</view>
+      </view>
+    </view>
+
+    <view class="section-card">
+      <view class="section-head">
+        <text class="section-kicker">设计想法</text>
+        <text class="section-title">我们遵守的三条小原则</text>
+      </view>
+      <view wx:for="{{principles}}" wx:key="title" class="principle-item">
+        <view class="principle-dot">{{index + 1}}</view>
+        <view class="principle-main">
+          <text class="principle-title">{{item.title}}</text>
+          <text class="principle-desc">{{item.desc}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section-card privacy-card">
+      <view class="section-head">
+        <text class="section-kicker">数据与隐私</text>
+        <text class="section-title">你的账本首先属于你</text>
+      </view>
+      <text class="section-text">我们会尽量把账单、账户、分类、标签这些信息处理得可解释、可追踪。后续如果加入更多智能能力，也应优先说明它为什么需要这些数据，以及它帮你完成了什么。</text>
+    </view>
+
+    <view class="section-card">
+      <view class="section-head">
+        <text class="section-kicker">小贴士</text>
+        <text class="section-title">让账本更好用</text>
+      </view>
+      <view wx:for="{{tips}}" wx:key="*this" class="tip-row">
+        <text class="tip-bullet">•</text>
+        <text class="tip-text">{{item}}</text>
+      </view>
+    </view>
+
+    <view class="signature-card">
+      <text class="signature-title">愿望清单</text>
+      <text class="signature-text">以后它应该能像一个安静的财务助手：你说一句，它记一笔；你想复盘，它把线索整理好；你不想看，它也不打扰。</text>
+    </view>
+  </scroll-view>
+</view>

@@ -164,6 +164,7 @@ Page({
   inputAmount(key) {
     let value = this.data.amount === '0' && key !== '.' ? '' : this.data.amount;
     if (key === '.' && value.includes('.')) return;
+    if (value === '' && key === '00') return;
     value += key;
     if (value.startsWith('.')) value = `0${value}`;
     if (value.includes('.') && value.split('.')[1].length > 2) return;

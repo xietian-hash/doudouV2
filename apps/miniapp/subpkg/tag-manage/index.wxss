@@ -1,24 +1,37 @@
 @import "../../styles/manage.wxss";
 
-.tag-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16rpx;
+.swipe-content .manage-card {
+  border-radius: 0;
 }
 
-.tag-item {
-  display: flex;
-  align-items: center;
-  padding: 16rpx 20rpx;
-  border-radius: 999rpx;
+.swipe-content .card-icon {
+  width: 76rpx;
+  height: 76rpx;
+  border-radius: 22rpx;
+  font-size: 28rpx;
+}
+
+.tag-summary {
+  font-family: inherit;
+  font-size: 28rpx;
+}
+
+.tag-icon--green {
   background: var(--color-selected);
-  color: var(--color-brand-deep);
-  font-weight: 700;
 }
 
-.tag-delete {
-  margin-left: 14rpx;
-  color: var(--color-error);
-  font-size: 34rpx;
-  line-height: 28rpx;
+.tag-icon--orange {
+  background: #fef3e8;
+}
+
+.tag-icon--blue {
+  background: #e3f2fd;
+}
+
+.tag-icon--pink {
+  background: #fff0f3;
+}
+
+.tag-icon--gray {
+  background: var(--color-surface-soft);
 }

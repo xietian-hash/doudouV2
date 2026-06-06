@@ -8,12 +8,11 @@
     <view class="amount-main">
       <text class="amount-unit">¥</text>
       <text class="amount-value">{{amount === '0' ? '0.00' : amount}}</text>
-      <text class="amount-cursor"></text>
     </view>
     <view class="selected-cat" bindtap="openCategorySheet">
       <text class="selected-cat-icon">{{selectedCategory.icon || '📝'}}</text>
       <text class="selected-cat-name">{{selectedCategory.name || '选择分类'}}</text>
-      <text class="chev">⌄</text>
+      <text class="chev">▾</text>
     </view>
   </view>
 

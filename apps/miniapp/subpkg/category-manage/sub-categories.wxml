@@ -1,25 +1,81 @@
-<view class="page category-page">
-  <view class="head-row">
-    <text class="title">{{parentName}}</text>
-    <view class="primary-small" bindtap="openCreate">新增子分类</view>
+<view class="manage-page">
+  <view class="manage-nav">
+    <view class="nav-back" bindtap="goBack">‹</view>
+    <view class="nav-title">{{parentName}}</view>
+    <view class="nav-spacer"></view>
   </view>
-  <view wx:for="{{children}}" wx:key="id" class="item card">
-    <text class="item-icon">{{item.icon || '📝'}}</text>
-    <view class="item-main">
-      <text class="item-title">{{item.name}}</text>
-      <text class="item-sub">记账时可直接选择</text>
+
+  <scroll-view class="manage-list manage-list--no-tabs" scroll-y enhanced show-scrollbar="{{false}}">
+    <view class="manage-list-inner">
+      <view
+        wx:for="{{children}}"
+        wx:key="id"
+        class="swipe-row"
+        data-index="{{index}}"
+        bindtouchstart="onTouchStart"
+        bindtouchend="onTouchEnd"
+      >
+        <view class="swipe-actions">
+          <view class="swipe-action swipe-action--edit" data-id="{{item.id}}" catchtap="openEdit">编辑</view>
+          <view class="swipe-action swipe-action--delete" data-id="{{item.id}}" data-name="{{item.name}}" catchtap="askDelete">删除</view>
+        </view>
+        <view class="swipe-content" style="transform: translateX({{item.slideX || 0}}rpx);">
+          <view class="manage-card">
+            <view class="card-icon">{{item.icon || '📌'}}</view>
+            <view class="card-main">
+              <text class="card-title">{{item.name}}</text>
+              <text class="card-sub">记账时可直接选择</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{!children.length}}" class="empty-state">暂无二级分类</view>
     </view>
-    <text class="item-delete" data-id="{{item.id}}" bindtap="remove">删除</text>
+  </scroll-view>
+
+  <view class="bottom-add">
+    <view class="bottom-add-btn" bindtap="openCreate">
+      <text class="bottom-add-plus">+</text>
+      <text>添加二级分类</text>
+    </view>
   </view>
 
   <view wx:if="{{dialogVisible}}" class="dialog-mask">
-    <view class="dialog card">
-      <text class="dialog-title">新增子分类</text>
-      <input class="input" value="{{form.name}}" bindinput="onNameInput" placeholder="分类名称" />
-      <input class="input input--mt" value="{{form.icon}}" bindinput="onIconInput" placeholder="图标 Emoji，可不填" />
+    <view class="dialog">
+      <view class="dialog-head">
+        <text class="dialog-title">{{editingId ? '编辑二级分类' : '添加二级分类'}}</text>
+        <text class="dialog-close" bindtap="closeDialog">×</text>
+      </view>
+      <view class="dialog-body">
+        <view class="field">
+          <text class="field-label">所属一级分类</text>
+          <input class="field-input" value="{{parentName}}" disabled />
+        </view>
+        <view class="field">
+          <text class="field-label">分类名称</text>
+          <input class="field-input" value="{{form.name}}" bindinput="onNameInput" placeholder="请输入分类名称" maxlength="4" />
+        </view>
+        <view class="field">
+          <text class="field-label">分类图标</text>
+          <input class="field-input" value="{{form.icon}}" bindinput="onIconInput" placeholder="请输入 Emoji，可不填" />
+        </view>
+      </view>
       <view class="dialog-actions">
-        <view class="secondary-btn" bindtap="closeDialog">取消</view>
-        <view class="primary-btn" bindtap="save">确认</view>
+        <view class="dialog-btn dialog-btn--secondary" bindtap="closeDialog">取消</view>
+        <view class="dialog-btn dialog-btn--primary" bindtap="save">确认</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{confirmVisible}}" class="dialog-mask">
+    <view class="confirm-dialog">
+      <view class="confirm-icon">!</view>
+      <text class="confirm-title">删除二级分类</text>
+      <text class="confirm-text">有关联账单时不可删除。确认删除“{{pendingDeleteName}}”？</text>
+      <view class="dialog-actions">
+        <view class="dialog-btn dialog-btn--secondary" bindtap="closeConfirm">取消</view>
+        <view class="dialog-btn dialog-btn--danger" bindtap="confirmDelete">确认删除</view>
       </view>
     </view>
   </view>

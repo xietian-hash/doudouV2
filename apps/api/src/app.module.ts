@@ -13,6 +13,7 @@ import { TagsModule } from './modules/tags/tags.module';
 import { BillsModule } from './modules/bills/bills.module';
 import { VoiceModule } from './modules/voice/voice.module';
 import { StatisticsModule } from './modules/statistics/statistics.module';
+import { FeedbackModule } from './modules/feedback/feedback.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
     BillsModule,
     VoiceModule,
     StatisticsModule,
+    FeedbackModule,
   ],
   providers: [
     {

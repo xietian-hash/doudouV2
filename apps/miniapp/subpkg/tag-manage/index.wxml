@@ -1,22 +1,80 @@
-<view class="page tag-page">
-  <view class="head-row">
-    <text class="title">标签</text>
-    <view class="primary-small" bindtap="openCreate">新增标签</view>
+<view class="manage-page">
+  <view class="manage-nav">
+    <view class="nav-back" bindtap="goBack">‹</view>
+    <view class="nav-title">标签管理</view>
+    <view class="nav-spacer"></view>
   </view>
-  <view class="tag-wrap">
-    <view wx:for="{{tags}}" wx:key="id" class="tag-item">
-      <text>{{item.name}}</text>
-      <text class="tag-delete" data-id="{{item.id}}" bindtap="remove">×</text>
+
+  <scroll-view class="manage-list manage-list--no-tabs" scroll-y enhanced show-scrollbar="{{false}}">
+    <view class="manage-list-inner">
+      <view class="summary-row">
+        <text class="summary-label">共 {{tags.length}} 个标签</text>
+        <text class="summary-value tag-summary">常用场景</text>
+      </view>
+
+      <view
+        wx:for="{{tags}}"
+        wx:key="id"
+        class="swipe-row"
+        data-index="{{index}}"
+        bindtouchstart="onTouchStart"
+        bindtouchmove="onTouchMove"
+        bindtouchend="onTouchEnd"
+        bindtouchcancel="onTouchEnd"
+      >
+        <view class="swipe-actions">
+          <view class="swipe-action swipe-action--edit" data-id="{{item.id}}" data-name="{{item.name}}" catchtap="openEdit">编辑</view>
+          <view class="swipe-action swipe-action--delete" data-id="{{item.id}}" data-name="{{item.name}}" catchtap="askDelete">删除</view>
+        </view>
+        <view class="swipe-content" style="transform: translateX({{item.slideX || 0}}rpx);">
+          <view class="manage-card" data-id="{{item.id}}" data-name="{{item.name}}" bindtap="openEdit">
+            <view class="card-icon {{item.toneClass}}">{{item.icon}}</view>
+            <view class="card-main">
+              <text class="card-title">{{item.name}}</text>
+              <text class="card-sub">常用场景标签</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{!tags.length}}" class="empty-state">暂无标签</view>
+    </view>
+  </scroll-view>
+
+  <view class="bottom-add">
+    <view class="bottom-add-btn" bindtap="openCreate">
+      <text class="bottom-add-plus">+</text>
+      <text>添加标签</text>
     </view>
   </view>
 
   <view wx:if="{{dialogVisible}}" class="dialog-mask">
-    <view class="dialog card">
-      <text class="dialog-title">新增标签</text>
-      <input class="input" value="{{name}}" bindinput="onInput" placeholder="标签名称" />
+    <view class="dialog">
+      <view class="dialog-head">
+        <text class="dialog-title">{{editingId ? '编辑标签' : '添加标签'}}</text>
+        <text class="dialog-close" bindtap="closeDialog">×</text>
+      </view>
+      <view class="dialog-body">
+        <view class="field">
+          <text class="field-label">标签名称</text>
+          <input class="field-input" value="{{name}}" bindinput="onInput" placeholder="请输入标签名称" maxlength="4" />
+        </view>
+      </view>
       <view class="dialog-actions">
-        <view class="secondary-btn" bindtap="closeDialog">取消</view>
-        <view class="primary-btn" bindtap="save">确认</view>
+        <view class="dialog-btn dialog-btn--secondary" bindtap="closeDialog">取消</view>
+        <view class="dialog-btn dialog-btn--primary" bindtap="save">确认</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{confirmVisible}}" class="dialog-mask">
+    <view class="confirm-dialog">
+      <view class="confirm-icon">!</view>
+      <text class="confirm-title">删除标签</text>
+      <text class="confirm-text">删除后账单将不再关联该标签。确认删除“{{pendingDeleteName}}”？</text>
+      <view class="dialog-actions">
+        <view class="dialog-btn dialog-btn--secondary" bindtap="closeConfirm">取消</view>
+        <view class="dialog-btn dialog-btn--danger" bindtap="confirmDelete">确认删除</view>
       </view>
     </view>
   </view>
