@@ -1,0 +1,10 @@
+{
+  "version": "1",
+  "desc": "本指引为兜兜有钱小程序提供录音用于语音记账的隐私保护说明",
+  "owner": "兜兜有钱",
+  "setting": {
+    "RecorderManager.start": {
+      "urls": []
+    }
+  }
+}

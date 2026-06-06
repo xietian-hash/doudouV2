@@ -16,7 +16,7 @@
 
 | 层级 | 技术 |
 |------|------|
-| 小程序前端 | Taro 4 + React 18 + TypeScript + Zustand |
+| 小程序前端 | 微信原生小程序 + WXML/WXSS/JavaScript + custom-tab-bar |
 | 后端 API | NestJS + Prisma ORM + MySQL |
 | AI 语音识别 | 豆包 ASR（火山引擎大模型录音文件识别） |
 | AI 文本解析 | 豆包 LLM（火山方舟，OpenAI 兼容格式） |
@@ -29,7 +29,7 @@
 .
 ├── apps/
 │   ├── api/          # NestJS 后端
-│   └── miniapp/      # Taro 小程序
+│   └── miniapp/      # 微信原生小程序
 ├── packages/
 │   └── shared/       # 共享类型
 ├── nginx/            # Nginx 配置
@@ -64,12 +64,11 @@ pnpm prisma db seed
 # 4. 启动后端
 pnpm --filter api dev
 
-# 5. 构建小程序（另开终端）
-pnpm --filter miniapp dev:weapp
+# 5. 校验小程序工程（另开终端）
 pnpm --filter @ddyq/miniapp build:weapp
 ```
 
-用微信开发者工具导入 `apps/miniapp/dist` 目录，AppID 填 `wxf979ecffe6e916fd`。
+用微信开发者工具导入 `apps/miniapp` 目录，AppID 填 `wxf979ecffe6e916fd`。
 
 ### 环境变量说明
 

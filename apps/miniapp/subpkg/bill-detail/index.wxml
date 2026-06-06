@@ -1,0 +1,35 @@
+<view class="page detail-page">
+  <view class="amount-card card">
+    <text class="detail-icon">{{bill.categoryIcon || '□'}}</text>
+    <text class="detail-type">{{bill.type === 2 ? '收入' : '支出'}}</text>
+    <text class="detail-amount {{bill.type === 2 ? 'detail-amount--income' : ''}}">{{bill.type === 2 ? '+' : '-'}}¥{{bill.amount}}</text>
+  </view>
+
+  <view class="detail-card card">
+    <view class="row">
+      <text class="label">分类</text>
+      <text>{{bill.categoryName || '-'}}</text>
+    </view>
+    <view class="row">
+      <text class="label">账户</text>
+      <text>{{bill.accountName || '-'}}</text>
+    </view>
+    <view class="row">
+      <text class="label">日期</text>
+      <text>{{bill.billDate || '-'}}</text>
+    </view>
+    <view class="row">
+      <text class="label">备注</text>
+      <text>{{bill.remark || '-'}}</text>
+    </view>
+    <view class="row">
+      <text class="label">来源</text>
+      <text>{{bill.source === 2 ? '语音识别' : '手工录入'}}</text>
+    </view>
+  </view>
+
+  <view class="actions">
+    <view class="secondary-btn" bindtap="edit">编辑</view>
+    <view class="danger-btn" bindtap="remove">删除</view>
+  </view>
+</view>

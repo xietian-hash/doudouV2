@@ -1,0 +1,23 @@
+<view class="page tag-page">
+  <view class="head-row">
+    <text class="title">标签</text>
+    <view class="primary-small" bindtap="openCreate">新增标签</view>
+  </view>
+  <view class="tag-wrap">
+    <view wx:for="{{tags}}" wx:key="id" class="tag-item">
+      <text>{{item.name}}</text>
+      <text class="tag-delete" data-id="{{item.id}}" bindtap="remove">×</text>
+    </view>
+  </view>
+
+  <view wx:if="{{dialogVisible}}" class="dialog-mask">
+    <view class="dialog card">
+      <text class="dialog-title">新增标签</text>
+      <input class="input" value="{{name}}" bindinput="onInput" placeholder="标签名称" />
+      <view class="dialog-actions">
+        <view class="secondary-btn" bindtap="closeDialog">取消</view>
+        <view class="primary-btn" bindtap="save">确认</view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,35 @@
+<view class="tab-shell {{hidden ? 'tab-shell--hidden' : ''}}">
+  <view class="tab-bar">
+    <view class="tab-item {{selected === 0 ? 'tab-item--active' : ''}}" data-index="0" bindtap="switchTab">
+      <text class="tab-icon">◎</text>
+      <text class="tab-label">记录</text>
+    </view>
+    <view class="tab-center">
+      <view
+        class="tab-fab {{selected === 1 ? 'tab-fab--mic' : ''}}"
+        data-index="1"
+        bindtap="switchTab"
+        bindtouchstart="handleFabTouchStart"
+        bindtouchmove="handleFabTouchMove"
+        bindtouchend="handleFabTouchEnd"
+        bindtouchcancel="handleFabTouchCancel"
+      >
+        <view wx:if="{{selected === 1}}" class="tab-fab-icon tab-fab-icon--voice">
+          <view class="mic-head"></view>
+          <view class="mic-arc"></view>
+          <view class="mic-stem"></view>
+          <view class="mic-base"></view>
+        </view>
+        <text wx:else class="tab-fab-icon tab-fab-icon--plus">＋</text>
+      </view>
+      <text class="tab-label tab-label--center">记账</text>
+    </view>
+    <view class="tab-item {{selected === 2 ? 'tab-item--active' : ''}}" data-index="2" bindtap="switchTab">
+      <view class="tab-icon tab-icon--mine">
+        <view class="mine-head"></view>
+        <view class="mine-body"></view>
+      </view>
+      <text class="tab-label">我的</text>
+    </view>
+  </view>
+</view>
