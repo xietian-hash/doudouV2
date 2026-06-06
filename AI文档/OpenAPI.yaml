@@ -499,9 +499,9 @@ paths:
           application/json:
             schema:
               type: object
-              required: [items]
+              required: [bills]
               properties:
-                items:
+                bills:
                   type: array
                   minItems: 1
                   items:

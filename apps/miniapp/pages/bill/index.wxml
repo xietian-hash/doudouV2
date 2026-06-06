@@ -37,6 +37,19 @@
   </scroll-view>
 
   <view wx:if="{{!recording}}" class="bill-bottom">
+    <view class="bill-remark-row">
+      <text class="bill-remark-icon">✎</text>
+      <input
+        class="bill-remark-input"
+        type="text"
+        value="{{remark}}"
+        placeholder="写点备注..."
+        placeholder-class="bill-remark-placeholder"
+        maxlength="100"
+        bindinput="onRemarkInput"
+      />
+    </view>
+
     <view class="meta-row">
       <view class="meta-pill" bindtap="openAccountSheet">
         <text>▣</text>
@@ -49,10 +62,6 @@
       <view class="meta-pill" bindtap="openDateSheet">
         <text>□</text>
         <text class="meta-text">{{displayDate}}</text>
-      </view>
-      <view class="meta-pill" bindtap="openRemarkModal">
-        <text>✎</text>
-        <text class="meta-text">{{remark || '备注'}}</text>
       </view>
     </view>
 

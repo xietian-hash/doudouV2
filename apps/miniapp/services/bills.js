@@ -5,7 +5,7 @@ module.exports = {
   getCalendarSummary: (month) => get('/api/bills/calendar-summary', { month }),
   getBillDetail: (id) => get(`/api/bills/${id}`),
   createBill: (data) => post('/api/bills', data),
-  createBillBatch: (items) => post('/api/bills/batch', { items }),
+  createBillBatch: (items) => post('/api/bills/batch', { bills: items }),
   updateBill: (id, data) => patch(`/api/bills/${id}`, data),
   deleteBill: (id) => del(`/api/bills/${id}`),
 };

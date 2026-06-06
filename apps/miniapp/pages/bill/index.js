@@ -143,19 +143,6 @@ Page({
     this.setData({ remark: event.detail.value });
   },
 
-  openRemarkModal() {
-    wx.showModal({
-      title: '备注',
-      editable: true,
-      placeholderText: '写点备注...',
-      content: this.data.remark || '',
-      success: (res) => {
-        if (!res.confirm) return;
-        this.setData({ remark: String(res.content || '').slice(0, 100) });
-      },
-    });
-  },
-
   handleKey(event) {
     const key = event.currentTarget.dataset.key;
     if (key === '完成') {
