@@ -1,6 +1,6 @@
 {
   "name": "@ddyq/miniapp",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "scripts": {
     "dev:weapp": "node scripts/validate-native.js",
     "build:weapp": "node scripts/validate-native.js",
