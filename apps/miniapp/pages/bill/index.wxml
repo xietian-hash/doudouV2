@@ -193,7 +193,18 @@
     </view>
   </view>
 
-  <view wx:if="{{recording}}" class="recording-panel">
+  <view wx:if="{{voiceParsing}}" class="voice-parsing-mask" catchtap="noop" catchtouchmove="noop">
+    <view class="voice-parsing-card">
+      <view class="voice-parsing-spinner">
+        <view class="voice-parsing-dot voice-parsing-dot--1"></view>
+        <view class="voice-parsing-dot voice-parsing-dot--2"></view>
+        <view class="voice-parsing-dot voice-parsing-dot--3"></view>
+      </view>
+      <text class="voice-parsing-text">兜兜思考中...</text>
+    </view>
+  </view>
+
+  <view wx:if="{{recording}}" class="recording-panel {{recordingCanceling ? 'recording-panel--canceling' : ''}}">
     <view class="wave-box">
       <view class="wave-bar wave-bar--1"></view>
       <view class="wave-bar wave-bar--2"></view>
@@ -206,12 +217,13 @@
       <view class="wave-bar wave-bar--9"></view>
       <view class="wave-bar wave-bar--10"></view>
     </view>
+    <view class="recording-hint">{{recordingCanceling ? '松开取消' : '上滑可取消'}}</view>
     <view class="recording-tips">
-      <view class="recording-tip recording-tip--cancel">
+      <view class="recording-tip recording-tip--cancel {{recordingCanceling ? 'recording-tip--active' : ''}}">
         <view class="recording-icon-arrow"></view>
-        <text>上滑取消</text>
+        <text>{{recordingCanceling ? '松开取消' : '上滑取消'}}</text>
       </view>
-      <view class="recording-tip recording-tip--done">
+      <view class="recording-tip recording-tip--done {{recordingCanceling ? '' : 'recording-tip--active'}}">
         <view class="recording-icon-check"></view>
         <text>松开完成</text>
       </view>

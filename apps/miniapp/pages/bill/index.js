@@ -38,6 +38,7 @@ Page({
     calMonth: new Date().getMonth() + 1,
     dateDays: [],
     recording: false,
+    recordingCanceling: false,
     voiceParsing: false,
     voiceConfirmVisible: false,
     voiceItems: [],
@@ -48,14 +49,17 @@ Page({
     this.recorder = wx.getRecorderManager();
     this.initRecorder();
     this.onVoiceStart = () => this.startRecording();
-    this.onVoiceStop = () => this.stopRecording();
+    this.onVoiceMove = (payload) => this.updateRecordingCancel(payload || {});
+    this.onVoiceStop = (payload) => this.stopRecording(payload || {});
     wx.$on('voiceRecord:start', this.onVoiceStart);
+    wx.$on('voiceRecord:move', this.onVoiceMove);
     wx.$on('voiceRecord:stop', this.onVoiceStop);
     this.updateDisplayDate();
   },
 
   onUnload() {
     wx.$off('voiceRecord:start', this.onVoiceStart);
+    wx.$off('voiceRecord:move', this.onVoiceMove);
     wx.$off('voiceRecord:stop', this.onVoiceStop);
   },
 
@@ -346,12 +350,12 @@ Page({
 
   initRecorder() {
     this.recorder.onStop(async (res) => {
-      this.setData({ recording: false });
-      if (!res.tempFilePath) return;
-      if (typeof res.duration === 'number' && res.duration < MIN_VOICE_DURATION_MS) {
-        showError('录音时长太短，请重新录制');
+      this.setData({ recording: false, recordingCanceling: false });
+      if (this._abortVoiceUpload) {
+        this._abortVoiceUpload = false;
         return;
       }
+      if (!res.tempFilePath) return;
       this.setData({ voiceParsing: true });
       try {
         const parsed = await voiceService.uploadAudioAndParse(res.tempFilePath);
@@ -373,7 +377,8 @@ Page({
       }
     });
     this.recorder.onError(() => {
-      this.setData({ recording: false });
+      this.setData({ recording: false, recordingCanceling: false });
+      this._abortVoiceUpload = false;
       showError('录音失败，请重试');
     });
   },
@@ -393,7 +398,8 @@ Page({
   },
 
   doStartRecording() {
-    this.setData({ recording: true });
+    this._abortVoiceUpload = false;
+    this.setData({ recording: true, recordingCanceling: false });
     this.recorder.start({
       duration: 60000,
       sampleRate: 16000,
@@ -403,8 +409,31 @@ Page({
     });
   },
 
-  stopRecording() {
+  updateRecordingCancel(payload) {
     if (!this.data.recording) return;
+    const canceling = Boolean(payload.canceling);
+    if (this.data.recordingCanceling === canceling) return;
+    this.setData({ recordingCanceling: canceling });
+  },
+
+  stopRecording(payload) {
+    if (!this.data.recording) return;
+    const duration = Number((payload && payload.duration) || 0);
+    const canceled = Boolean(payload && payload.canceled);
+    this.setData({ recording: false, recordingCanceling: false });
+    if (canceled) {
+      this._abortVoiceUpload = true;
+      this.recorder.stop();
+      showToast('已取消', 'none');
+      return;
+    }
+    if (duration < MIN_VOICE_DURATION_MS) {
+      this._abortVoiceUpload = true;
+      this.recorder.stop();
+      showError('录音时间太短，请长按说话');
+      return;
+    }
+    this._abortVoiceUpload = false;
     this.recorder.stop();
   },
 

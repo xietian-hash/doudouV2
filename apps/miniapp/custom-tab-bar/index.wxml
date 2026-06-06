@@ -10,8 +10,9 @@
         data-index="1"
         bindtap="switchTab"
         bindtouchstart="handleFabTouchStart"
+        bindtouchmove="handleFabTouchMove"
         bindtouchend="handleFabTouchEnd"
-        bindtouchcancel="handleFabTouchEnd"
+        bindtouchcancel="handleFabTouchCancel"
       >
         <view wx:if="{{selected === 1}}" class="tab-fab-icon tab-fab-icon--voice">
           <view class="mic-head"></view>
