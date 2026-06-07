@@ -26,6 +26,10 @@
       "pages": ["index"]
     },
     {
+      "root": "subpkg/bill-edit",
+      "pages": ["index"]
+    },
+    {
       "root": "subpkg/bill-detail",
       "pages": ["index"]
     }

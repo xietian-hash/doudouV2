@@ -14,6 +14,13 @@ const KEY_ROWS = [
 ];
 const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日'];
 const MIN_VOICE_DURATION_MS = 1000;
+const ACCOUNT_TYPES = [
+  { value: 1, label: '现金', icon: '💼' },
+  { value: 2, label: '银行卡', icon: '🏦' },
+  { value: 3, label: '支付宝', icon: '📱' },
+  { value: 4, label: '微信', icon: '💬' },
+  { value: 5, label: '其他', icon: '💳' },
+];
 
 Page({
   data: {
@@ -43,6 +50,11 @@ Page({
     voiceConfirmVisible: false,
     voiceItems: [],
     editId: '',
+    accountDialogVisible: false,
+    accountTypes: ACCOUNT_TYPES,
+    accountForm: { name: '', type: 1, icon: '💼' },
+    tagDialogVisible: false,
+    tagName: '',
   },
 
   onLoad() {
@@ -289,10 +301,11 @@ Page({
   },
 
   buildDateDays() {
+    const today = formatDate(new Date());
     const days = buildCalendarDays(this.data.calYear, this.data.calMonth).map((day, index) => {
       if (!day) return { key: `empty-${index}`, day: '', date: '' };
       const date = `${this.data.calYear}-${String(this.data.calMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      return { key: date, day, date, selected: date === this.data.billDate };
+      return { key: date, day, date, selected: date === this.data.billDate, today: date === today };
     });
     this.setData({ dateDays: days });
   },
@@ -334,6 +347,71 @@ Page({
 
   openTagManage() {
     wx.navigateTo({ url: '/subpkg/tag-manage/index' });
+  },
+
+  openCreateAccountDialog() {
+    this.setData({
+      accountDialogVisible: true,
+      accountForm: { name: '', type: 1, icon: '💼' },
+    });
+  },
+
+  closeAccountDialog() {
+    this.setData({ accountDialogVisible: false });
+  },
+
+  onAccountNameInput(event) {
+    this.setData({ 'accountForm.name': event.detail.value });
+  },
+
+  selectAccountType(event) {
+    const type = Number(event.currentTarget.dataset.type);
+    const found = ACCOUNT_TYPES.find((item) => item.value === type) || ACCOUNT_TYPES[4];
+    this.setData({ 'accountForm.type': found.value, 'accountForm.icon': found.icon });
+  },
+
+  async saveNewAccount() {
+    const name = this.data.accountForm.name.trim();
+    if (!name) {
+      showError('请输入账户名称');
+      return;
+    }
+    const created = await accountsService.createAccount({ ...this.data.accountForm, name });
+    showToast('添加成功', 'success');
+    this.setData({ accountDialogVisible: false });
+    const accounts = await accountsService.getAccounts();
+    const selected = accounts.find((item) => String(item.id) === String(created && created.id))
+      || accounts.find((item) => item.name === name)
+      || this.data.selectedAccount;
+    this.setData({ accounts, selectedAccount: selected });
+  },
+
+  openCreateTagDialog() {
+    this.setData({ tagDialogVisible: true, tagName: '' });
+  },
+
+  closeTagDialog() {
+    this.setData({ tagDialogVisible: false, tagName: '' });
+  },
+
+  onTagNameInput(event) {
+    this.setData({ tagName: String(event.detail.value || '').slice(0, 4) });
+  },
+
+  async saveNewTag() {
+    const name = this.data.tagName.trim();
+    if (!name) {
+      showError('请输入标签名称');
+      return;
+    }
+    const created = await tagsService.createTag(name);
+    showToast('添加成功', 'success');
+    this.setData({ tagDialogVisible: false, tagName: '' });
+    const tags = await tagsService.getTags();
+    const selected = tags.find((item) => String(item.id) === String(created && created.id))
+      || tags.find((item) => item.name === name)
+      || {};
+    this.setData({ tags, selectedTag: selected });
   },
 
   initRecorder() {

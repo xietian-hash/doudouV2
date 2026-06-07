@@ -139,7 +139,7 @@ Page({
 
   openDetail(event) {
     wx.navigateTo({
-      url: `/subpkg/bill-detail/index?id=${event.currentTarget.dataset.id}`,
+      url: `/subpkg/bill-edit/index?id=${event.currentTarget.dataset.id}`,
     });
   },
 });

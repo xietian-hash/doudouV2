@@ -4,7 +4,7 @@ Page({
   data: {
     user: {},
     avatarText: '我',
-    version: '0.1.10',
+    version: '0.1.11',
     importDialogVisible: false,
     importUrl: `${BASE_URL}/import/bills`,
   },

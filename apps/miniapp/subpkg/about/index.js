@@ -1,6 +1,6 @@
 Page({
   data: {
-    version: '0.1.10',
+    version: '0.1.11',
     principles: [
       {
         title: '少打字，多记账',

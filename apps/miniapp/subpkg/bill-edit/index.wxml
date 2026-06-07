@@ -1,4 +1,4 @@
-<view class="page bill-page">
+<view class="page bill-page bill-edit-page">
   <view class="type-switch">
     <view class="type-btn {{type === 1 ? 'type-btn--active' : ''}}" data-type="1" bindtap="switchType">支出</view>
     <view class="type-btn {{type === 2 ? 'type-btn--active type-btn--income' : ''}}" data-type="2" bindtap="switchType">收入</view>
@@ -35,7 +35,7 @@
     </view>
   </scroll-view>
 
-  <view wx:if="{{!recording}}" class="bill-bottom">
+  <view class="bill-bottom">
     <view class="bill-remark-row">
       <text class="bill-remark-icon">✎</text>
       <input
@@ -129,7 +129,7 @@
       </scroll-view>
       <view class="sheet-footer">
         <view class="secondary-btn" bindtap="closeSheet">取消</view>
-        <view class="primary-btn" bindtap="openCreateAccountDialog">添加账户</view>
+        <view class="primary-btn" bindtap="openAccountManage">管理账户</view>
       </view>
     </view>
   </view>
@@ -152,60 +152,7 @@
       </view>
       <view class="sheet-footer">
         <view class="secondary-btn" bindtap="closeSheet">取消</view>
-        <view class="primary-btn" bindtap="openCreateTagDialog">添加标签</view>
-      </view>
-    </view>
-  </view>
-
-  <view wx:if="{{accountDialogVisible}}" class="form-dialog-mask" catchtap="closeAccountDialog">
-    <view class="form-dialog" catchtap="noop">
-      <view class="form-dialog-head">
-        <text class="form-dialog-title">添加账户</text>
-        <text class="form-dialog-close" bindtap="closeAccountDialog">×</text>
-      </view>
-      <view class="form-dialog-body">
-        <view class="form-field">
-          <text class="form-label">账户类型</text>
-          <view class="type-choice">
-            <view
-              wx:for="{{accountTypes}}"
-              wx:key="value"
-              class="type-choice-item {{accountForm.type === item.value ? 'type-choice-item--active' : ''}}"
-              data-type="{{item.value}}"
-              bindtap="selectAccountType"
-            >
-              <text class="type-choice-icon">{{item.icon}}</text>
-              <text>{{item.label}}</text>
-            </view>
-          </view>
-        </view>
-        <view class="form-field">
-          <text class="form-label">账户名称</text>
-          <input class="form-input" value="{{accountForm.name}}" bindinput="onAccountNameInput" placeholder="请输入账户名称" maxlength="10" />
-        </view>
-      </view>
-      <view class="form-dialog-actions">
-        <view class="form-dialog-btn form-dialog-btn--secondary" bindtap="closeAccountDialog">取消</view>
-        <view class="form-dialog-btn form-dialog-btn--primary" bindtap="saveNewAccount">确认</view>
-      </view>
-    </view>
-  </view>
-
-  <view wx:if="{{tagDialogVisible}}" class="form-dialog-mask" catchtap="closeTagDialog">
-    <view class="form-dialog" catchtap="noop">
-      <view class="form-dialog-head">
-        <text class="form-dialog-title">添加标签</text>
-        <text class="form-dialog-close" bindtap="closeTagDialog">×</text>
-      </view>
-      <view class="form-dialog-body">
-        <view class="form-field">
-          <text class="form-label">标签名称</text>
-          <input class="form-input" value="{{tagName}}" bindinput="onTagNameInput" placeholder="请输入标签名称" maxlength="4" />
-        </view>
-      </view>
-      <view class="form-dialog-actions">
-        <view class="form-dialog-btn form-dialog-btn--secondary" bindtap="closeTagDialog">取消</view>
-        <view class="form-dialog-btn form-dialog-btn--primary" bindtap="saveNewTag">确认</view>
+        <view class="primary-btn" bindtap="openTagManage">管理标签</view>
       </view>
     </view>
   </view>
@@ -232,67 +179,6 @@
       <view class="sheet-footer">
         <view class="secondary-btn" bindtap="closeSheet">取消</view>
         <view class="primary-btn" bindtap="selectToday">今天</view>
-      </view>
-    </view>
-  </view>
-
-  <view wx:if="{{voiceConfirmVisible}}" class="sheet-mask" bindtap="closeVoiceConfirm">
-    <view class="sheet sheet--voice" catchtap="noop">
-      <view class="sheet-head">
-        <text class="sheet-title">确认记账</text>
-        <text class="sheet-close" bindtap="closeVoiceConfirm">×</text>
-      </view>
-      <scroll-view scroll-y class="voice-list">
-        <view wx:for="{{voiceItems}}" wx:key="_localId" class="voice-item">
-          <view class="voice-row">
-            <text class="voice-cat">{{item.categoryIcon || '□'}} {{item.categoryName || '未匹配分类'}}</text>
-            <text class="voice-amount {{item.type === 2 ? 'voice-amount--income' : ''}}">{{item.type === 1 ? '-' : '+'}}{{item.amount}}</text>
-          </view>
-          <text wx:if="{{item.remark}}" class="voice-remark">{{item.remark}}</text>
-          <text wx:if="{{item.needsConfirm}}" class="voice-warn">需要确认分类或金额</text>
-          <text class="voice-delete" data-id="{{item._localId}}" bindtap="removeVoiceItem">×</text>
-        </view>
-      </scroll-view>
-      <view class="sheet-footer">
-        <view class="secondary-btn" bindtap="closeVoiceConfirm">取消</view>
-        <view class="primary-btn" bindtap="saveVoiceItems">确认保存</view>
-      </view>
-    </view>
-  </view>
-
-  <view wx:if="{{voiceParsing}}" class="voice-parsing-mask" catchtap="noop" catchtouchmove="noop">
-    <view class="voice-parsing-card">
-      <view class="voice-parsing-spinner">
-        <view class="voice-parsing-dot voice-parsing-dot--1"></view>
-        <view class="voice-parsing-dot voice-parsing-dot--2"></view>
-        <view class="voice-parsing-dot voice-parsing-dot--3"></view>
-      </view>
-      <text class="voice-parsing-text">兜兜思考中...</text>
-    </view>
-  </view>
-
-  <view wx:if="{{recording}}" class="recording-panel {{recordingCanceling ? 'recording-panel--canceling' : ''}}">
-    <view class="wave-box">
-      <view class="wave-bar wave-bar--1"></view>
-      <view class="wave-bar wave-bar--2"></view>
-      <view class="wave-bar wave-bar--3"></view>
-      <view class="wave-bar wave-bar--4"></view>
-      <view class="wave-bar wave-bar--5"></view>
-      <view class="wave-bar wave-bar--6"></view>
-      <view class="wave-bar wave-bar--7"></view>
-      <view class="wave-bar wave-bar--8"></view>
-      <view class="wave-bar wave-bar--9"></view>
-      <view class="wave-bar wave-bar--10"></view>
-    </view>
-    <view class="recording-hint">{{recordingCanceling ? '松开取消' : '上滑可取消'}}</view>
-    <view class="recording-tips">
-      <view class="recording-tip recording-tip--cancel {{recordingCanceling ? 'recording-tip--active' : ''}}">
-        <view class="recording-icon-arrow"></view>
-        <text>{{recordingCanceling ? '松开取消' : '上滑取消'}}</text>
-      </view>
-      <view class="recording-tip recording-tip--done {{recordingCanceling ? '' : 'recording-tip--active'}}">
-        <view class="recording-icon-check"></view>
-        <text>松开完成</text>
       </view>
     </view>
   </view>
