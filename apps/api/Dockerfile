@@ -5,6 +5,7 @@ ENV PATH="$PNPM_HOME:$PATH"
 ENV COREPACK_NPM_REGISTRY=https://registry.npmmirror.com
 
 RUN corepack enable
+RUN corepack prepare pnpm@11.0.9 --activate
 
 WORKDIR /app
 
@@ -37,6 +38,7 @@ RUN sed -i "s@http://deb.debian.org@http://mirrors.aliyun.com@g" /etc/apt/source
     rm -rf /var/lib/apt/lists/*
 
 RUN corepack enable
+RUN corepack prepare pnpm@11.0.9 --activate
 
 WORKDIR /app
 
