@@ -1,0 +1,78 @@
+<view class="import-page">
+  <view class="import-header">
+    <view class="header-title">批量导入账单</view>
+    <view class="header-sub">用 Excel 模板把历史账单批量入账</view>
+  </view>
+
+  <view class="step-card">
+    <view class="step-row">
+      <view class="step-num">1</view>
+      <view class="step-info">
+        <view class="step-title">获取模板</view>
+        <view class="step-desc">点击下方按钮下载，并转发到「文件传输助手」</view>
+      </view>
+    </view>
+    <view class="step-row">
+      <view class="step-num">2</view>
+      <view class="step-info">
+        <view class="step-title">填写账单</view>
+        <view class="step-desc">在电脑/手机上打开 Excel 填写。每行一笔账单，最多 10000 条</view>
+      </view>
+    </view>
+    <view class="step-row">
+      <view class="step-num">3</view>
+      <view class="step-info">
+        <view class="step-title">上传账单</view>
+        <view class="step-desc">点击下方上传按钮，从「文件传输助手」选择文件</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="rules-card">
+    <view class="rules-title">填写要求</view>
+    <view class="rules-item">· 二级分类、账户名、标签 必须与系统中的名称完全一致</view>
+    <view class="rules-item">· 日期使用 YYYY-MM-DD 格式</view>
+    <view class="rules-item">· 类型仅支持「支出」或「收入」</view>
+    <view class="rules-item">· 任一行有错 整批不入账（可下载错误清单查看）</view>
+    <view class="rules-item">· 重复账单（日期/金额/分类/账户/备注 全部相同）自动跳过</view>
+  </view>
+
+  <view class="action-bar">
+    <view class="action-btn action-btn--secondary {{loading ? 'action-btn--disabled' : ''}}" bindtap="onGetTemplate">
+      <text class="action-btn-icon">↓</text>
+      <text>获取模板</text>
+    </view>
+    <view class="action-btn action-btn--primary {{loading ? 'action-btn--disabled' : ''}}" bindtap="onUploadFile">
+      <text class="action-btn-icon">↑</text>
+      <text>上传账单</text>
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading-mask">
+    <view class="loading-card">
+      <view class="loading-spinner">
+        <view class="loading-dot loading-dot--1"></view>
+        <view class="loading-dot loading-dot--2"></view>
+        <view class="loading-dot loading-dot--3"></view>
+      </view>
+      <text class="loading-text">{{loadingText}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{resultDialogVisible}}" class="dialog-mask" catchtap="closeResultDialog">
+    <view class="result-dialog" catchtap="noop">
+      <view class="result-icon {{resultIsSuccess ? 'result-icon--success' : 'result-icon--error'}}">{{resultIsSuccess ? '✓' : '!'}}</view>
+      <view class="result-title">{{resultTitle}}</view>
+      <view class="result-text">{{resultMessage}}</view>
+
+      <view wx:if="{{!resultIsSuccess && errorFileUrl}}" class="result-error-tip">
+        发现 {{errorCount}} 条数据有问题，请下载错误清单查看具体原因。
+      </view>
+
+      <view class="result-actions">
+        <view wx:if="{{!resultIsSuccess && errorFileUrl}}" class="dialog-btn dialog-btn--primary" bindtap="onDownloadErrorFile">下载错误清单</view>
+        <view class="dialog-btn {{resultIsSuccess || !errorFileUrl ? 'dialog-btn--primary' : 'dialog-btn--secondary'}}" bindtap="closeResultDialog">{{resultIsSuccess ? '完成' : '我知道了'}}</view>
+      </view>
+    </view>
+  </view>
+</view>

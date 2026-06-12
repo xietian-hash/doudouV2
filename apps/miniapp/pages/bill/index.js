@@ -14,6 +14,13 @@ const KEY_ROWS = [
 ];
 const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日'];
 const MIN_VOICE_DURATION_MS = 1000;
+const ACCOUNT_TYPES = [
+  { value: 1, label: '现金', icon: '💼' },
+  { value: 2, label: '银行卡', icon: '🏦' },
+  { value: 3, label: '支付宝', icon: '📱' },
+  { value: 4, label: '微信', icon: '💬' },
+  { value: 5, label: '其他', icon: '💳' },
+];
 
 Page({
   data: {
@@ -43,10 +50,17 @@ Page({
     voiceConfirmVisible: false,
     voiceItems: [],
     editId: '',
+    accountDialogVisible: false,
+    accountTypes: ACCOUNT_TYPES,
+    accountForm: { name: '', type: 1, icon: '💼' },
+    tagDialogVisible: false,
+    tagName: '',
   },
 
   onLoad() {
     this.recorder = wx.getRecorderManager();
+    this._startingRecord = false;
+    this._pendingStopPayload = null;
     this.initRecorder();
     this.onVoiceStart = () => this.startRecording();
     this.onVoiceMove = (payload) => this.updateRecordingCancel(payload || {});
@@ -143,19 +157,6 @@ Page({
     this.setData({ remark: event.detail.value });
   },
 
-  openRemarkModal() {
-    wx.showModal({
-      title: '备注',
-      editable: true,
-      placeholderText: '写点备注...',
-      content: this.data.remark || '',
-      success: (res) => {
-        if (!res.confirm) return;
-        this.setData({ remark: String(res.content || '').slice(0, 100) });
-      },
-    });
-  },
-
   handleKey(event) {
     const key = event.currentTarget.dataset.key;
     if (key === '完成') {
@@ -177,6 +178,7 @@ Page({
   inputAmount(key) {
     let value = this.data.amount === '0' && key !== '.' ? '' : this.data.amount;
     if (key === '.' && value.includes('.')) return;
+    if (value === '' && key === '00') return;
     value += key;
     if (value.startsWith('.')) value = `0${value}`;
     if (value.includes('.') && value.split('.')[1].length > 2) return;
@@ -301,10 +303,11 @@ Page({
   },
 
   buildDateDays() {
+    const today = formatDate(new Date());
     const days = buildCalendarDays(this.data.calYear, this.data.calMonth).map((day, index) => {
       if (!day) return { key: `empty-${index}`, day: '', date: '' };
       const date = `${this.data.calYear}-${String(this.data.calMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      return { key: date, day, date, selected: date === this.data.billDate };
+      return { key: date, day, date, selected: date === this.data.billDate, today: date === today };
     });
     this.setData({ dateDays: days });
   },
@@ -348,8 +351,89 @@ Page({
     wx.navigateTo({ url: '/subpkg/tag-manage/index' });
   },
 
+  openCreateAccountDialog() {
+    this.setData({
+      accountDialogVisible: true,
+      accountForm: { name: '', type: 1, icon: '💼' },
+    });
+  },
+
+  closeAccountDialog() {
+    this.setData({ accountDialogVisible: false });
+  },
+
+  onAccountNameInput(event) {
+    this.setData({ 'accountForm.name': event.detail.value });
+  },
+
+  selectAccountType(event) {
+    const type = Number(event.currentTarget.dataset.type);
+    const found = ACCOUNT_TYPES.find((item) => item.value === type) || ACCOUNT_TYPES[4];
+    this.setData({ 'accountForm.type': found.value, 'accountForm.icon': found.icon });
+  },
+
+  async saveNewAccount() {
+    const name = this.data.accountForm.name.trim();
+    if (!name) {
+      showError('请输入账户名称');
+      return;
+    }
+    const created = await accountsService.createAccount({ ...this.data.accountForm, name });
+    showToast('添加成功', 'success');
+    this.setData({ accountDialogVisible: false });
+    const accounts = await accountsService.getAccounts();
+    const selected = accounts.find((item) => String(item.id) === String(created && created.id))
+      || accounts.find((item) => item.name === name)
+      || this.data.selectedAccount;
+    this.setData({ accounts, selectedAccount: selected });
+  },
+
+  openCreateTagDialog() {
+    this.setData({ tagDialogVisible: true, tagName: '' });
+  },
+
+  closeTagDialog() {
+    this.setData({ tagDialogVisible: false, tagName: '' });
+  },
+
+  onTagNameInput(event) {
+    this.setData({ tagName: String(event.detail.value || '').slice(0, 4) });
+  },
+
+  async saveNewTag() {
+    const name = this.data.tagName.trim();
+    if (!name) {
+      showError('请输入标签名称');
+      return;
+    }
+    const created = await tagsService.createTag(name);
+    showToast('添加成功', 'success');
+    this.setData({ tagDialogVisible: false, tagName: '' });
+    const tags = await tagsService.getTags();
+    const selected = tags.find((item) => String(item.id) === String(created && created.id))
+      || tags.find((item) => item.name === name)
+      || {};
+    this.setData({ tags, selectedTag: selected });
+  },
+
   initRecorder() {
+    this._recorderStarted = false;
+    this._stopBeforeStart = null;
+
+    this.recorder.onStart(() => {
+      const pending = this._stopBeforeStart;
+      this._stopBeforeStart = null;
+      this._recorderStarted = true;
+      if (pending !== null) {
+        this._abortVoiceUpload = true;
+        this.recorder.stop();
+        if (pending.canceled) showToast('已取消', 'none');
+        else showError('录音时间太短，请长按说话');
+      }
+    });
     this.recorder.onStop(async (res) => {
+      this._recorderStarted = false;
+      this._stopBeforeStart = null;
       this.setData({ recording: false, recordingCanceling: false });
       if (this._abortVoiceUpload) {
         this._abortVoiceUpload = false;
@@ -377,6 +461,8 @@ Page({
       }
     });
     this.recorder.onError(() => {
+      this._recorderStarted = false;
+      this._stopBeforeStart = null;
       this.setData({ recording: false, recordingCanceling: false });
       this._abortVoiceUpload = false;
       showError('录音失败，请重试');
@@ -385,9 +471,14 @@ Page({
 
   startRecording() {
     if (this.data.voiceParsing || this.data.recording) return;
+    if (this._startingRecord) return;
+    this._startingRecord = true;
+    this._pendingStopPayload = null;
     wx.getSetting({
       success: (setting) => {
         if (setting.authSetting['scope.record'] === false) {
+          this._startingRecord = false;
+          this._pendingStopPayload = null;
           showError('需授权后才能使用语音记账');
           return;
         }
@@ -398,8 +489,25 @@ Page({
   },
 
   doStartRecording() {
+    // 启动期间用户已松手：丢弃启动，按"过短/取消"逻辑收尾，避免录音界面卡住
+    if (this._pendingStopPayload) {
+      const payload = this._pendingStopPayload;
+      this._pendingStopPayload = null;
+      this._startingRecord = false;
+      const duration = Number((payload && payload.duration) || 0);
+      const canceled = Boolean(payload && payload.canceled);
+      if (canceled) {
+        showToast('已取消', 'none');
+      } else if (duration < MIN_VOICE_DURATION_MS) {
+        showError('录音时间太短，请长按说话');
+      }
+      return;
+    }
     this._abortVoiceUpload = false;
+    this._recorderStarted = false;
+    this._stopBeforeStart = null;
     this.setData({ recording: true, recordingCanceling: false });
+    this._startingRecord = false;
     this.recorder.start({
       duration: 60000,
       sampleRate: 16000,
@@ -417,10 +525,20 @@ Page({
   },
 
   stopRecording(payload) {
+    // 启动流程还未完成（如权限查询异步未回）时，先把 stop 意图缓存，由 doStartRecording 兜底
+    if (this._startingRecord) {
+      this._pendingStopPayload = payload || {};
+      return;
+    }
     if (!this.data.recording) return;
     const duration = Number((payload && payload.duration) || 0);
     const canceled = Boolean(payload && payload.canceled);
     this.setData({ recording: false, recordingCanceling: false });
+    if (!this._recorderStarted) {
+      // recorder.start() 已调用但 onStart 尚未回调（如等待授权弹窗），缓存停止意图
+      this._stopBeforeStart = { duration, canceled };
+      return;
+    }
     if (canceled) {
       this._abortVoiceUpload = true;
       this.recorder.stop();

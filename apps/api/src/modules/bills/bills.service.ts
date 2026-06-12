@@ -83,6 +83,9 @@ export class BillsService {
     const { total, bills } = await this.repo.findAll(userId, {
       month: query.month,
       date: query.date,
+      year: query.year,
+      categoryId: query.categoryId,
+      type: query.type,
       pageNo: query.pageNo ?? 1,
       pageSize: query.pageSize ?? 20,
     });

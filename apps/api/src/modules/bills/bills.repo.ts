@@ -35,11 +35,14 @@ export class BillsRepo {
     options: {
       month?: string;
       date?: string;
+      year?: string;
+      categoryId?: string;
+      type?: number;
       pageNo?: number;
       pageSize?: number;
     },
   ) {
-    const { month, date, pageNo = 1, pageSize = 20 } = options;
+    const { month, date, year, categoryId, type, pageNo = 1, pageSize = 20 } = options;
     const where: Prisma.BillWhereInput = { userId, isDeleted: 0 };
 
     if (date) {
@@ -48,11 +51,18 @@ export class BillsRepo {
       end.setDate(end.getDate() + 1);
       where.billDate = { gte: start, lt: end };
     } else if (month) {
-      const [year, mon] = month.split('-').map(Number);
-      const start = new Date(year, (mon ?? 1) - 1, 1);
-      const end = new Date(year, mon ?? 1, 1);
+      const [y, mon] = month.split('-').map(Number);
+      const start = new Date(Date.UTC(y, (mon ?? 1) - 1, 1));
+      const end = new Date(Date.UTC(y, mon ?? 1, 1));
+      where.billDate = { gte: start, lt: end };
+    } else if (year) {
+      const y = Number(year);
+      const start = new Date(Date.UTC(y, 0, 1));
+      const end = new Date(Date.UTC(y + 1, 0, 1));
       where.billDate = { gte: start, lt: end };
     }
+    if (categoryId) where.categoryId = BigInt(categoryId);
+    if (type) where.type = type;
 
     const skip = (pageNo - 1) * pageSize;
 

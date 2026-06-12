@@ -1,0 +1,220 @@
+.about-page {
+  min-height: 100vh;
+  padding: 0;
+  background: var(--color-bg-page);
+  color: var(--color-text-main);
+}
+
+.about-nav {
+  height: 184rpx;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 32rpx 22rpx;
+}
+
+.nav-back,
+.nav-spacer {
+  width: 44rpx;
+  height: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-main);
+  font-size: 42rpx;
+  line-height: 44rpx;
+}
+
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.about-scroll {
+  height: calc(100vh - 184rpx);
+  padding: 0 32rpx 48rpx;
+}
+
+.brand-card {
+  min-height: 360rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48rpx 40rpx;
+  border-radius: 40rpx;
+  background: linear-gradient(180deg, #4db87a 0%, #5dbe88 100%);
+  color: #ffffff;
+  box-shadow: 0 16rpx 56rpx rgba(43, 74, 58, 0.16);
+}
+
+.brand-mark {
+  width: 112rpx;
+  height: 112rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 56rpx;
+  background: #ffffff;
+  color: var(--color-brand);
+  font-size: 56rpx;
+  font-weight: 800;
+}
+
+.brand-name {
+  margin-top: 24rpx;
+  font-size: 44rpx;
+  font-weight: 800;
+}
+
+.brand-slogan {
+  margin-top: 14rpx;
+  text-align: center;
+  font-size: 26rpx;
+  line-height: 1.6;
+  opacity: 0.92;
+}
+
+.version-pill {
+  margin-top: 28rpx;
+  padding: 10rpx 24rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.section-card,
+.signature-card {
+  margin-top: 24rpx;
+  padding: 32rpx;
+  border-radius: 32rpx;
+  background: #ffffff;
+  box-shadow: 0 8rpx 40rpx rgba(43, 74, 58, 0.09);
+}
+
+.section-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  margin-bottom: 24rpx;
+}
+
+.section-kicker {
+  color: var(--color-brand);
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.section-title,
+.signature-title {
+  color: var(--color-text-main);
+  font-size: 30rpx;
+  font-weight: 800;
+}
+
+.section-text,
+.signature-text {
+  color: var(--color-text-sub);
+  font-size: 26rpx;
+  line-height: 1.65;
+}
+
+.feature-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.feature-chip {
+  padding: 12rpx 20rpx;
+  border-radius: 999rpx;
+  background: var(--color-selected);
+  color: var(--color-brand);
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.principle-item {
+  display: flex;
+  gap: 20rpx;
+  padding: 22rpx 0;
+  border-top: 1rpx solid var(--color-divider);
+}
+
+.principle-item:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.principle-dot {
+  width: 52rpx;
+  height: 52rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 26rpx;
+  background: var(--color-selected);
+  color: var(--color-brand);
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.principle-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.principle-title {
+  color: var(--color-text-main);
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.principle-desc {
+  color: var(--color-text-sub);
+  font-size: 24rpx;
+  line-height: 1.55;
+}
+
+.privacy-card {
+  border: 1rpx solid var(--color-divider);
+}
+
+.tip-row {
+  display: flex;
+  gap: 12rpx;
+  margin-top: 18rpx;
+}
+
+.tip-row:first-of-type {
+  margin-top: 0;
+}
+
+.tip-bullet {
+  color: var(--color-brand);
+  font-size: 28rpx;
+  line-height: 1.5;
+}
+
+.tip-text {
+  flex: 1;
+  color: var(--color-text-sub);
+  font-size: 25rpx;
+  line-height: 1.55;
+}
+
+.signature-card {
+  margin-bottom: 48rpx;
+  background: #f7faf8;
+  border: 1rpx solid var(--color-divider);
+}
+
+.signature-text {
+  display: block;
+  margin-top: 16rpx;
+}

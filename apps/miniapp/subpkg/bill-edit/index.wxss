@@ -1,0 +1,10 @@
+@import "../../pages/bill/index.wxss";
+
+.bill-edit-page {
+  padding-bottom: calc(468rpx + env(safe-area-inset-bottom));
+}
+
+.bill-edit-page .bill-bottom {
+  bottom: 0;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+}

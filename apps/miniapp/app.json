@@ -18,7 +18,27 @@
       "pages": ["index"]
     },
     {
+      "root": "subpkg/about",
+      "pages": ["index"]
+    },
+    {
+      "root": "subpkg/feedback",
+      "pages": ["index"]
+    },
+    {
+      "root": "subpkg/bill-edit",
+      "pages": ["index"]
+    },
+    {
       "root": "subpkg/bill-detail",
+      "pages": ["index"]
+    },
+    {
+      "root": "subpkg/import",
+      "pages": ["index"]
+    },
+    {
+      "root": "subpkg/stats",
       "pages": ["index"]
     }
   ],

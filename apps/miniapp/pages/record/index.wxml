@@ -32,8 +32,8 @@
         bindtap="selectDate"
       >
         <text class="day-num">{{item.day}}</text>
-        <text wx:if="{{item.expense}}" class="day-expense">-{{item.expense}}</text>
-        <text wx:if="{{item.income}}" class="day-income">+{{item.income}}</text>
+        <text wx:if="{{item.expense}}" class="day-expense">{{item.expense}}</text>
+        <text wx:if="{{item.income}}" class="day-income">{{item.income}}</text>
       </view>
     </view>
   </view>

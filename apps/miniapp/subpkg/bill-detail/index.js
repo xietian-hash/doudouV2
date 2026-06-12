@@ -22,8 +22,7 @@ Page({
   },
 
   edit() {
-    wx.setStorageSync('editBillDraft', this.data.bill);
-    wx.switchTab({ url: '/pages/bill/index' });
+    wx.navigateTo({ url: `/subpkg/bill-edit/index?id=${this.data.id}` });
   },
 
   remove() {

@@ -25,6 +25,20 @@ export class GetBillsQueryDto {
   date?: string; // 格式: YYYY-MM-DD
 
   @IsOptional()
+  @IsString()
+  year?: string; // 格式: YYYY（与 month/date 互斥使用，用于按整年筛选）
+
+  @IsOptional()
+  @IsString()
+  categoryId?: string; // 精确匹配单个分类（叶子）
+
+  @IsOptional()
+  @IsInt()
+  @IsIn([1, 2])
+  @Type(() => Number)
+  type?: number; // 1=支出 2=收入
+
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Type(() => Number)

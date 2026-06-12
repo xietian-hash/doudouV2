@@ -8,12 +8,11 @@
     <view class="amount-main">
       <text class="amount-unit">¥</text>
       <text class="amount-value">{{amount === '0' ? '0.00' : amount}}</text>
-      <text class="amount-cursor"></text>
     </view>
     <view class="selected-cat" bindtap="openCategorySheet">
       <text class="selected-cat-icon">{{selectedCategory.icon || '📝'}}</text>
       <text class="selected-cat-name">{{selectedCategory.name || '选择分类'}}</text>
-      <text class="chev">⌄</text>
+      <text class="chev">▾</text>
     </view>
   </view>
 
@@ -37,6 +36,19 @@
   </scroll-view>
 
   <view wx:if="{{!recording}}" class="bill-bottom">
+    <view class="bill-remark-row">
+      <text class="bill-remark-icon">✎</text>
+      <input
+        class="bill-remark-input"
+        type="text"
+        value="{{remark}}"
+        placeholder="写点备注..."
+        placeholder-class="bill-remark-placeholder"
+        maxlength="100"
+        bindinput="onRemarkInput"
+      />
+    </view>
+
     <view class="meta-row">
       <view class="meta-pill" bindtap="openAccountSheet">
         <text>▣</text>
@@ -47,12 +59,8 @@
         <text class="meta-text">{{selectedTag.name || '标签'}}</text>
       </view>
       <view class="meta-pill" bindtap="openDateSheet">
-        <text>□</text>
+        <view class="meta-icon meta-icon--date"></view>
         <text class="meta-text">{{displayDate}}</text>
-      </view>
-      <view class="meta-pill" bindtap="openRemarkModal">
-        <text>✎</text>
-        <text class="meta-text">{{remark || '备注'}}</text>
       </view>
     </view>
 
@@ -121,7 +129,7 @@
       </scroll-view>
       <view class="sheet-footer">
         <view class="secondary-btn" bindtap="closeSheet">取消</view>
-        <view class="primary-btn" bindtap="openAccountManage">管理账户</view>
+        <view class="primary-btn" bindtap="openCreateAccountDialog">添加账户</view>
       </view>
     </view>
   </view>
@@ -133,12 +141,71 @@
         <text class="sheet-close" bindtap="closeSheet">×</text>
       </view>
       <view class="tag-grid">
-        <view class="tag-item {{!selectedTag.id ? 'tag-item--active' : ''}}" bindtap="clearTag">不选择标签</view>
-        <view wx:for="{{tags}}" wx:key="id" class="tag-item {{selectedTag.id === item.id ? 'tag-item--active' : ''}}" data-id="{{item.id}}" bindtap="selectTag">{{item.name}}</view>
+        <view class="tag-cell {{!selectedTag.id ? 'tag-cell--active' : ''}}" bindtap="clearTag">
+          <text class="tag-cell-icon tag-cell-icon--none">⊘</text>
+          <text class="tag-cell-name">不选择</text>
+        </view>
+        <view wx:for="{{tags}}" wx:key="id" class="tag-cell {{selectedTag.id === item.id ? 'tag-cell--active' : ''}}" data-id="{{item.id}}" bindtap="selectTag">
+          <text class="tag-cell-icon">#</text>
+          <text class="tag-cell-name">{{item.name}}</text>
+        </view>
       </view>
       <view class="sheet-footer">
         <view class="secondary-btn" bindtap="closeSheet">取消</view>
-        <view class="primary-btn" bindtap="openTagManage">管理标签</view>
+        <view class="primary-btn" bindtap="openCreateTagDialog">添加标签</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{accountDialogVisible}}" class="form-dialog-mask" catchtap="closeAccountDialog">
+    <view class="form-dialog" catchtap="noop">
+      <view class="form-dialog-head">
+        <text class="form-dialog-title">添加账户</text>
+        <text class="form-dialog-close" bindtap="closeAccountDialog">×</text>
+      </view>
+      <view class="form-dialog-body">
+        <view class="form-field">
+          <text class="form-label">账户类型</text>
+          <view class="type-choice">
+            <view
+              wx:for="{{accountTypes}}"
+              wx:key="value"
+              class="type-choice-item {{accountForm.type === item.value ? 'type-choice-item--active' : ''}}"
+              data-type="{{item.value}}"
+              bindtap="selectAccountType"
+            >
+              <text class="type-choice-icon">{{item.icon}}</text>
+              <text>{{item.label}}</text>
+            </view>
+          </view>
+        </view>
+        <view class="form-field">
+          <text class="form-label">账户名称</text>
+          <input class="form-input" value="{{accountForm.name}}" bindinput="onAccountNameInput" placeholder="请输入账户名称" maxlength="10" />
+        </view>
+      </view>
+      <view class="form-dialog-actions">
+        <view class="form-dialog-btn form-dialog-btn--secondary" bindtap="closeAccountDialog">取消</view>
+        <view class="form-dialog-btn form-dialog-btn--primary" bindtap="saveNewAccount">确认</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{tagDialogVisible}}" class="form-dialog-mask" catchtap="closeTagDialog">
+    <view class="form-dialog" catchtap="noop">
+      <view class="form-dialog-head">
+        <text class="form-dialog-title">添加标签</text>
+        <text class="form-dialog-close" bindtap="closeTagDialog">×</text>
+      </view>
+      <view class="form-dialog-body">
+        <view class="form-field">
+          <text class="form-label">标签名称</text>
+          <input class="form-input" value="{{tagName}}" bindinput="onTagNameInput" placeholder="请输入标签名称" maxlength="4" />
+        </view>
+      </view>
+      <view class="form-dialog-actions">
+        <view class="form-dialog-btn form-dialog-btn--secondary" bindtap="closeTagDialog">取消</view>
+        <view class="form-dialog-btn form-dialog-btn--primary" bindtap="saveNewTag">确认</view>
       </view>
     </view>
   </view>
@@ -158,7 +225,7 @@
         <text wx:for="{{weekdays}}" wx:key="*this">{{item}}</text>
       </view>
       <view class="date-grid">
-        <view wx:for="{{dateDays}}" wx:key="key" class="date-day {{item.selected ? 'date-day--selected' : ''}}" data-date="{{item.date}}" bindtap="selectDate">
+        <view wx:for="{{dateDays}}" wx:key="key" class="date-day {{item.today ? 'date-day--today' : ''}} {{item.selected ? 'date-day--selected' : ''}}" data-date="{{item.date}}" bindtap="selectDate">
           {{item.day}}
         </view>
       </view>
