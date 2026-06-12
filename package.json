@@ -1,6 +1,7 @@
 {
   "name": "doudouyouqian",
   "private": true,
+  "packageManager": "pnpm@11.0.9",
   "scripts": {
     "dev:api": "pnpm --filter @ddyq/api dev",
     "dev:miniapp": "pnpm --filter @ddyq/miniapp dev:weapp",
