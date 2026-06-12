@@ -14,6 +14,7 @@ import { BillsModule } from './modules/bills/bills.module';
 import { VoiceModule } from './modules/voice/voice.module';
 import { StatisticsModule } from './modules/statistics/statistics.module';
 import { FeedbackModule } from './modules/feedback/feedback.module';
+import { ImportModule } from './modules/import/import.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { FeedbackModule } from './modules/feedback/feedback.module';
     VoiceModule,
     StatisticsModule,
     FeedbackModule,
+    ImportModule,
   ],
   providers: [
     {

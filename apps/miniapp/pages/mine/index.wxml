@@ -46,20 +46,20 @@
 
     <view class="setting-section">
       <view class="section-title">数据工具</view>
-      <view class="setting-item">
+      <view class="setting-item" bindtap="goStats">
         <view class="setting-icon setting-icon--muted">统</view>
         <view class="setting-main">
           <text class="setting-title">数据统计</text>
-          <text class="setting-desc">查看收支趋势</text>
+          <text class="setting-desc">分类占比、趋势、TOP 单笔</text>
         </view>
         <text class="setting-arrow">›</text>
       </view>
       <view class="section-divider"></view>
-      <view class="setting-item" bindtap="openImportDialog">
+      <view class="setting-item" bindtap="goImport">
         <view class="setting-icon setting-icon--muted">入</view>
         <view class="setting-main">
           <text class="setting-title">数据导入</text>
-          <text class="setting-desc">通过网页上传 Excel 账单</text>
+          <text class="setting-desc">用 Excel 模板批量导入历史账单</text>
         </view>
         <text class="setting-arrow">›</text>
       </view>
@@ -96,20 +96,4 @@
     </view>
   </scroll-view>
 
-  <view wx:if="{{importDialogVisible}}" class="import-mask" catchtap="closeImportDialog">
-    <view class="import-dialog" catchtap="noop">
-      <view class="import-head">
-        <text class="import-title">数据导入</text>
-        <text class="import-close" bindtap="closeImportDialog">×</text>
-      </view>
-      <text class="import-desc">在电脑浏览器打开以下地址，上传 Excel 文件即可导入账单数据。</text>
-      <view class="import-url-box">
-        <text class="import-url" selectable="true">{{importUrl}}</text>
-      </view>
-      <view class="import-actions">
-        <view class="import-btn import-btn--secondary" bindtap="closeImportDialog">取消</view>
-        <view class="import-btn import-btn--primary" bindtap="copyImportUrl">复制地址</view>
-      </view>
-    </view>
-  </view>
 </view>

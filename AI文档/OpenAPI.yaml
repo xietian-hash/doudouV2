@@ -30,6 +30,8 @@ tags:
     description: 统计分析
   - name: Feedback
     description: 意见反馈
+  - name: Import
+    description: 数据导入
 
 security:
   - bearerAuth: []
@@ -447,6 +449,26 @@ paths:
           schema:
             type: string
             format: date
+        - name: year
+          in: query
+          required: false
+          description: 年份，格式 YYYY。与 month/date 互斥使用
+          schema:
+            type: string
+            pattern: "^\\d{4}$"
+        - name: categoryId
+          in: query
+          required: false
+          description: 精确匹配指定分类（叶子）下的账单
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: false
+          description: 1=支出 2=收入
+          schema:
+            type: integer
+            enum: [1, 2]
         - $ref: "#/components/parameters/PageNo"
         - $ref: "#/components/parameters/PageSize"
       responses:
@@ -651,7 +673,9 @@ paths:
   /statistics/category-expense:
     get:
       tags: [Statistics]
-      summary: 查询支出分类占比
+      deprecated: true
+      summary: (已废弃) 查询当月支出分类占比
+      description: 已被 /statistics/overview 取代。保留供旧客户端使用。
       x-permissions:
         auth: bearer
         interface: statistics:category-expense
@@ -678,6 +702,117 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/CategoryExpenseStat"
+
+  /statistics/overview:
+    get:
+      tags: [Statistics]
+      summary: 统计总览（摘要 + 分类聚合 + 关键洞察）
+      description: |
+        支持 3 个时间维度（月/年/全部）、2 个分类层级（一级/二级）、2 个收支类型（支出/收入）。
+        period=all 时不返回 dailyAvg / prevTotal / changePercent。
+      x-permissions:
+        auth: bearer
+        interface: statistics:overview
+        dataScope: current-user
+      parameters:
+        - { name: period, in: query, required: true, schema: { type: string, enum: [month, year, all] } }
+        - { name: month, in: query, required: false, description: period=month 时必填，YYYY-MM, schema: { type: string, pattern: "^\\d{4}-(0[1-9]|1[0-2])$" } }
+        - { name: year, in: query, required: false, description: period=year 时必填，YYYY, schema: { type: string, pattern: "^\\d{4}$" } }
+        - { name: level, in: query, required: true, description: 1=一级分类 2=二级分类, schema: { type: integer, enum: [1, 2] } }
+        - { name: type, in: query, required: true, description: 1=支出 2=收入, schema: { type: integer, enum: [1, 2] } }
+      responses:
+        "200":
+          description: 统计总览
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/StatsOverviewResult"
+
+  /statistics/category-trend:
+    get:
+      tags: [Statistics]
+      summary: 各分类近 6 个月金额趋势
+      description: 固定回溯到当月起的 6 个月，用于排行榜每行的迷你柱状图。
+      x-permissions:
+        auth: bearer
+        interface: statistics:category-trend
+        dataScope: current-user
+      parameters:
+        - { name: level, in: query, required: true, schema: { type: integer, enum: [1, 2] } }
+        - { name: type, in: query, required: true, schema: { type: integer, enum: [1, 2] } }
+      responses:
+        "200":
+          description: 分类趋势
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/StatsCategoryTrendResult"
+
+  /statistics/daily-series:
+    get:
+      tags: [Statistics]
+      summary: 按天/按月的金额序列
+      description: |
+        period=month 返回当月每天的金额（空天补 0）；period=year 仅返回有账单的日；period=all 自动按月聚合。
+        响应中 granularity 字段表明粒度。
+      x-permissions:
+        auth: bearer
+        interface: statistics:daily-series
+        dataScope: current-user
+      parameters:
+        - { name: period, in: query, required: true, schema: { type: string, enum: [month, year, all] } }
+        - { name: month, in: query, required: false, schema: { type: string, pattern: "^\\d{4}-(0[1-9]|1[0-2])$" } }
+        - { name: year, in: query, required: false, schema: { type: string, pattern: "^\\d{4}$" } }
+        - { name: type, in: query, required: true, schema: { type: integer, enum: [1, 2] } }
+      responses:
+        "200":
+          description: 金额序列
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/StatsDailySeriesResult"
+
+  /statistics/top-bills:
+    get:
+      tags: [Statistics]
+      summary: 期间内金额最大的 N 笔账单
+      x-permissions:
+        auth: bearer
+        interface: statistics:top-bills
+        dataScope: current-user
+      parameters:
+        - { name: period, in: query, required: true, schema: { type: string, enum: [month, year, all] } }
+        - { name: month, in: query, required: false, schema: { type: string, pattern: "^\\d{4}-(0[1-9]|1[0-2])$" } }
+        - { name: year, in: query, required: false, schema: { type: string, pattern: "^\\d{4}$" } }
+        - { name: type, in: query, required: true, schema: { type: integer, enum: [1, 2] } }
+        - { name: limit, in: query, required: false, schema: { type: integer, minimum: 1, maximum: 20, default: 5 } }
+      responses:
+        "200":
+          description: TOP 单笔
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/StatsTopBillsResult"
 
   /feedback/images:
     post:
@@ -740,6 +875,64 @@ paths:
                     properties:
                       data:
                         $ref: "#/components/schemas/FeedbackCreateResult"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+
+  /import/template:
+    get:
+      tags: [Import]
+      summary: 下载导入模板
+      description: |
+        生成当前用户的 Excel 导入模板。
+        模板包含 3 个 sheet：账单数据（带 3 行示例）、合法值清单（用户的二级分类/账户/标签）、使用说明。
+      x-permissions:
+        auth: bearer
+        interface: import:template
+        dataScope: current-user
+      responses:
+        "200":
+          description: 返回 Excel 文件流
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+
+  /import/bills:
+    post:
+      tags: [Import]
+      summary: 上传账单 Excel 并批量入账
+      description: |
+        上传按模板填写的 Excel 文件。后端逐行校验，任一行错误整批拒绝并生成错误清单 Excel。
+        校验通过后按「日期+金额+分类+账户+备注」自动跳过重复账单，剩余数据在事务中批量入账。
+      x-permissions:
+        auth: bearer
+        interface: import:bills
+        dataScope: current-user
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: .xlsx 或 .xls 文件，单次最多 10000 行
+      responses:
+        "200":
+          description: 解析与入账结果
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/ImportBillsResult"
         "400":
           $ref: "#/components/responses/ValidationError"
 
@@ -1282,6 +1475,156 @@ components:
           type: number
           format: float
 
+    StatsSummary:
+      type: object
+      required: [total, count]
+      properties:
+        total:
+          type: string
+          format: decimal
+          description: 当期类型总金额
+        count:
+          type: integer
+          description: 当期账单笔数
+        dailyAvg:
+          type: string
+          format: decimal
+          description: 当期日均金额；period=all 时不返回
+        prevTotal:
+          type: string
+          format: decimal
+          description: 上一周期总金额；period=all 时不返回
+        changePercent:
+          type: number
+          format: float
+          nullable: true
+          description: 同环比百分比（正负），上一周期为 0 时为 null
+
+    StatsCategoryItem:
+      type: object
+      required: [categoryId, categoryName, amount, percent, count]
+      properties:
+        categoryId:
+          type: string
+        categoryName:
+          type: string
+        categoryIcon:
+          type: string
+          nullable: true
+        amount:
+          type: string
+          format: decimal
+        percent:
+          type: number
+          format: float
+        count:
+          type: integer
+        prevAmount:
+          type: string
+          format: decimal
+        changePercent:
+          type: number
+          format: float
+          nullable: true
+
+    StatsOverviewResult:
+      type: object
+      required: [summary, categories, insights]
+      properties:
+        summary:
+          $ref: "#/components/schemas/StatsSummary"
+        categories:
+          type: array
+          description: 按金额降序，前端可截取前 N 项后将剩余合并为「其他」
+          items:
+            $ref: "#/components/schemas/StatsCategoryItem"
+        insights:
+          type: array
+          description: 后端基于聚合结果生成的关键洞察文案（一般 1-2 条）
+          items:
+            type: string
+
+    StatsCategoryTrendResult:
+      type: object
+      required: [months, data]
+      properties:
+        months:
+          type: array
+          description: 6 个 YYYY-MM
+          items:
+            type: string
+        data:
+          type: array
+          items:
+            type: object
+            required: [categoryId, categoryName, amounts]
+            properties:
+              categoryId:
+                type: string
+              categoryName:
+                type: string
+              categoryIcon:
+                type: string
+                nullable: true
+              amounts:
+                type: array
+                description: 长度 6，对应 months
+                items:
+                  type: string
+                  format: decimal
+
+    StatsDailySeriesResult:
+      type: object
+      required: [granularity, points]
+      properties:
+        granularity:
+          type: string
+          enum: [day, month]
+        points:
+          type: array
+          items:
+            type: object
+            required: [date, amount]
+            properties:
+              date:
+                type: string
+                description: granularity=day 时为 YYYY-MM-DD；granularity=month 时为 YYYY-MM
+              amount:
+                type: string
+                format: decimal
+
+    StatsTopBillsResult:
+      type: object
+      required: [bills]
+      properties:
+        bills:
+          type: array
+          items:
+            type: object
+            required: [id, amount, billDate, type, categoryName, accountName]
+            properties:
+              id:
+                type: string
+              amount:
+                type: string
+                format: decimal
+              billDate:
+                type: string
+                description: YYYY-MM-DD
+              type:
+                type: integer
+                enum: [1, 2]
+              categoryName:
+                type: string
+              categoryIcon:
+                type: string
+                nullable: true
+              accountName:
+                type: string
+              remark:
+                type: string
+                nullable: true
+
     FeedbackImageUploadResult:
       type: object
       required: [url]
@@ -1315,3 +1658,29 @@ components:
         createdAt:
           type: string
           format: date-time
+
+    ImportBillsResult:
+      type: object
+      required: [success, totalRows, successCount, skipDuplicateCount, errorCount, message]
+      properties:
+        success:
+          type: boolean
+          description: 是否成功完成导入（即便 successCount=0 但全部为重复跳过也视为 success=true）
+        totalRows:
+          type: integer
+          description: Excel 中非空数据行总数
+        successCount:
+          type: integer
+          description: 成功入账的条数
+        skipDuplicateCount:
+          type: integer
+          description: 因重复而自动跳过的条数
+        errorCount:
+          type: integer
+          description: 校验失败的条数（>0 时整批未入账）
+        errorFileUrl:
+          type: string
+          description: 错误清单 Excel 的下载地址；仅在 errorCount>0 时返回，24 小时后失效
+        message:
+          type: string
+          description: 提示文案

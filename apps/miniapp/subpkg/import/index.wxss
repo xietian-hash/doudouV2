@@ -1,0 +1,245 @@
+@import "../../styles/manage.wxss";
+
+.import-page {
+  min-height: 100vh;
+  padding: 0 0 40rpx;
+  background: var(--color-bg-page);
+}
+
+.import-header {
+  padding: 40rpx 32rpx 24rpx;
+}
+
+.header-title {
+  font-size: 40rpx;
+  font-weight: 800;
+  color: var(--color-text-main);
+}
+
+.header-sub {
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  color: var(--color-text-sub);
+}
+
+.step-card,
+.rules-card {
+  margin: 16rpx 24rpx;
+  padding: 24rpx 28rpx;
+  border-radius: 24rpx;
+  background: #ffffff;
+  box-shadow: 0 8rpx 32rpx rgba(43, 74, 58, 0.06);
+}
+
+.step-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  padding: 14rpx 0;
+}
+
+.step-row + .step-row {
+  border-top: 1rpx solid var(--color-divider);
+}
+
+.step-num {
+  flex-shrink: 0;
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 999rpx;
+  background: var(--color-selected);
+  color: var(--color-brand-deep);
+  font-size: 24rpx;
+  font-weight: 700;
+  text-align: center;
+  line-height: 44rpx;
+}
+
+.step-info {
+  flex: 1;
+}
+
+.step-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.step-desc {
+  margin-top: 4rpx;
+  font-size: 24rpx;
+  color: var(--color-text-sub);
+  line-height: 1.5;
+}
+
+.rules-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin-bottom: 12rpx;
+}
+
+.rules-item {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: var(--color-text-sub);
+  line-height: 1.6;
+}
+
+.action-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+  background: #ffffff;
+  border-top: 1rpx solid var(--color-divider);
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  height: 88rpx;
+  border-radius: 24rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.action-btn--secondary {
+  background: var(--color-selected);
+  color: var(--color-brand-deep);
+}
+
+.action-btn--primary {
+  background: var(--color-brand);
+  color: #ffffff;
+}
+
+.action-btn--disabled {
+  opacity: 0.5;
+}
+
+.action-btn-icon {
+  font-size: 28rpx;
+}
+
+.loading-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(43, 74, 58, 0.4);
+}
+
+.loading-card {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 36rpx 48rpx;
+  border-radius: 24rpx;
+  background: #ffffff;
+  box-shadow: 0 12rpx 32rpx rgba(43, 74, 58, 0.18);
+}
+
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.loading-dot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 999rpx;
+  background: var(--color-brand);
+  animation: import-bounce 1.1s ease-in-out infinite;
+}
+
+.loading-dot--1 {
+  animation-delay: 0s;
+}
+
+.loading-dot--2 {
+  animation-delay: 0.18s;
+}
+
+.loading-dot--3 {
+  animation-delay: 0.36s;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+@keyframes import-bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.result-dialog {
+  width: 600rpx;
+  padding: 48rpx 36rpx 36rpx;
+  border-radius: 32rpx;
+  background: #ffffff;
+  box-shadow: 0 16rpx 64rpx rgba(43, 74, 58, 0.16);
+}
+
+.result-icon {
+  width: 96rpx;
+  height: 96rpx;
+  margin: 0 auto 20rpx;
+  border-radius: 999rpx;
+  text-align: center;
+  line-height: 96rpx;
+  color: #ffffff;
+  font-size: 56rpx;
+  font-weight: 700;
+}
+
+.result-icon--success {
+  background: var(--color-brand);
+}
+
+.result-icon--error {
+  background: var(--color-error, #ff4444);
+}
+
+.result-title {
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.result-text {
+  margin-top: 16rpx;
+  text-align: center;
+  font-size: 26rpx;
+  color: var(--color-text-sub);
+  line-height: 1.6;
+}
+
+.result-error-tip {
+  margin-top: 16rpx;
+  padding: 18rpx 24rpx;
+  border-radius: 16rpx;
+  background: #fff8f5;
+  color: #b45f3b;
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+
+.result-actions {
+  display: grid;
+  gap: 16rpx;
+  margin-top: 32rpx;
+}

@@ -1,0 +1,155 @@
+<view class="page">
+  <!-- 顶部工具栏：三层 segmented -->
+  <view class="toolbar">
+    <!-- 时间维度 -->
+    <view class="segmented">
+      <view class="seg-item {{period === 'month' ? 'seg-item--active' : ''}}" bindtap="onPeriodChange" data-value="month">月</view>
+      <view class="seg-item {{period === 'year' ? 'seg-item--active' : ''}}" bindtap="onPeriodChange" data-value="year">年</view>
+      <view class="seg-item {{period === 'all' ? 'seg-item--active' : ''}}" bindtap="onPeriodChange" data-value="all">全部</view>
+    </view>
+
+    <!-- 翻页 -->
+    <view wx:if="{{period !== 'all'}}" class="period-nav">
+      <view class="period-arrow" bindtap="onPrevPeriod">‹</view>
+      <view class="period-text">{{periodLabel}}</view>
+      <view class="period-arrow {{canNext ? '' : 'period-arrow--disabled'}}" bindtap="onNextPeriod">›</view>
+    </view>
+
+    <!-- 分类层级 -->
+    <view class="segmented">
+      <view class="seg-item {{level === 1 ? 'seg-item--active' : ''}}" bindtap="onLevelChange" data-value="1">一级分类</view>
+      <view class="seg-item {{level === 2 ? 'seg-item--active' : ''}}" bindtap="onLevelChange" data-value="2">二级分类</view>
+    </view>
+
+    <!-- 收支切换 -->
+    <view class="segmented">
+      <view class="seg-item {{type === 1 ? 'seg-item--active' : ''}}" bindtap="onTypeChange" data-value="1">支出</view>
+      <view class="seg-item {{type === 2 ? 'seg-item--active' : ''}}" bindtap="onTypeChange" data-value="2">收入</view>
+    </view>
+  </view>
+
+  <scroll-view class="content-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+  <view wx:if="{{loading}}" class="loading">加载中…</view>
+
+  <!-- 空态 -->
+  <view wx:elif="{{isEmpty}}" class="empty">
+    <view class="empty-icon">📊</view>
+    <view class="empty-text">{{emptyHint}}</view>
+    <view class="empty-btn" bindtap="goRecord">去记一笔</view>
+  </view>
+
+  <block wx:else>
+    <!-- 摘要卡 -->
+    <view class="card">
+      <view class="summary-amount-label">{{typeLabel}}总额（{{periodLabelShort}}）</view>
+      <view class="summary-amount">¥ {{summary.total}}</view>
+      <view class="summary-meta">
+        <text>{{summary.count}} 笔</text>
+        <text wx:if="{{summary.dailyAvg}}">日均 ¥{{summary.dailyAvg}}</text>
+        <text wx:if="{{summary.changeText}}" class="summary-change--{{summary.changeDir}}">
+          比{{prevLabel}}{{summary.changeText}}
+        </text>
+      </view>
+    </view>
+
+    <!-- 环形图 -->
+    <view class="card">
+      <view class="card-title">分类占比</view>
+      <view class="ring-chart">
+        <image wx:if="{{ringImageSrc}}" class="ring-image" src="{{ringImageSrc}}" mode="aspectFit"></image>
+        <canvas wx:if="{{!ringImageSrc}}" type="2d" id="ring-canvas" class="ring-canvas"></canvas>
+      </view>
+      <view class="ring-legend">
+        <view wx:for="{{ringLegend}}" wx:key="categoryId" class="legend-item">
+          <view class="legend-dot" style="background: {{item.color}}"></view>
+          <text>{{item.name}} {{item.percent}}%</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 洞察卡 -->
+    <view wx:if="{{insights.length > 0}}" class="card">
+      <view class="card-title">关键洞察</view>
+      <view wx:for="{{insights}}" wx:key="*this" class="insight-row">💡 {{item}}</view>
+    </view>
+
+    <!-- 排行榜 -->
+    <view class="card">
+      <view class="card-title">分类排行</view>
+      <view wx:for="{{rankItems}}" wx:key="categoryId" class="rank-row" bindtap="onRankTap" data-id="{{item.categoryId}}" data-name="{{item.categoryName}}">
+        <view class="rank-icon">{{item.categoryIcon || '📊'}}</view>
+        <view class="rank-main">
+          <view class="rank-line1">
+            <text class="rank-name">{{item.categoryName}}</text>
+            <text class="rank-amount">¥ {{item.amount}}</text>
+          </view>
+          <view class="rank-line2">
+            <view class="rank-bar-wrap">
+              <view class="rank-bar" style="width: {{item.percent}}%; background: {{item.color}}"></view>
+            </view>
+            <text>{{item.percent}}%</text>
+            <text wx:if="{{item.changeText}}" class="rank-change--{{item.changeDir}}">{{item.changeText}}</text>
+          </view>
+        </view>
+        <view class="mini-bars">
+          <view wx:for="{{item.miniBars}}" wx:for-item="bar" wx:key="index"
+                class="mini-bar {{bar.isLast ? 'mini-bar--last' : ''}}"
+                style="height: {{bar.height}}%"></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- TOP 单笔 -->
+    <view wx:if="{{topBills.length > 0}}" class="card">
+      <view class="card-title">{{periodLabelShort}}最大 {{topBills.length}} 笔{{typeLabel}}</view>
+      <view wx:for="{{topBills}}" wx:key="id" class="top-row">
+        <view class="top-icon">{{item.categoryIcon || '💰'}}</view>
+        <view class="top-main">
+          <view class="top-line1">{{item.categoryName}}{{item.remark ? ' · ' + item.remark : ''}}</view>
+          <view class="top-line2">{{item.billDate}} · {{item.accountName}}</view>
+        </view>
+        <text class="top-amount">¥ {{item.amount}}</text>
+      </view>
+    </view>
+
+    <!-- 日均折线 -->
+    <view wx:if="{{showLine}}" class="card">
+      <view class="card-title">{{lineTitle}}</view>
+      <view class="chart-frame chart-frame--line">
+        <image wx:if="{{lineImageSrc}}" class="chart-image chart-image--line" src="{{lineImageSrc}}" mode="aspectFit"></image>
+        <canvas wx:if="{{!lineImageSrc}}" type="2d" id="line-canvas" class="chart-canvas"></canvas>
+      </view>
+    </view>
+
+    <!-- 月度热力 -->
+    <view wx:if="{{showHeatmap}}" class="card">
+      <view class="card-title">本月每日{{typeLabel}}</view>
+      <view class="chart-frame chart-frame--heatmap">
+        <image wx:if="{{heatmapImageSrc}}" class="chart-image chart-image--heatmap" src="{{heatmapImageSrc}}" mode="aspectFit"></image>
+        <canvas wx:if="{{!heatmapImageSrc}}" type="2d" id="heatmap-canvas" class="heatmap-canvas"></canvas>
+      </view>
+    </view>
+  </block>
+  </scroll-view>
+
+  <!-- 分类详情弹层 -->
+  <view wx:if="{{sheetVisible}}">
+    <view class="sheet-mask" bindtap="closeSheet"></view>
+    <view class="sheet">
+      <view class="sheet-title">{{sheetCategoryName}}</view>
+      <view class="sheet-sub">{{periodLabelShort}} · 共 {{sheetBills.length}} 笔</view>
+      <scroll-view class="sheet-list" scroll-y enhanced show-scrollbar="{{false}}">
+        <view wx:if="{{sheetLoading}}" class="loading">加载中…</view>
+        <view wx:elif="{{sheetBills.length === 0}}" class="loading">暂无明细</view>
+        <view wx:for="{{sheetBills}}" wx:key="id" class="top-row" bindtap="openBillDetail" data-id="{{item.id}}">
+          <view class="top-icon">{{item.categoryIcon || '💰'}}</view>
+          <view class="top-main">
+            <view class="top-line1">{{item.subcategoryName || item.categoryName}}{{item.remark ? ' · ' + item.remark : ''}}</view>
+            <view class="top-line2">{{item.billDate}} · {{item.accountName}}</view>
+          </view>
+          <text class="top-amount">¥ {{item.amount}}</text>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+</view>

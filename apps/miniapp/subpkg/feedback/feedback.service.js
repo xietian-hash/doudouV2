@@ -1,5 +1,5 @@
-const { post } = require('./request');
-const { BASE_URL } = require('../utils/config');
+const { post } = require('../../services/request');
+const { BASE_URL } = require('../../utils/config');
 
 function uploadImage(filePath) {
   const app = getApp();

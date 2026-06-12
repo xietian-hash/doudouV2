@@ -59,6 +59,8 @@ Page({
 
   onLoad() {
     this.recorder = wx.getRecorderManager();
+    this._startingRecord = false;
+    this._pendingStopPayload = null;
     this.initRecorder();
     this.onVoiceStart = () => this.startRecording();
     this.onVoiceMove = (payload) => this.updateRecordingCancel(payload || {});
@@ -415,7 +417,23 @@ Page({
   },
 
   initRecorder() {
+    this._recorderStarted = false;
+    this._stopBeforeStart = null;
+
+    this.recorder.onStart(() => {
+      const pending = this._stopBeforeStart;
+      this._stopBeforeStart = null;
+      this._recorderStarted = true;
+      if (pending !== null) {
+        this._abortVoiceUpload = true;
+        this.recorder.stop();
+        if (pending.canceled) showToast('已取消', 'none');
+        else showError('录音时间太短，请长按说话');
+      }
+    });
     this.recorder.onStop(async (res) => {
+      this._recorderStarted = false;
+      this._stopBeforeStart = null;
       this.setData({ recording: false, recordingCanceling: false });
       if (this._abortVoiceUpload) {
         this._abortVoiceUpload = false;
@@ -443,6 +461,8 @@ Page({
       }
     });
     this.recorder.onError(() => {
+      this._recorderStarted = false;
+      this._stopBeforeStart = null;
       this.setData({ recording: false, recordingCanceling: false });
       this._abortVoiceUpload = false;
       showError('录音失败，请重试');
@@ -451,9 +471,14 @@ Page({
 
   startRecording() {
     if (this.data.voiceParsing || this.data.recording) return;
+    if (this._startingRecord) return;
+    this._startingRecord = true;
+    this._pendingStopPayload = null;
     wx.getSetting({
       success: (setting) => {
         if (setting.authSetting['scope.record'] === false) {
+          this._startingRecord = false;
+          this._pendingStopPayload = null;
           showError('需授权后才能使用语音记账');
           return;
         }
@@ -464,8 +489,25 @@ Page({
   },
 
   doStartRecording() {
+    // 启动期间用户已松手：丢弃启动，按"过短/取消"逻辑收尾，避免录音界面卡住
+    if (this._pendingStopPayload) {
+      const payload = this._pendingStopPayload;
+      this._pendingStopPayload = null;
+      this._startingRecord = false;
+      const duration = Number((payload && payload.duration) || 0);
+      const canceled = Boolean(payload && payload.canceled);
+      if (canceled) {
+        showToast('已取消', 'none');
+      } else if (duration < MIN_VOICE_DURATION_MS) {
+        showError('录音时间太短，请长按说话');
+      }
+      return;
+    }
     this._abortVoiceUpload = false;
+    this._recorderStarted = false;
+    this._stopBeforeStart = null;
     this.setData({ recording: true, recordingCanceling: false });
+    this._startingRecord = false;
     this.recorder.start({
       duration: 60000,
       sampleRate: 16000,
@@ -483,10 +525,20 @@ Page({
   },
 
   stopRecording(payload) {
+    // 启动流程还未完成（如权限查询异步未回）时，先把 stop 意图缓存，由 doStartRecording 兜底
+    if (this._startingRecord) {
+      this._pendingStopPayload = payload || {};
+      return;
+    }
     if (!this.data.recording) return;
     const duration = Number((payload && payload.duration) || 0);
     const canceled = Boolean(payload && payload.canceled);
     this.setData({ recording: false, recordingCanceling: false });
+    if (!this._recorderStarted) {
+      // recorder.start() 已调用但 onStart 尚未回调（如等待授权弹窗），缓存停止意图
+      this._stopBeforeStart = { duration, canceled };
+      return;
+    }
     if (canceled) {
       this._abortVoiceUpload = true;
       this.recorder.stop();

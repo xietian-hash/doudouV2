@@ -5,6 +5,7 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  Logger,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
@@ -19,6 +20,12 @@ import { VoiceService } from './voice.service';
 import { AsrService } from './asr.service';
 import { VoiceParseDto } from './voice.dto';
 
+// 清洗 ASR 文本：去除所有空白与中英文标点后，仍 >= 3 字符才视为有意义
+function isMeaningfulText(text: string): boolean {
+  const cleaned = (text || '').replace(/[\s\p{P}]+/gu, '');
+  return cleaned.length >= 3;
+}
+
 const audioStorage = diskStorage({
   destination: './uploads',
   filename: (_req, file, cb) => {
@@ -30,6 +37,8 @@ const audioStorage = diskStorage({
 @Controller('voice')
 @UseGuards(JwtAuthGuard)
 export class VoiceController {
+  private readonly logger = new Logger(VoiceController.name);
+
   constructor(
     private readonly voiceService: VoiceService,
     private readonly asrService: AsrService,
@@ -62,8 +71,11 @@ export class VoiceController {
       unlink(file.path).catch(() => undefined);
     }
 
-    if (!text) {
-      return { text: '', bills: [] };
+    if (!isMeaningfulText(text)) {
+      this.logger.warn(
+        `语音识别文本无效，跳过 LLM 解析。userId=${user.id} text=${JSON.stringify(text)}`,
+      );
+      return { text, bills: [] };
     }
 
     const bills = await this.voiceService.parseText(text, user.id);

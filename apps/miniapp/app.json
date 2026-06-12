@@ -32,6 +32,14 @@
     {
       "root": "subpkg/bill-detail",
       "pages": ["index"]
+    },
+    {
+      "root": "subpkg/import",
+      "pages": ["index"]
+    },
+    {
+      "root": "subpkg/stats",
+      "pages": ["index"]
     }
   ],
   "window": {

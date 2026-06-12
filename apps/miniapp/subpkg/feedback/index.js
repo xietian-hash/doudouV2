@@ -1,4 +1,4 @@
-const feedbackService = require('../../services/feedback');
+const feedbackService = require('./feedback.service');
 const { showToast, showError } = require('../../utils/toast');
 
 Page({
