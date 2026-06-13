@@ -7,6 +7,7 @@ const { showToast, showError } = require('../../utils/toast');
 
 const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日'];
 const MIN_VOICE_DURATION_MS = 1000;
+const PAGE_SIZE = 20;
 
 Page({
   data: {
@@ -19,6 +20,13 @@ Page({
     todayExpense: '0.00',
     monthExpense: '0.00',
     loading: false,
+    loadingMore: false,
+    pageNo: 1,
+    pageSize: PAGE_SIZE,
+    total: 0,
+    hasMore: false,
+    footerVisible: false,
+    footerText: '',
     recording: false,
     recordingCanceling: false,
     voiceParsing: false,
@@ -33,6 +41,7 @@ Page({
   },
 
   onLoad() {
+    this._loadedBills = [];
     this.recorder = wx.getRecorderManager();
     this._startingRecord = false;
     this._pendingStopPayload = null;
@@ -71,18 +80,26 @@ Page({
     return `${this.data.year}-${String(this.data.month).padStart(2, '0')}`;
   },
 
-  async loadData() {
-    this.setData({ loading: true });
+  async loadData(options = {}) {
+    const append = Boolean(options.append);
+    if (append) {
+      if (this.data.loading || this.data.loadingMore || !this.data.hasMore) return;
+    } else {
+      this._loadedBills = [];
+    }
+    const nextPageNo = append ? this.data.pageNo + 1 : 1;
+    this.setData(append ? { loadingMore: true, footerVisible: true, footerText: '加载中...' } : { loading: true });
     const month = this.monthText();
     try {
-      const [billPage, summary] = await Promise.all([
-        billsService.getBills({
-          month: this.data.selectedDate ? undefined : month,
-          date: this.data.selectedDate || undefined,
-          pageSize: 100,
-        }),
-        billsService.getCalendarSummary(month),
-      ]);
+      const billsQuery = {
+        month: this.data.selectedDate ? undefined : month,
+        date: this.data.selectedDate || undefined,
+        pageNo: nextPageNo,
+        pageSize: this.data.pageSize,
+      };
+      const [billPage, summary] = append
+        ? [await billsService.getBills(billsQuery), null]
+        : await Promise.all([billsService.getBills(billsQuery), billsService.getCalendarSummary(month)]);
       const bills = (billPage.list || []).map((bill) => ({
         ...bill,
         sign: bill.type === 1 ? '-' : '+',
@@ -91,14 +108,25 @@ Page({
         metaText: bill.remark ? `${bill.accountName} · ${bill.remark}` : bill.accountName,
         slideX: 0,
       }));
+      this._loadedBills = append ? this._loadedBills.concat(bills) : bills;
+      const total = Number(billPage.total || 0);
+      const hasMore = this._loadedBills.length < total;
+      const groups = this.buildGroups(this._loadedBills);
+      const footerState = this.buildFooterState(groups.length, hasMore, false);
       this.setData({
-        calendarDays: this.buildCalendar(summary || []),
-        groups: this.buildGroups(bills),
-        todayExpense: this.calcTodayExpense(bills),
-        monthExpense: this.calcMonthExpense(bills),
+        ...(summary ? {
+          calendarDays: this.buildCalendar(summary),
+          todayExpense: this.calcTodayExpense(summary),
+          monthExpense: this.calcMonthExpense(summary),
+        } : {}),
+        groups,
+        pageNo: Number(billPage.pageNo || nextPageNo),
+        total,
+        hasMore,
+        ...footerState,
       });
     } finally {
-      this.setData({ loading: false });
+      this.setData(append ? { loadingMore: false } : { loading: false });
     }
   },
 
@@ -150,17 +178,28 @@ Page({
       });
   },
 
-  calcTodayExpense(bills) {
+  buildFooterState(groupCount, hasMore, loadingMore) {
+    if (!groupCount) return { footerVisible: false, footerText: '' };
+    if (loadingMore) return { footerVisible: true, footerText: '加载中...' };
+    if (hasMore) return { footerVisible: true, footerText: '上拉加载更多' };
+    return { footerVisible: true, footerText: '没有更多了' };
+  },
+
+  calcTodayExpense(summary) {
     const today = formatDate(new Date());
-    const total = bills
-      .filter((bill) => bill.type === 1 && String(bill.billDate).slice(0, 10) === today)
-      .reduce((sum, bill) => sum + Number(bill.amount), 0);
+    const currentMonth = today.slice(0, 7);
+    if (this.monthText() !== currentMonth) return '0.00';
+    const item = summary.find((row) => row.date === today);
+    return formatAmount(Number((item && item.expenseAmount) || 0));
+  },
+
+  calcMonthExpense(summary) {
+    const total = summary.reduce((sum, item) => sum + Number(item.expenseAmount || 0), 0);
     return formatAmount(total);
   },
 
-  calcMonthExpense(bills) {
-    const total = bills.filter((bill) => bill.type === 1).reduce((sum, bill) => sum + Number(bill.amount), 0);
-    return formatAmount(total);
+  loadMoreBills() {
+    this.loadData({ append: true });
   },
 
   prevMonth() {

@@ -155,6 +155,13 @@
   margin-bottom: 28rpx;
 }
 
+.list-footer {
+  padding: 8rpx 0 28rpx;
+  color: var(--color-text-sub);
+  font-size: 24rpx;
+  text-align: center;
+}
+
 .group-head {
   display: flex;
   justify-content: space-between;
