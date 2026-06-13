@@ -50,8 +50,7 @@ COPY packages/shared/package.json ./packages/shared/
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY apps/api/prisma ./apps/api/prisma
 
-RUN pnpm --filter @ddyq/api exec prisma generate && \
-    mkdir -p /app/apps/api/uploads
+RUN mkdir -p /app/apps/api/uploads
 
 EXPOSE 3000
 
