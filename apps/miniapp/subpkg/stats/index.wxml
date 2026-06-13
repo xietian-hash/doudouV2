@@ -40,20 +40,44 @@
 
   <block wx:else>
     <!-- 摘要卡 -->
-    <view class="card">
-      <view class="summary-amount-label">{{typeLabel}}总额（{{periodLabelShort}}）</view>
-      <view class="summary-amount">¥ {{summary.total}}</view>
-      <view class="summary-meta">
-        <text>{{summary.count}} 笔</text>
-        <text wx:if="{{summary.dailyAvg}}">日均 ¥{{summary.dailyAvg}}</text>
-        <text wx:if="{{summary.changeText}}" class="summary-change--{{summary.changeDir}}">
-          比{{prevLabel}}{{summary.changeText}}
-        </text>
+    <view class="card summary-card">
+      <view class="summary-main">
+        <view class="summary-left">
+          <view class="summary-amount-label">{{typeLabel}}总额（{{periodLabelShort}}）</view>
+          <view class="summary-amount">¥ {{summary.total}}</view>
+          <view class="summary-meta">
+            <text>{{summary.count}} 笔</text>
+            <text wx:if="{{summary.dailyAvg}}">日均 ¥{{summary.dailyAvg}}</text>
+          </view>
+        </view>
+        <view class="summary-compare">
+          <view wx:if="{{summary.yearOverYearText}}" class="summary-compare-row">
+            <text class="summary-compare-label">同比</text>
+            <text class="summary-change--{{summary.yearOverYearDir}}">{{summary.yearOverYearText}}</text>
+          </view>
+          <view wx:if="{{summary.periodOverPeriodText}}" class="summary-compare-row">
+            <text class="summary-compare-label">环比</text>
+            <text class="summary-change--{{summary.periodOverPeriodDir}}">{{summary.periodOverPeriodText}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{economicIndicators.length > 0}}" class="indicator-row">
+      <view
+        wx:for="{{economicIndicators}}"
+        wx:key="key"
+        class="indicator-item"
+        bindtap="onIndicatorTap"
+        data-key="{{item.key}}"
+      >
+        <view class="indicator-name">{{item.name}}</view>
+        <view class="indicator-value">{{item.valueText}}</view>
       </view>
     </view>
 
     <!-- 环形图 -->
-    <view class="card">
+    <view wx:if="{{rankItems.length > 0}}" class="card">
       <view class="card-title">分类占比</view>
       <view class="ring-chart">
         <image wx:if="{{ringImageSrc}}" class="ring-image" src="{{ringImageSrc}}" mode="aspectFit"></image>
@@ -74,7 +98,7 @@
     </view>
 
     <!-- 排行榜 -->
-    <view class="card">
+    <view wx:if="{{rankItems.length > 0}}" class="card">
       <view class="card-title">分类排行</view>
       <view wx:for="{{rankItems}}" wx:key="categoryId" class="rank-row" bindtap="onRankTap" data-id="{{item.categoryId}}" data-name="{{item.categoryName}}">
         <view class="rank-icon">{{item.categoryIcon || '📊'}}</view>
@@ -150,6 +174,27 @@
           <text class="top-amount">¥ {{item.amount}}</text>
         </view>
       </scroll-view>
+    </view>
+  </view>
+
+  <view wx:if="{{indicatorVisible}}">
+    <view class="indicator-mask" bindtap="closeIndicator"></view>
+    <view class="indicator-modal">
+      <view class="indicator-modal-title">{{indicatorDetail.name}}</view>
+      <view class="indicator-modal-value">{{indicatorDetail.valueText}}</view>
+      <view class="indicator-modal-section">
+        <view class="indicator-modal-label">计算公式</view>
+        <view class="indicator-modal-text">{{indicatorDetail.formula}}</view>
+      </view>
+      <view class="indicator-modal-section">
+        <view class="indicator-modal-label">本期数据</view>
+        <view class="indicator-modal-text">分子 {{indicatorDetail.numerator}} / 收入总额 {{indicatorDetail.denominator}}</view>
+      </view>
+      <view class="indicator-modal-section">
+        <view class="indicator-modal-label">指标说明</view>
+        <view class="indicator-modal-text">{{indicatorDetail.description}}</view>
+      </view>
+      <view class="indicator-modal-btn" bindtap="closeIndicator">知道了</view>
     </view>
   </view>
 </view>

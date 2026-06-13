@@ -8,56 +8,84 @@ datasource db {
 }
 
 model User {
-  id        BigInt    @id @default(autoincrement())
-  openid    String    @unique @db.VarChar(64)
-  nickname  String?   @db.VarChar(50)
-  avatarUrl String?   @db.VarChar(255) @map("avatar_url")
-  phone     String?   @db.VarChar(11)
-  status    Int       @default(1) @db.TinyInt
-  isDeleted Int       @default(0) @db.TinyInt @map("is_deleted")
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  accounts  Account[]
+  id         BigInt     @id @default(autoincrement())
+  openid     String     @unique @db.VarChar(64)
+  nickname   String?    @db.VarChar(50)
+  avatarUrl  String?    @map("avatar_url") @db.VarChar(255)
+  phone      String?    @db.VarChar(11)
+  status     Int        @default(1) @db.TinyInt
+  isDeleted  Int        @default(0) @map("is_deleted") @db.TinyInt
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+  accounts   Account[]
   categories Category[]
-  tags      Tag[]
-  bills     Bill[]
-  feedbacks Feedback[]
+  tags       Tag[]
+  bills      Bill[]
+  ledgers    Ledger[]
+  feedbacks  Feedback[]
+
   @@map("users")
+}
+
+model Ledger {
+  id         BigInt     @id @default(autoincrement())
+  userId     BigInt     @map("user_id")
+  name       String     @db.VarChar(50)
+  sceneType  String     @default("personal") @map("scene_type") @db.VarChar(20)
+  isDefault  Int        @default(0) @map("is_default") @db.TinyInt
+  isDeleted  Int        @default(0) @map("is_deleted") @db.TinyInt
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+  user       User       @relation(fields: [userId], references: [id])
+  accounts   Account[]
+  categories Category[]
+  tags       Tag[]
+  bills      Bill[]
+
+  @@index([userId], map: "ledgers_user_id_idx")
+  @@map("ledgers")
 }
 
 model Account {
   id        BigInt   @id @default(autoincrement())
   userId    BigInt   @map("user_id")
+  ledgerId  BigInt   @map("ledger_id")
   name      String   @db.VarChar(50)
   type      Int      @db.TinyInt
   balance   Decimal  @default(0) @db.Decimal(12, 2)
   icon      String?  @db.VarChar(50)
   sort      Int      @default(0)
-  isDefault Int      @default(0) @db.TinyInt @map("is_default")
-  isDeleted Int      @default(0) @db.TinyInt @map("is_deleted")
+  isDefault Int      @default(0) @map("is_default") @db.TinyInt
+  isDeleted Int      @default(0) @map("is_deleted") @db.TinyInt
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   user      User     @relation(fields: [userId], references: [id])
+  ledger    Ledger   @relation(fields: [ledgerId], references: [id])
   bills     Bill[]
+
   @@map("accounts")
 }
 
 model Category {
-  id         BigInt     @id @default(autoincrement())
-  userId     BigInt     @map("user_id")
-  parentId   BigInt?    @map("parent_id")
-  name       String     @db.VarChar(50)
-  type       Int        @db.TinyInt
-  icon       String?    @db.VarChar(50)
-  sort       Int        @default(0)
-  lastUsedAt DateTime?  @map("last_used_at")
-  isDeleted  Int        @default(0) @db.TinyInt @map("is_deleted")
-  createdAt  DateTime   @default(now()) @map("created_at")
-  updatedAt  DateTime   @updatedAt @map("updated_at")
-  user       User       @relation(fields: [userId], references: [id])
-  parent     Category?  @relation("CategoryTree", fields: [parentId], references: [id])
-  children   Category[] @relation("CategoryTree")
-  bills      Bill[]
+  id           BigInt        @id @default(autoincrement())
+  userId       BigInt        @map("user_id")
+  ledgerId     BigInt        @map("ledger_id")
+  parentId     BigInt?       @map("parent_id")
+  name         String        @db.VarChar(50)
+  type         Int           @db.TinyInt
+  icon         String?       @db.VarChar(50)
+  sort         Int           @default(0)
+  lastUsedAt   DateTime?     @map("last_used_at")
+  isDeleted    Int           @default(0) @map("is_deleted") @db.TinyInt
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  user         User          @relation(fields: [userId], references: [id])
+  ledger       Ledger        @relation(fields: [ledgerId], references: [id])
+  parent       Category?     @relation("CategoryTree", fields: [parentId], references: [id])
+  children     Category[]    @relation("CategoryTree")
+  bills        Bill[]
+  categoryTags CategoryTag[]
+
   @@map("categories")
 }
 
@@ -66,15 +94,17 @@ model CategoryIcon {
   icon      String   @db.VarChar(20)
   name      String   @db.VarChar(50)
   sort      Int      @default(0)
-  isEnabled Int      @default(1) @db.TinyInt @map("is_enabled")
+  isEnabled Int      @default(1) @map("is_enabled") @db.TinyInt
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
   @@map("category_icons")
 }
 
 model Bill {
   id         BigInt    @id @default(autoincrement())
   userId     BigInt    @map("user_id")
+  ledgerId   BigInt    @map("ledger_id")
   accountId  BigInt    @map("account_id")
   categoryId BigInt    @map("category_id")
   type       Int       @db.TinyInt
@@ -82,26 +112,36 @@ model Bill {
   remark     String?   @db.VarChar(255)
   billDate   DateTime  @map("bill_date") @db.DateTime(0)
   source     Int       @default(1) @db.TinyInt
-  voiceText  String?   @db.VarChar(500) @map("voice_text")
-  isDeleted  Int       @default(0) @db.TinyInt @map("is_deleted")
+  voiceText  String?   @map("voice_text") @db.VarChar(500)
+  isDeleted  Int       @default(0) @map("is_deleted") @db.TinyInt
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime  @updatedAt @map("updated_at")
   user       User      @relation(fields: [userId], references: [id])
+  ledger     Ledger    @relation(fields: [ledgerId], references: [id])
   account    Account   @relation(fields: [accountId], references: [id])
   category   Category  @relation(fields: [categoryId], references: [id])
   billTags   BillTag[]
+
   @@map("bills")
 }
 
 model Tag {
-  id        BigInt    @id @default(autoincrement())
-  userId    BigInt    @map("user_id")
-  name      String    @db.VarChar(20)
-  isDeleted Int       @default(0) @db.TinyInt @map("is_deleted")
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  user      User      @relation(fields: [userId], references: [id])
-  billTags  BillTag[]
+  id           BigInt        @id @default(autoincrement())
+  userId       BigInt        @map("user_id")
+  ledgerId     BigInt        @map("ledger_id")
+  name         String        @db.VarChar(20)
+  description  String?       @db.VarChar(255)
+  tagType      String        @default("user") @map("tag_type") @db.VarChar(20)
+  canEdit      Int           @default(1) @map("can_edit") @db.TinyInt
+  canDelete    Int           @default(1) @map("can_delete") @db.TinyInt
+  isDeleted    Int           @default(0) @map("is_deleted") @db.TinyInt
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  user         User          @relation(fields: [userId], references: [id])
+  ledger       Ledger        @relation(fields: [ledgerId], references: [id])
+  billTags     BillTag[]
+  categoryTags CategoryTag[]
+
   @@map("tags")
 }
 
@@ -112,7 +152,21 @@ model BillTag {
   createdAt DateTime @default(now()) @map("created_at")
   bill      Bill     @relation(fields: [billId], references: [id])
   tag       Tag      @relation(fields: [tagId], references: [id])
+
   @@map("bill_tags")
+}
+
+model CategoryTag {
+  id         BigInt   @id @default(autoincrement())
+  categoryId BigInt   @map("category_id")
+  tagId      BigInt   @map("tag_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  category   Category @relation(fields: [categoryId], references: [id])
+  tag        Tag      @relation(fields: [tagId], references: [id])
+
+  @@unique([categoryId, tagId], map: "category_tags_category_id_tag_id_key")
+  @@index([tagId], map: "category_tags_tag_id_idx")
+  @@map("category_tags")
 }
 
 model Feedback {

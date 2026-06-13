@@ -1,5 +1,43 @@
 import { PrismaClient } from '@prisma/client';
 
+const ECONOMIC_TAGS = [
+  {
+    name: '餐饮必要',
+    description:
+      '日常基本饮食支出，包括三餐、买菜、米面粮油、基础食品、工作日便餐、家庭日常食材。不包括聚餐请客、高端餐厅、奶茶咖啡、零食饮料、夜宵、非必要外卖。',
+  },
+  {
+    name: '居住刚性',
+    description:
+      '维持基本居住条件所需的固定或必要支出，包括房租、物业、水电燃气、取暖费、宽带、基础维修。不包括装修升级、装饰摆件、家电换新、改善型家居消费。',
+  },
+  {
+    name: '债务还款',
+    description:
+      '偿还既有债务或信用负债的支出，包括房贷、车贷、信用卡还款、消费贷、借款还款、分期还款。不包括新的投资、储蓄、普通消费或账户间转账。',
+  },
+  {
+    name: '生活必要',
+    description:
+      '维持基本生活、健康、工作和家庭责任的必要支出，包括通勤、基础通讯、医疗、教育、保险、赡养、基础日用品。不包括娱乐、旅游、兴趣消费、改善型购物。',
+  },
+  {
+    name: '可选消费',
+    description:
+      '非生存必需、可延后或可减少的消费，包括娱乐、购物、旅游、奶茶咖啡、游戏、数码、服饰、美妆、聚餐、非必要外卖。不包括基本餐饮、刚性居住、债务还款、医疗教育等必要支出。',
+  },
+  {
+    name: '转账投资',
+    description:
+      '资金在账户、资产或投资产品之间转移，不代表真实消费的支出，包括基金、股票、理财、储蓄转入、账户间转账、证券入金。不包括餐饮、购物、居住、债务还款等实际消费。',
+  },
+  {
+    name: '不计入统计',
+    description:
+      '不应纳入消费结构判断，或无法可靠判断经济属性的记录，包括报销冲账、退款、内部调整、误记、无法判断、临时占位。不作为优先选择，只有无法归类时使用。',
+  },
+];
+
 export async function seedCategoryIcons(client: PrismaClient): Promise<void> {
   const existingCount = await client.categoryIcon.count();
   if (existingCount > 0) {
@@ -104,12 +142,66 @@ export async function seedCategoryIcons(client: PrismaClient): Promise<void> {
   await client.categoryIcon.createMany({ data: icons });
 }
 
-export async function seedUserData(
+export async function seedEconomicTags(
   client: PrismaClient,
   userId: bigint,
+  ledgerId: bigint,
 ): Promise<void> {
+  for (const tag of ECONOMIC_TAGS) {
+    const existing = await client.tag.findFirst({
+      where: {
+        userId,
+        ledgerId,
+        name: tag.name,
+        isDeleted: 0,
+      },
+    });
+
+    const data = {
+      description: tag.description,
+      tagType: 'economic',
+      canEdit: 0,
+      canDelete: 0,
+      isDeleted: 0,
+    };
+
+    if (existing) {
+      await client.tag.update({
+        where: { id: existing.id },
+        data,
+      });
+    } else {
+      await client.tag.create({
+        data: {
+          userId,
+          ledgerId,
+          name: tag.name,
+          ...data,
+        },
+      });
+    }
+  }
+}
+
+export async function seedUserData(client: PrismaClient, userId: bigint): Promise<void> {
+  let defaultLedger = await client.ledger.findFirst({
+    where: { userId, isDeleted: 0, isDefault: 1 },
+  });
+  if (!defaultLedger) {
+    defaultLedger = await client.ledger.create({
+      data: {
+        userId,
+        name: '日常账本',
+        sceneType: 'personal',
+        isDefault: 1,
+      },
+    });
+  }
+
+  await seedEconomicTags(client, userId, defaultLedger.id);
+
   const existingAccount = await client.account.findFirst({
-    where: { userId, isDeleted: 0 },
+    where: { userId, ledgerId: defaultLedger.id, isDeleted: 0 },
   });
   if (existingAccount) {
     return;
@@ -118,6 +210,7 @@ export async function seedUserData(
   await client.account.create({
     data: {
       userId,
+      ledgerId: defaultLedger.id,
       name: '现金',
       type: 1,
       balance: 0,
@@ -302,6 +395,7 @@ export async function seedUserData(
     const parentCategory = await client.category.create({
       data: {
         userId,
+        ledgerId: defaultLedger.id,
         name: parent.name,
         icon: parent.icon,
         type: 1,
@@ -314,6 +408,7 @@ export async function seedUserData(
       await client.category.create({
         data: {
           userId,
+          ledgerId: defaultLedger.id,
           name: child.name,
           icon: child.icon,
           type: 1,
@@ -328,6 +423,7 @@ export async function seedUserData(
     const parentCategory = await client.category.create({
       data: {
         userId,
+        ledgerId: defaultLedger.id,
         name: parent.name,
         icon: parent.icon,
         type: 2,
@@ -340,6 +436,7 @@ export async function seedUserData(
       await client.category.create({
         data: {
           userId,
+          ledgerId: defaultLedger.id,
           name: child.name,
           icon: child.icon,
           type: 2,
@@ -361,7 +458,9 @@ async function main() {
   }
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}

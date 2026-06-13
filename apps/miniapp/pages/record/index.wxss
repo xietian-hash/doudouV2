@@ -1,5 +1,13 @@
 .record-page {
   background: var(--color-bg-page);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.record-fixed {
+  flex-shrink: 0;
 }
 
 .month-header {
@@ -43,6 +51,11 @@
   grid-template-columns: 1fr 1fr;
   gap: 20rpx;
   margin-bottom: 24rpx;
+}
+
+.record-scroll {
+  flex: 1;
+  min-height: 0;
 }
 
 .summary-card {
@@ -120,7 +133,7 @@
 }
 
 .bill-list {
-  height: calc(100vh - 620rpx);
+  padding-bottom: calc(32rpx + env(safe-area-inset-bottom));
 }
 
 .empty {
@@ -172,6 +185,46 @@
   overflow: hidden;
 }
 
+.bill-swipe-row {
+  position: relative;
+  overflow: hidden;
+}
+
+.bill-swipe-content {
+  position: relative;
+  z-index: 2;
+  background: #ffffff;
+  transition: transform 0.18s ease;
+}
+
+.bill-swipe-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+}
+
+.bill-swipe-action {
+  width: 144rpx;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.bill-swipe-action--edit {
+  background: var(--color-brand);
+}
+
+.bill-swipe-action--delete {
+  background: var(--color-error);
+}
+
 .bill-item {
   min-height: 112rpx;
   display: flex;
@@ -181,6 +234,14 @@
 }
 
 .bill-item:last-child {
+  border-bottom: 0;
+}
+
+.bill-swipe-row .bill-item {
+  border-bottom: 1rpx solid var(--color-divider);
+}
+
+.bill-swipe-row:last-child .bill-item {
   border-bottom: 0;
 }
 

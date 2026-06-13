@@ -2,7 +2,7 @@ const accountsService = require('../../services/accounts');
 const categoriesService = require('../../services/categories');
 const tagsService = require('../../services/tags');
 const billsService = require('../../services/bills');
-const { buildCalendarDays, formatDate } = require('../../utils/date');
+const { buildCalendarDays, formatDate, formatDisplayDate } = require('../../utils/date');
 const { showToast, showError } = require('../../utils/toast');
 
 const KEY_ROWS = [
@@ -273,8 +273,7 @@ Page({
   },
 
   updateDisplayDate() {
-    const parts = this.data.billDate.split('-');
-    this.setData({ displayDate: `${Number(parts[1])}月${Number(parts[2])}日` });
+    this.setData({ displayDate: formatDisplayDate(this.data.billDate) });
   },
 
   openCategoryManage() {

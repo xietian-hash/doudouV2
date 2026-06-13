@@ -1,4 +1,4 @@
-@import "../../styles/manage.wxss";
+@import '../../styles/manage.wxss';
 
 .swipe-content .manage-card {
   border-radius: 0;
@@ -14,6 +14,42 @@
 .tag-summary {
   font-family: inherit;
   font-size: 28rpx;
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  min-width: 0;
+}
+
+.card-title-row .card-title {
+  min-width: 0;
+}
+
+.tag-type {
+  flex-shrink: 0;
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+  font-size: 20rpx;
+  line-height: 28rpx;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-soft);
+}
+
+.tag-type--economic {
+  color: var(--color-brand);
+  background: var(--color-selected);
+}
+
+.tag-type--system {
+  color: var(--color-warning);
+  background: #fef3e8;
+}
+
+.tag-type--user {
+  color: var(--color-text-secondary);
+  background: var(--color-surface-soft);
 }
 
 .tag-icon--green {

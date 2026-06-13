@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { LlmService } from './llm.service';
 import { CategoriesRepo } from '../categories/categories.repo';
 import { VoiceParsedBill } from './voice.dto';
+import { LedgersService } from '../ledgers/ledgers.service';
 
 function getTodayStr(): string {
   const now = new Date();
@@ -70,6 +71,7 @@ export class VoiceService {
   constructor(
     private readonly llmService: LlmService,
     private readonly categoriesRepo: CategoriesRepo,
+    private readonly ledgersService: LedgersService,
   ) {}
 
   async parseText(text: string, userId: bigint): Promise<VoiceParsedBill[]> {
@@ -77,8 +79,15 @@ export class VoiceService {
     this.logger.log(`开始解析语音文本 userId=${userId} text="${text}"`);
 
     // 获取用户的叶子分类
-    const leafCategories = await this.categoriesRepo.findLeafCategories(userId);
-    this.logger.log(`叶子分类数量=${leafCategories.length} names=${leafCategories.map((c) => c.name).join(',')}`);
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
+    const leafCategories = await this.categoriesRepo.findLeafCategories(
+      userId,
+      undefined,
+      ledger.id,
+    );
+    this.logger.log(
+      `叶子分类数量=${leafCategories.length} names=${leafCategories.map((c) => c.name).join(',')}`,
+    );
 
     // 调用LLM解析（将叶子分类白名单注入 prompt，强约束 LLM 只能从中选择）
     const leafNames = leafCategories.map((c) => c.name);
@@ -92,7 +101,9 @@ export class VoiceService {
     // 匹配分类
     const results: VoiceParsedBill[] = rawBills.map((raw) => {
       const matched = findBestCategory(raw.categoryName, leafCategories);
-      this.logger.log(`分类匹配 llm分类="${raw.categoryName}" 匹配结果=${matched ? `"${matched.name}"(id=${matched.id})` : '未匹配'}`);
+      this.logger.log(
+        `分类匹配 llm分类="${raw.categoryName}" 匹配结果=${matched ? `"${matched.name}"(id=${matched.id})` : '未匹配'}`,
+      );
       return {
         type: raw.type === 2 ? 2 : 1,
         amount: raw.amount,

@@ -9,10 +9,13 @@ import {
 } from '../../common/errors/business-error';
 import { CategoriesRepo } from '../categories/categories.repo';
 import { AccountsRepo } from '../accounts/accounts.repo';
+import { LedgersService } from '../ledgers/ledgers.service';
+import { TagsRepo } from '../tags/tags.repo';
 
 function serializeBill(bill: {
   id: bigint;
   userId: bigint;
+  ledgerId: bigint;
   accountId: bigint;
   categoryId: bigint;
   type: number;
@@ -38,6 +41,7 @@ function serializeBill(bill: {
     ...bill,
     id: bill.id.toString(),
     userId: bill.userId.toString(),
+    ledgerId: bill.ledgerId.toString(),
     accountId: bill.accountId.toString(),
     categoryId: bill.categoryId.toString(),
     amount: bill.amount.toString(),
@@ -54,9 +58,7 @@ function serializeBill(bill: {
             : null,
         }
       : undefined,
-    account: bill.account
-      ? { ...bill.account, id: bill.account.id.toString() }
-      : undefined,
+    account: bill.account ? { ...bill.account, id: bill.account.id.toString() } : undefined,
     billTags: bill.billTags?.map((bt) => ({
       id: bt.tag.id.toString(),
       name: bt.tag.name,
@@ -64,10 +66,11 @@ function serializeBill(bill: {
     categoryName: bill.category?.name ?? '',
     categoryIcon: bill.category?.icon ?? null,
     accountName: bill.account?.name ?? '',
-    tags: bill.billTags?.map((bt) => ({
-      id: bt.tag.id.toString(),
-      name: bt.tag.name,
-    })) ?? [],
+    tags:
+      bill.billTags?.map((bt) => ({
+        id: bt.tag.id.toString(),
+        name: bt.tag.name,
+      })) ?? [],
   };
 }
 
@@ -77,10 +80,13 @@ export class BillsService {
     private readonly repo: BillsRepo,
     private readonly categoriesRepo: CategoriesRepo,
     private readonly accountsRepo: AccountsRepo,
+    private readonly ledgersService: LedgersService,
+    private readonly tagsRepo: TagsRepo,
   ) {}
 
   async list(userId: bigint, query: GetBillsQueryDto) {
-    const { total, bills } = await this.repo.findAll(userId, {
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
+    const { total, bills } = await this.repo.findAll(userId, ledger.id, {
       month: query.month,
       date: query.date,
       year: query.year,
@@ -100,6 +106,7 @@ export class BillsService {
 
   private async validateBillInput(
     userId: bigint,
+    ledgerId: bigint,
     accountId: bigint,
     categoryId: bigint,
   ) {
@@ -107,11 +114,13 @@ export class BillsService {
     const account = await this.accountsRepo.findById(accountId);
     if (!account) throw new NotFoundException('账户不存在');
     if (account.userId !== userId) throw new ForbiddenException('无权使用该账户');
+    if (account.ledgerId !== ledgerId) throw new ForbiddenException('无权使用该账户');
 
     // 验证分类归属和叶节点
     const category = await this.categoriesRepo.findById(categoryId);
     if (!category) throw new NotFoundException('分类不存在');
     if (category.userId !== userId) throw new ForbiddenException('无权使用该分类');
+    if (category.ledgerId !== ledgerId) throw new ForbiddenException('无权使用该分类');
 
     const hasChildren = await this.categoriesRepo.hasChildren(categoryId);
     if (hasChildren) {
@@ -121,20 +130,32 @@ export class BillsService {
     return { account, category };
   }
 
+  private async validateTagIds(userId: bigint, ledgerId: bigint, tagIds: bigint[]) {
+    for (const tagId of tagIds) {
+      const tag = await this.tagsRepo.findById(tagId);
+      if (!tag) throw new NotFoundException('标签不存在');
+      if (tag.userId !== userId || tag.ledgerId !== ledgerId) {
+        throw new ForbiddenException('无权使用该标签');
+      }
+    }
+  }
+
   async create(userId: bigint, dto: CreateBillDto) {
     const accountId = BigInt(dto.accountId);
     const categoryId = BigInt(dto.categoryId);
     const tagIds = (dto.tagIds ?? []).map((id) => BigInt(id));
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
 
-    await this.validateBillInput(userId, accountId, categoryId);
+    await this.validateBillInput(userId, ledger.id, accountId, categoryId);
+    await this.validateTagIds(userId, ledger.id, tagIds);
 
     const amount = new Prisma.Decimal(dto.amount);
-    const balanceDelta =
-      dto.type === 1 ? amount.negated() : amount;
+    const balanceDelta = dto.type === 1 ? amount.negated() : amount;
 
     const bill = await this.repo.getClient().$transaction(async (tx) => {
       const created = await this.repo.create(tx, {
         userId,
+        ledgerId: ledger.id,
         accountId,
         categoryId,
         type: dto.type,
@@ -167,15 +188,17 @@ export class BillsService {
         const accountId = BigInt(dto.accountId);
         const categoryId = BigInt(dto.categoryId);
         const tagIds = (dto.tagIds ?? []).map((id) => BigInt(id));
+        const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
 
-        await this.validateBillInput(userId, accountId, categoryId);
+        await this.validateBillInput(userId, ledger.id, accountId, categoryId);
+        await this.validateTagIds(userId, ledger.id, tagIds);
 
         const amount = new Prisma.Decimal(dto.amount);
-        const balanceDelta =
-          dto.type === 1 ? amount.negated() : amount;
+        const balanceDelta = dto.type === 1 ? amount.negated() : amount;
 
         const created = await this.repo.create(tx, {
           userId,
+          ledgerId: ledger.id,
           accountId,
           categoryId,
           type: dto.type,
@@ -201,41 +224,42 @@ export class BillsService {
   }
 
   async findOne(userId: bigint, id: bigint) {
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
     const bill = await this.repo.findById(id);
     if (!bill) throw new NotFoundException('账单不存在');
     if (bill.userId !== userId) throw new ForbiddenException('无权查看该账单');
+    if (bill.ledgerId !== ledger.id) throw new ForbiddenException('无权查看该账单');
     return serializeBill(bill);
   }
 
   async update(userId: bigint, id: bigint, dto: UpdateBillDto) {
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
     const bill = await this.repo.findById(id);
     if (!bill) throw new NotFoundException('账单不存在');
     if (bill.userId !== userId) throw new ForbiddenException('无权操作该账单');
+    if (bill.ledgerId !== ledger.id) throw new ForbiddenException('无权操作该账单');
 
     const newAccountId = dto.accountId ? BigInt(dto.accountId) : bill.accountId;
-    const newCategoryId = dto.categoryId
-      ? BigInt(dto.categoryId)
-      : bill.categoryId;
+    const newCategoryId = dto.categoryId ? BigInt(dto.categoryId) : bill.categoryId;
     const tagIds = dto.tagIds?.map((tid) => BigInt(tid));
 
     if (dto.accountId || dto.categoryId) {
-      await this.validateBillInput(userId, newAccountId, newCategoryId);
+      await this.validateBillInput(userId, bill.ledgerId, newAccountId, newCategoryId);
+    }
+    if (tagIds !== undefined) {
+      await this.validateTagIds(userId, bill.ledgerId, tagIds);
     }
 
-    const newAmount = dto.amount
-      ? new Prisma.Decimal(dto.amount)
-      : bill.amount;
+    const newAmount = dto.amount ? new Prisma.Decimal(dto.amount) : bill.amount;
     const newType = dto.type ?? bill.type;
 
     await this.repo.getClient().$transaction(async (tx) => {
       // 反向旧账户余额
-      const oldBalanceDelta =
-        bill.type === 1 ? bill.amount : bill.amount.negated();
+      const oldBalanceDelta = bill.type === 1 ? bill.amount : bill.amount.negated();
       await this.repo.updateAccount(tx, bill.accountId, oldBalanceDelta);
 
       // 应用新账户余额
-      const newBalanceDelta =
-        newType === 1 ? newAmount.negated() : newAmount;
+      const newBalanceDelta = newType === 1 ? newAmount.negated() : newAmount;
       await this.repo.updateAccount(tx, newAccountId, newBalanceDelta);
 
       // 更新账单
@@ -244,7 +268,7 @@ export class BillsService {
         categoryId: newCategoryId,
         type: newType,
         amount: newAmount,
-        remark: dto.remark !== undefined ? dto.remark ?? null : undefined,
+        remark: dto.remark !== undefined ? (dto.remark ?? null) : undefined,
         billDate: dto.billDate ? new Date(dto.billDate) : undefined,
       });
 
@@ -266,14 +290,15 @@ export class BillsService {
   }
 
   async remove(userId: bigint, id: bigint) {
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
     const bill = await this.repo.findById(id);
     if (!bill) throw new NotFoundException('账单不存在');
     if (bill.userId !== userId) throw new ForbiddenException('无权操作该账单');
+    if (bill.ledgerId !== ledger.id) throw new ForbiddenException('无权操作该账单');
 
     await this.repo.getClient().$transaction(async (tx) => {
       // 反向账户余额
-      const balanceDelta =
-        bill.type === 1 ? bill.amount : bill.amount.negated();
+      const balanceDelta = bill.type === 1 ? bill.amount : bill.amount.negated();
       await this.repo.updateAccount(tx, bill.accountId, balanceDelta);
 
       await this.repo.softDelete(tx, id);
@@ -283,12 +308,10 @@ export class BillsService {
   }
 
   async calendarSummary(userId: bigint, month: string) {
-    const results = await this.repo.calendarSummary(userId, month);
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
+    const results = await this.repo.calendarSummary(userId, ledger.id, month);
 
-    const map = new Map<
-      string,
-      { date: string; expenseAmount: string; incomeAmount: string }
-    >();
+    const map = new Map<string, { date: string; expenseAmount: string; incomeAmount: string }>();
 
     for (const item of results) {
       const dateKey = item.billDate.toISOString().slice(0, 10);
@@ -308,8 +331,6 @@ export class BillsService {
       }
     }
 
-    return Array.from(map.values()).sort((a, b) =>
-      a.date.localeCompare(b.date),
-    );
+    return Array.from(map.values()).sort((a, b) => a.date.localeCompare(b.date));
   }
 }

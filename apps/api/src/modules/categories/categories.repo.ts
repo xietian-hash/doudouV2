@@ -5,12 +5,19 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 export class CategoriesRepo {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAllByUserId(userId: bigint, type?: number) {
+  async findAllByUserId(userId: bigint, type?: number, ledgerId?: bigint) {
     return this.prisma.category.findMany({
       where: {
         userId,
+        ...(ledgerId !== undefined && { ledgerId }),
         isDeleted: 0,
         ...(type !== undefined && { type }),
+      },
+      include: {
+        categoryTags: {
+          include: { tag: true },
+          orderBy: { id: 'asc' },
+        },
       },
       orderBy: [{ sort: 'asc' }, { id: 'asc' }],
     });
@@ -25,12 +32,14 @@ export class CategoriesRepo {
   async findByNameUserParent(
     name: string,
     userId: bigint,
+    ledgerId: bigint,
     parentId: bigint | null,
     excludeId?: bigint,
   ) {
     return this.prisma.category.findFirst({
       where: {
         userId,
+        ledgerId,
         name,
         parentId: parentId ?? null,
         isDeleted: 0,
@@ -41,6 +50,7 @@ export class CategoriesRepo {
 
   async create(data: {
     userId: bigint;
+    ledgerId: bigint;
     name: string;
     type: number;
     icon?: string;
@@ -50,10 +60,33 @@ export class CategoriesRepo {
     return this.prisma.category.create({ data });
   }
 
-  async update(
-    id: bigint,
-    data: { name?: string; icon?: string; sort?: number },
-  ) {
+  async replaceCategoryTags(categoryId: bigint, tagIds: bigint[]) {
+    await this.prisma.$transaction([
+      this.prisma.categoryTag.deleteMany({ where: { categoryId } }),
+      ...(tagIds.length
+        ? [
+            this.prisma.categoryTag.createMany({
+              data: tagIds.map((tagId) => ({ categoryId, tagId })),
+              skipDuplicates: true,
+            }),
+          ]
+        : []),
+    ]);
+  }
+
+  async findEconomicTagsByUserId(userId: bigint, ledgerId: bigint) {
+    return this.prisma.tag.findMany({
+      where: {
+        userId,
+        ledgerId,
+        isDeleted: 0,
+        tagType: 'economic',
+      },
+      orderBy: { id: 'asc' },
+    });
+  }
+
+  async update(id: bigint, data: { name?: string; icon?: string; sort?: number }) {
     return this.prisma.category.update({ where: { id }, data });
   }
 
@@ -91,9 +124,9 @@ export class CategoriesRepo {
     });
   }
 
-  async findLeafCategories(userId: bigint, type?: number) {
+  async findLeafCategories(userId: bigint, type?: number, ledgerId?: bigint) {
     // 先获取所有分类
-    const all = await this.findAllByUserId(userId, type);
+    const all = await this.findAllByUserId(userId, type, ledgerId);
     const parentIds = new Set(
       all.filter((c) => c.parentId !== null).map((c) => c.parentId!.toString()),
     );

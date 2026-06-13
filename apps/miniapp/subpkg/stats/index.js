@@ -42,12 +42,21 @@ Page({
     isEmpty: false,
     emptyHint: '本月还没有支出记录',
 
-    summary: { total: '0.00', count: 0, dailyAvg: '', changeText: '', changeDir: 'down' },
+    summary: {
+      total: '0.00',
+      count: 0,
+      dailyAvg: '',
+      yearOverYearText: '',
+      yearOverYearDir: 'down',
+      periodOverPeriodText: '',
+      periodOverPeriodDir: 'down',
+    },
     ringImageSrc: '',
     lineImageSrc: '',
     heatmapImageSrc: '',
     ringLegend: [],
     insights: [],
+    economicIndicators: [],
     rankItems: [],
     topBills: [],
 
@@ -60,6 +69,8 @@ Page({
     sheetCategoryName: '',
     sheetBills: [],
     sheetLoading: false,
+    indicatorVisible: false,
+    indicatorDetail: null,
 
     // 内部缓存
     _ringItems: [],
@@ -69,10 +80,7 @@ Page({
 
   onLoad() {
     const now = new Date();
-    this.setData(
-      { year: now.getFullYear(), month: now.getMonth() + 1 },
-      () => this.loadAll(),
-    );
+    this.setData({ year: now.getFullYear(), month: now.getMonth() + 1 }, () => this.loadAll());
   },
 
   // ============ 切换 ============
@@ -99,7 +107,10 @@ Page({
     if (this.data.period === 'month') {
       let y = this.data.year;
       let m = this.data.month - 1;
-      if (m < 1) { m = 12; y -= 1; }
+      if (m < 1) {
+        m = 12;
+        y -= 1;
+      }
       this.setData({ year: y, month: m }, () => this.loadAll());
     } else if (this.data.period === 'year') {
       this.setData({ year: this.data.year - 1 }, () => this.loadAll());
@@ -111,7 +122,10 @@ Page({
     if (this.data.period === 'month') {
       let y = this.data.year;
       let m = this.data.month + 1;
-      if (m > 12) { m = 1; y += 1; }
+      if (m > 12) {
+        m = 1;
+        y += 1;
+      }
       this.setData({ year: y, month: m }, () => this.loadAll());
     } else if (this.data.period === 'year') {
       this.setData({ year: this.data.year + 1 }, () => this.loadAll());
@@ -150,7 +164,11 @@ Page({
     }
 
     this.setData({
-      periodLabel, periodLabelShort, prevLabel, canNext, typeLabel,
+      periodLabel,
+      periodLabelShort,
+      prevLabel,
+      canNext,
+      typeLabel,
       emptyHint: `${periodLabelShort}还没有${typeLabel}记录`,
     });
   },
@@ -194,15 +212,18 @@ Page({
 
     // 摘要
     const summary = (overview && overview.summary) || { total: '0.00', count: 0 };
-    const changeText = summary.changePercent != null
-      ? formatChange(summary.changePercent)
-      : '';
+    const yearOverYear = summary.yearOverYear || null;
+    const periodOverPeriod = summary.periodOverPeriod || null;
     const summaryView = {
       total: summary.total,
       count: summary.count,
       dailyAvg: summary.dailyAvg || '',
-      changeText,
-      changeDir: changeDir(summary.changePercent, type),
+      yearOverYearText: yearOverYear ? formatChange(yearOverYear.changePercent) || '--' : '',
+      yearOverYearDir: changeDir(yearOverYear && yearOverYear.changePercent, type),
+      periodOverPeriodText: periodOverPeriod
+        ? formatChange(periodOverPeriod.changePercent) || '--'
+        : '',
+      periodOverPeriodDir: changeDir(periodOverPeriod && periodOverPeriod.changePercent, type),
     };
 
     // 环形图数据 & 图例（前 7 个，超过合"其他"）
@@ -233,7 +254,10 @@ Page({
     const trendMap = new Map();
     if (trend && trend.data) {
       trend.data.forEach((row) => {
-        trendMap.set(row.categoryId, row.amounts.map((s) => Number(s)));
+        trendMap.set(
+          row.categoryId,
+          row.amounts.map((s) => Number(s)),
+        );
       });
     }
     const rankItems = colored.map((c) => {
@@ -251,13 +275,17 @@ Page({
       };
     });
 
+    const economicIndicators = (overview && overview.economicIndicators) || [];
+    const hasEconomicIndicators = economicIndicators.some((item) => item.value !== null);
+
     this.setData({
       summary: summaryView,
       ringLegend,
       ringImageSrc: '',
       insights: (overview && overview.insights) || [],
+      economicIndicators,
       rankItems,
-      isEmpty: rankItems.length === 0,
+      isEmpty: rankItems.length === 0 && !hasEconomicIndicators,
       _ringItems: ringItems,
     });
   },
@@ -280,8 +308,11 @@ Page({
       return;
     }
     const points = (series && series.points) || [];
-    const showHeatmap = period === 'month' && (series && series.granularity === 'day');
-    const lineTitle = period === 'month' ? `${this.data.periodLabelShort}每日趋势` : `${this.data.periodLabelShort}每日趋势`;
+    const showHeatmap = period === 'month' && series && series.granularity === 'day';
+    const lineTitle =
+      period === 'month'
+        ? `${this.data.periodLabelShort}每日趋势`
+        : `${this.data.periodLabelShort}每日趋势`;
     this.setData({
       showLine: points.length > 0,
       lineTitle,
@@ -332,7 +363,12 @@ Page({
         maxSlices: 7,
         centerTexts: [
           { text: `¥${total}`, font: 'bold 22px sans-serif', color: '#1F2A24', dy: -10 },
-          { text: `${this.data.typeLabel} · ${count}笔`, font: '12px sans-serif', color: '#7A9E8E', dy: 14 },
+          {
+            text: `${this.data.typeLabel} · ${count}笔`,
+            font: '12px sans-serif',
+            color: '#7A9E8E',
+            dy: 14,
+          },
         ],
       });
       this.updateCanvasImage(node, 'ringImageSrc');
@@ -341,17 +377,20 @@ Page({
 
   updateCanvasImage(canvas, imageKey) {
     if (!canvas || !wx.canvasToTempFilePath) return;
-    wx.canvasToTempFilePath({
-      canvas,
-      success: (res) => {
-        if (res && res.tempFilePath) {
-          this.setData({ [imageKey]: res.tempFilePath });
-        }
+    wx.canvasToTempFilePath(
+      {
+        canvas,
+        success: (res) => {
+          if (res && res.tempFilePath) {
+            this.setData({ [imageKey]: res.tempFilePath });
+          }
+        },
+        fail: () => {
+          this.setData({ [imageKey]: '' });
+        },
       },
-      fail: () => {
-        this.setData({ [imageKey]: '' });
-      },
-    }, this);
+      this,
+    );
   },
 
   renderLine() {
@@ -389,7 +428,12 @@ Page({
     }
     const categoryId = e.currentTarget.dataset.id;
     const name = e.currentTarget.dataset.name;
-    this.setData({ sheetVisible: true, sheetCategoryName: name, sheetBills: [], sheetLoading: true });
+    this.setData({
+      sheetVisible: true,
+      sheetCategoryName: name,
+      sheetBills: [],
+      sheetLoading: true,
+    });
 
     const { period, type, year, month } = this.data;
     const params = { categoryId, type, pageSize: 200 };
@@ -429,5 +473,16 @@ Page({
 
   goRecord() {
     wx.switchTab({ url: '/pages/bill/index' });
+  },
+
+  onIndicatorTap(e) {
+    const key = e.currentTarget.dataset.key;
+    const item = (this.data.economicIndicators || []).find((indicator) => indicator.key === key);
+    if (!item) return;
+    this.setData({ indicatorVisible: true, indicatorDetail: item });
+  },
+
+  closeIndicator() {
+    this.setData({ indicatorVisible: false, indicatorDetail: null });
   },
 });

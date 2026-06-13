@@ -12,6 +12,16 @@ function formatMonth(date) {
   return `${value.getFullYear()}-${pad(value.getMonth() + 1)}`;
 }
 
+function formatDisplayDate(date) {
+  const value = date instanceof Date ? date : new Date(date);
+  const target = formatDate(value);
+  const today = new Date();
+  const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
+  if (target === formatDate(today)) return '今天';
+  if (target === formatDate(yesterday)) return '昨天';
+  return `${value.getMonth() + 1}月${value.getDate()}日`;
+}
+
 function getDaysInMonth(year, month) {
   return new Date(year, month, 0).getDate();
 }
@@ -29,6 +39,7 @@ function buildCalendarDays(year, month) {
 
 module.exports = {
   formatDate,
+  formatDisplayDate,
   formatMonth,
   getDaysInMonth,
   getFirstDayOfWeek,

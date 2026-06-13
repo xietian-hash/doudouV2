@@ -5,9 +5,9 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 export class AccountsRepo {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAllByUserId(userId: bigint) {
+  async findAllByUserId(userId: bigint, ledgerId: bigint) {
     return this.prisma.account.findMany({
-      where: { userId, isDeleted: 0 },
+      where: { userId, ledgerId, isDeleted: 0 },
       orderBy: [{ isDefault: 'desc' }, { sort: 'asc' }],
     });
   }
@@ -18,10 +18,11 @@ export class AccountsRepo {
     });
   }
 
-  async findByNameAndUserId(name: string, userId: bigint, excludeId?: bigint) {
+  async findByNameAndUserId(name: string, userId: bigint, ledgerId: bigint, excludeId?: bigint) {
     return this.prisma.account.findFirst({
       where: {
         userId,
+        ledgerId,
         name,
         isDeleted: 0,
         ...(excludeId !== undefined && { id: { not: excludeId } }),
@@ -31,6 +32,7 @@ export class AccountsRepo {
 
   async create(data: {
     userId: bigint;
+    ledgerId: bigint;
     name: string;
     type: number;
     icon?: string;
@@ -40,10 +42,7 @@ export class AccountsRepo {
     return this.prisma.account.create({ data });
   }
 
-  async update(
-    id: bigint,
-    data: { name?: string; type?: number; icon?: string; sort?: number },
-  ) {
+  async update(id: bigint, data: { name?: string; type?: number; icon?: string; sort?: number }) {
     return this.prisma.account.update({ where: { id }, data });
   }
 
@@ -61,10 +60,10 @@ export class AccountsRepo {
     return count > 0;
   }
 
-  async setDefault(userId: bigint, accountId: bigint) {
+  async setDefault(userId: bigint, ledgerId: bigint, accountId: bigint) {
     return this.prisma.$transaction([
       this.prisma.account.updateMany({
-        where: { userId, isDeleted: 0 },
+        where: { userId, ledgerId, isDeleted: 0 },
         data: { isDefault: 0 },
       }),
       this.prisma.account.update({

@@ -23,15 +23,17 @@
         bindtouchcancel="onTouchEnd"
       >
         <view class="swipe-actions">
-          <view class="swipe-action swipe-action--edit" data-id="{{item.id}}" data-name="{{item.name}}" catchtap="openEdit">编辑</view>
-          <view class="swipe-action swipe-action--delete" data-id="{{item.id}}" data-name="{{item.name}}" catchtap="askDelete">删除</view>
+          <view wx:if="{{item.canEdit}}" class="swipe-action swipe-action--edit" data-id="{{item.id}}" data-name="{{item.name}}" catchtap="openEdit">编辑</view>
+          <view wx:if="{{item.canDelete}}" class="swipe-action swipe-action--delete" data-id="{{item.id}}" data-name="{{item.name}}" catchtap="askDelete">删除</view>
         </view>
         <view class="swipe-content" style="transform: translateX({{item.slideX || 0}}rpx);">
           <view class="manage-card" data-id="{{item.id}}" data-name="{{item.name}}" bindtap="openEdit">
             <view class="card-icon {{item.toneClass}}">{{item.icon}}</view>
             <view class="card-main">
-              <text class="card-title">{{item.name}}</text>
-              <text class="card-sub">常用场景标签</text>
+              <view class="card-title-row">
+                <text class="card-title">{{item.name}}</text>
+                <text wx:if="{{item.showTagType}}" class="tag-type tag-type--{{item.tagType}}">{{item.tagTypeText}}</text>
+              </view>
             </view>
           </view>
         </view>

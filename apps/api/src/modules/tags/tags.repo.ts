@@ -5,9 +5,9 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 export class TagsRepo {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAllByUserId(userId: bigint) {
+  async findAllByUserId(userId: bigint, ledgerId: bigint) {
     return this.prisma.tag.findMany({
-      where: { userId, isDeleted: 0 },
+      where: { userId, ledgerId, isDeleted: 0 },
       orderBy: { id: 'asc' },
     });
   }
@@ -18,14 +18,11 @@ export class TagsRepo {
     });
   }
 
-  async findByNameAndUserId(
-    name: string,
-    userId: bigint,
-    excludeId?: bigint,
-  ) {
+  async findByNameAndUserId(name: string, userId: bigint, ledgerId: bigint, excludeId?: bigint) {
     return this.prisma.tag.findFirst({
       where: {
         userId,
+        ledgerId,
         name,
         isDeleted: 0,
         ...(excludeId !== undefined && { id: { not: excludeId } }),
@@ -33,11 +30,29 @@ export class TagsRepo {
     });
   }
 
-  async create(data: { userId: bigint; name: string }) {
-    return this.prisma.tag.create({ data });
+  async create(data: {
+    userId: bigint;
+    ledgerId: bigint;
+    name: string;
+    description?: string | null;
+    tagType?: string;
+    canEdit?: number;
+    canDelete?: number;
+  }) {
+    return this.prisma.tag.create({
+      data: {
+        userId: data.userId,
+        ledgerId: data.ledgerId,
+        name: data.name,
+        description: data.description ?? null,
+        tagType: data.tagType ?? 'user',
+        canEdit: data.canEdit ?? 1,
+        canDelete: data.canDelete ?? 1,
+      },
+    });
   }
 
-  async update(id: bigint, data: { name: string }) {
+  async update(id: bigint, data: { name: string; description?: string | null }) {
     return this.prisma.tag.update({ where: { id }, data });
   }
 

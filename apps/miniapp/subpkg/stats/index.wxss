@@ -1,6 +1,6 @@
 .page {
   height: 100vh;
-  background: #F0FBF5;
+  background: #f0fbf5;
   display: flex;
   flex-direction: column;
 }
@@ -8,7 +8,7 @@
 /* 顶部固定控件 */
 .toolbar {
   flex-shrink: 0;
-  background: #F0FBF5;
+  background: #f0fbf5;
   padding: 20rpx 24rpx 12rpx;
 }
 
@@ -20,7 +20,7 @@
 
 .segmented {
   display: flex;
-  background: #E8F3EE;
+  background: #e8f3ee;
   border-radius: 18rpx;
   padding: 4rpx;
   margin-bottom: 16rpx;
@@ -30,88 +30,232 @@
   flex: 1;
   text-align: center;
   font-size: 26rpx;
-  color: #7A9E8E;
+  color: #7a9e8e;
   padding: 12rpx 0;
   border-radius: 14rpx;
-  transition: all .15s;
+  transition: all 0.15s;
 }
 
 .seg-item--active {
-  background: #FFFFFF;
-  color: #2B8A57;
+  background: #ffffff;
+  color: #2b8a57;
   font-weight: 600;
-  box-shadow: 0 2rpx 8rpx rgba(93,190,136,0.15);
+  box-shadow: 0 2rpx 8rpx rgba(93, 190, 136, 0.15);
 }
 
 .period-nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #FFFFFF;
+  background: #ffffff;
   border-radius: 18rpx;
   padding: 14rpx 24rpx;
   margin-bottom: 16rpx;
 }
 
 .period-arrow {
-  color: #5DBE88;
+  color: #5dbe88;
   font-size: 36rpx;
   padding: 0 24rpx;
 }
 
 .period-arrow--disabled {
-  color: #C5D7CD;
+  color: #c5d7cd;
 }
 
 .period-text {
   font-size: 30rpx;
-  color: #1F2A24;
+  color: #1f2a24;
   font-weight: 600;
 }
 
 /* 通用卡片 */
 .card {
-  background: #FFFFFF;
+  background: #ffffff;
   border-radius: 24rpx;
   margin: 0 24rpx 24rpx;
   padding: 32rpx;
-  box-shadow: 0 4rpx 16rpx rgba(93,190,136,0.06);
+  box-shadow: 0 4rpx 16rpx rgba(93, 190, 136, 0.06);
 }
 
 .card-title {
   font-size: 28rpx;
   font-weight: 600;
-  color: #1F2A24;
+  color: #1f2a24;
   margin-bottom: 24rpx;
 }
 
 /* 摘要卡 */
+.summary-card {
+  padding: 30rpx 28rpx;
+}
+
+.summary-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.summary-left {
+  flex: 1;
+  min-width: 0;
+}
+
 .summary-amount-label {
   font-size: 24rpx;
-  color: #7A9E8E;
+  color: #7a9e8e;
 }
 
 .summary-amount {
-  font-size: 64rpx;
+  font-size: 58rpx;
   font-weight: 700;
-  color: #1F2A24;
+  color: #1f2a24;
   margin: 12rpx 0 16rpx;
   line-height: 1.1;
+  word-break: break-all;
 }
 
 .summary-meta {
   display: flex;
   gap: 40rpx;
   font-size: 24rpx;
-  color: #7A9E8E;
+  color: #7a9e8e;
+}
+
+.summary-compare {
+  flex-shrink: 0;
+  min-width: 150rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12rpx;
+}
+
+.summary-compare-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10rpx;
+  font-size: 24rpx;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.summary-compare-label {
+  color: #7a9e8e;
 }
 
 .summary-change--up {
-  color: #E78A82;
+  color: #e78a82;
 }
 
 .summary-change--down {
-  color: #5DBE88;
+  color: #5dbe88;
+}
+
+.indicator-row {
+  display: flex;
+  gap: 8rpx;
+  margin: 0 24rpx 24rpx;
+}
+
+.indicator-item {
+  flex: 1;
+  min-width: 0;
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 18rpx 6rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 16rpx rgba(93, 190, 136, 0.06);
+}
+
+.indicator-name {
+  font-size: 20rpx;
+  line-height: 1.2;
+  color: #7a9e8e;
+  min-height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  word-break: break-all;
+}
+
+.indicator-value {
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  line-height: 1.1;
+  font-weight: 700;
+  color: #1f2a24;
+  word-break: break-all;
+}
+
+.indicator-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.42);
+  z-index: 120;
+}
+
+.indicator-modal {
+  position: fixed;
+  left: 56rpx;
+  right: 56rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 121;
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 36rpx 32rpx 28rpx;
+  box-shadow: 0 16rpx 48rpx rgba(31, 42, 36, 0.18);
+}
+
+.indicator-modal-title {
+  font-size: 34rpx;
+  line-height: 1.2;
+  font-weight: 700;
+  color: #1f2a24;
+  text-align: center;
+}
+
+.indicator-modal-value {
+  margin: 12rpx 0 28rpx;
+  font-size: 44rpx;
+  line-height: 1.1;
+  font-weight: 800;
+  color: #2b8a57;
+  text-align: center;
+}
+
+.indicator-modal-section {
+  margin-bottom: 22rpx;
+}
+
+.indicator-modal-label {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #2b8a57;
+  margin-bottom: 8rpx;
+}
+
+.indicator-modal-text {
+  font-size: 26rpx;
+  line-height: 1.55;
+  color: #1f2a24;
+  word-break: break-word;
+}
+
+.indicator-modal-btn {
+  margin-top: 8rpx;
+  height: 76rpx;
+  border-radius: 18rpx;
+  background: #5dbe88;
+  color: #ffffff;
+  font-size: 28rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* 环形图 */
@@ -147,7 +291,7 @@
   align-items: center;
   gap: 8rpx;
   font-size: 22rpx;
-  color: #1F2A24;
+  color: #1f2a24;
 }
 
 .legend-dot {
@@ -159,9 +303,9 @@
 /* 洞察卡 */
 .insight-row {
   font-size: 26rpx;
-  color: #1F2A24;
-  background: #F7FBF9;
-  border-left: 4rpx solid #5DBE88;
+  color: #1f2a24;
+  background: #f7fbf9;
+  border-left: 4rpx solid #5dbe88;
   padding: 16rpx 20rpx;
   border-radius: 0 12rpx 12rpx 0;
   margin-bottom: 12rpx;
@@ -177,7 +321,7 @@
   align-items: center;
   gap: 16rpx;
   padding: 20rpx 0;
-  border-bottom: 1rpx solid #F0F5F2;
+  border-bottom: 1rpx solid #f0f5f2;
 }
 
 .rank-row:last-child {
@@ -188,7 +332,7 @@
   width: 64rpx;
   height: 64rpx;
   border-radius: 16rpx;
-  background: #E8F3EE;
+  background: #e8f3ee;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -210,19 +354,19 @@
 
 .rank-name {
   font-size: 28rpx;
-  color: #1F2A24;
+  color: #1f2a24;
   font-weight: 500;
 }
 
 .rank-amount {
   font-size: 28rpx;
-  color: #1F2A24;
+  color: #1f2a24;
   font-weight: 600;
 }
 
 .rank-bar-wrap {
   height: 8rpx;
-  background: #F0F5F2;
+  background: #f0f5f2;
   border-radius: 4rpx;
   overflow: hidden;
   margin-right: 12rpx;
@@ -230,7 +374,7 @@
 
 .rank-bar {
   height: 100%;
-  background: #5DBE88;
+  background: #5dbe88;
   border-radius: 4rpx;
 }
 
@@ -239,7 +383,7 @@
   align-items: center;
   gap: 16rpx;
   font-size: 22rpx;
-  color: #7A9E8E;
+  color: #7a9e8e;
 }
 
 .rank-line2 .rank-bar-wrap {
@@ -247,11 +391,11 @@
 }
 
 .rank-change--up {
-  color: #E78A82;
+  color: #e78a82;
 }
 
 .rank-change--down {
-  color: #5DBE88;
+  color: #5dbe88;
 }
 
 /* mini 柱 */
@@ -266,13 +410,13 @@
 
 .mini-bar {
   flex: 1;
-  background: #D5E9DD;
+  background: #d5e9dd;
   border-radius: 2rpx;
   min-height: 2rpx;
 }
 
 .mini-bar--last {
-  background: #5DBE88;
+  background: #5dbe88;
 }
 
 /* TOP 单笔 */
@@ -281,7 +425,7 @@
   align-items: center;
   gap: 16rpx;
   padding: 16rpx 0;
-  border-bottom: 1rpx solid #F0F5F2;
+  border-bottom: 1rpx solid #f0f5f2;
 }
 
 .top-row:last-child {
@@ -292,7 +436,7 @@
   width: 56rpx;
   height: 56rpx;
   border-radius: 14rpx;
-  background: #E8F3EE;
+  background: #e8f3ee;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -307,19 +451,19 @@
 
 .top-line1 {
   font-size: 26rpx;
-  color: #1F2A24;
+  color: #1f2a24;
   margin-bottom: 4rpx;
 }
 
 .top-line2 {
   font-size: 22rpx;
-  color: #7A9E8E;
+  color: #7a9e8e;
 }
 
 .top-amount {
   font-size: 30rpx;
   font-weight: 600;
-  color: #1F2A24;
+  color: #1f2a24;
 }
 
 /* 折线/热力 canvas */
@@ -372,14 +516,14 @@
 
 .empty-text {
   font-size: 28rpx;
-  color: #7A9E8E;
+  color: #7a9e8e;
   margin-bottom: 32rpx;
 }
 
 .empty-btn {
   display: inline-block;
-  background: #5DBE88;
-  color: #FFFFFF;
+  background: #5dbe88;
+  color: #ffffff;
   font-size: 28rpx;
   padding: 18rpx 48rpx;
   border-radius: 24rpx;
@@ -389,7 +533,7 @@
 .loading {
   text-align: center;
   padding: 40rpx;
-  color: #7A9E8E;
+  color: #7a9e8e;
   font-size: 26rpx;
 }
 
@@ -397,7 +541,7 @@
 .sheet-mask {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   z-index: 100;
 }
 
@@ -406,7 +550,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: #FFFFFF;
+  background: #ffffff;
   border-radius: 32rpx 32rpx 0 0;
   padding: 32rpx 24rpx 40rpx;
   z-index: 101;
@@ -418,14 +562,14 @@
 .sheet-title {
   font-size: 30rpx;
   font-weight: 600;
-  color: #1F2A24;
+  color: #1f2a24;
   margin-bottom: 8rpx;
   text-align: center;
 }
 
 .sheet-sub {
   font-size: 24rpx;
-  color: #7A9E8E;
+  color: #7a9e8e;
   text-align: center;
   margin-bottom: 16rpx;
 }
