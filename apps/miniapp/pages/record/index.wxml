@@ -83,10 +83,9 @@
           <view class="bill-icon">{{bill.categoryIcon || '□'}}</view>
           <view class="bill-main">
             <text class="bill-name">{{bill.categoryName}}</text>
-            <text class="bill-meta">{{bill.remark || bill.accountName}}</text>
-            <text wx:if="{{bill.remark}}" class="bill-account">{{bill.accountName}}</text>
+            <text class="bill-meta">{{bill.metaText}}</text>
           </view>
-          <text class="bill-amount {{bill.type === 2 ? 'bill-amount--income' : ''}}">{{bill.sign}}{{bill.amountText}}</text>
+          <text class="{{bill.amountClass}}">{{bill.sign}}{{bill.amountText}}</text>
             </view>
           </view>
         </view>
@@ -94,4 +93,67 @@
     </view>
   </view>
   </scroll-view>
+
+  <view wx:if="{{voiceConfirmVisible}}" class="sheet-mask" bindtap="closeVoiceConfirm">
+    <view class="sheet sheet--voice" catchtap="noop">
+      <view class="sheet-head">
+        <text class="sheet-title">确认记账</text>
+        <text class="sheet-close" bindtap="closeVoiceConfirm">×</text>
+      </view>
+      <scroll-view scroll-y class="voice-list">
+        <view wx:for="{{voiceItems}}" wx:key="_localId" class="voice-item">
+          <view class="voice-row">
+            <text class="voice-cat">{{item.categoryText}}</text>
+            <text class="{{item.amountClass}}">{{item.amountSign}}{{item.amount}}</text>
+          </view>
+          <view class="voice-bottom-row">
+            <text class="voice-meta-text">{{item.metaText}}</text>
+            <text class="voice-del-btn" data-id="{{item._localId}}" bindtap="removeVoiceItem">删除</text>
+          </view>
+          <text wx:if="{{item.needsConfirm}}" class="voice-warn">需要确认分类或金额</text>
+        </view>
+      </scroll-view>
+      <view class="sheet-footer">
+        <view class="secondary-btn" bindtap="closeVoiceConfirm">取消</view>
+        <view class="primary-btn" bindtap="saveVoiceItems">确认保存</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{voiceParsing}}" class="voice-parsing-mask" catchtap="noop" catchtouchmove="noop">
+    <view class="voice-parsing-card">
+      <view class="voice-parsing-spinner">
+        <view class="voice-parsing-dot voice-parsing-dot--1"></view>
+        <view class="voice-parsing-dot voice-parsing-dot--2"></view>
+        <view class="voice-parsing-dot voice-parsing-dot--3"></view>
+      </view>
+      <text class="voice-parsing-text">兜兜思考中...</text>
+    </view>
+  </view>
+
+  <view wx:if="{{recording}}" class="{{recordingPanelClass}}">
+    <view class="wave-box">
+      <view class="wave-bar wave-bar--1"></view>
+      <view class="wave-bar wave-bar--2"></view>
+      <view class="wave-bar wave-bar--3"></view>
+      <view class="wave-bar wave-bar--4"></view>
+      <view class="wave-bar wave-bar--5"></view>
+      <view class="wave-bar wave-bar--6"></view>
+      <view class="wave-bar wave-bar--7"></view>
+      <view class="wave-bar wave-bar--8"></view>
+      <view class="wave-bar wave-bar--9"></view>
+      <view class="wave-bar wave-bar--10"></view>
+    </view>
+    <view class="recording-hint">{{recordingHintText}}</view>
+    <view class="recording-tips">
+      <view class="{{cancelTipClass}}">
+        <view class="recording-icon-arrow"></view>
+        <text>{{cancelTipText}}</text>
+      </view>
+      <view class="{{doneTipClass}}">
+        <view class="recording-icon-check"></view>
+        <text>松开完成</text>
+      </view>
+    </view>
+  </view>
 </view>

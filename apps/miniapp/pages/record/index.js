@@ -1,9 +1,12 @@
 const billsService = require('../../services/bills');
+const accountsService = require('../../services/accounts');
+const voiceService = require('../../services/voice');
 const { buildCalendarDays, formatDate } = require('../../utils/date');
 const { formatAmount } = require('../../utils/format');
 const { showToast, showError } = require('../../utils/toast');
 
 const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日'];
+const MIN_VOICE_DURATION_MS = 1000;
 
 Page({
   data: {
@@ -16,6 +19,36 @@ Page({
     todayExpense: '0.00',
     monthExpense: '0.00',
     loading: false,
+    recording: false,
+    recordingCanceling: false,
+    voiceParsing: false,
+    voiceConfirmVisible: false,
+    voiceItems: [],
+    defaultAccount: {},
+    recordingPanelClass: 'recording-panel',
+    recordingHintText: '上滑可取消',
+    cancelTipClass: 'recording-tip recording-tip--cancel',
+    cancelTipText: '上滑取消',
+    doneTipClass: 'recording-tip recording-tip--done recording-tip--active',
+  },
+
+  onLoad() {
+    this.recorder = wx.getRecorderManager();
+    this._startingRecord = false;
+    this._pendingStopPayload = null;
+    this.initRecorder();
+    this.onVoiceStart = () => this.startRecording();
+    this.onVoiceMove = (payload) => this.updateRecordingCancel(payload || {});
+    this.onVoiceStop = (payload) => this.stopRecording(payload || {});
+    wx.$on('voiceRecord:start', this.onVoiceStart);
+    wx.$on('voiceRecord:move', this.onVoiceMove);
+    wx.$on('voiceRecord:stop', this.onVoiceStop);
+  },
+
+  onUnload() {
+    wx.$off('voiceRecord:start', this.onVoiceStart);
+    wx.$off('voiceRecord:move', this.onVoiceMove);
+    wx.$off('voiceRecord:stop', this.onVoiceStop);
   },
 
   onShow() {
@@ -26,7 +59,12 @@ Page({
 
   async ensureAndLoad() {
     await getApp().ensureLogin();
-    await this.loadData();
+    await Promise.all([this.loadData(), this.loadDefaultAccount()]);
+  },
+
+  async loadDefaultAccount() {
+    const accounts = await accountsService.getAccounts();
+    this.setData({ defaultAccount: accounts.find((a) => a.isDefault) || accounts[0] || {} });
   },
 
   monthText() {
@@ -49,6 +87,8 @@ Page({
         ...bill,
         sign: bill.type === 1 ? '-' : '+',
         amountText: formatAmount(bill.amount),
+        amountClass: `bill-amount${bill.type === 2 ? ' bill-amount--income' : ''}`,
+        metaText: bill.remark ? `${bill.accountName} · ${bill.remark}` : bill.accountName,
         slideX: 0,
       }));
       this.setData({
@@ -231,5 +271,213 @@ Page({
     } catch (error) {
       showError('删除失败');
     }
+  },
+
+  setTabBarHidden(hidden) {
+    const tabBar = this.getTabBar && this.getTabBar();
+    if (tabBar && tabBar.setHidden) tabBar.setHidden(hidden);
+  },
+
+  noop() {},
+
+  buildRecordingViewState(recording, canceling) {
+    return {
+      recording: Boolean(recording),
+      recordingCanceling: Boolean(canceling),
+      recordingPanelClass: `recording-panel${canceling ? ' recording-panel--canceling' : ''}`,
+      recordingHintText: canceling ? '松开取消' : '上滑可取消',
+      cancelTipClass: `recording-tip recording-tip--cancel${canceling ? ' recording-tip--active' : ''}`,
+      cancelTipText: canceling ? '松开取消' : '上滑取消',
+      doneTipClass: `recording-tip recording-tip--done${canceling ? '' : ' recording-tip--active'}`,
+    };
+  },
+
+  buildVoiceItemView(item, index) {
+    const dateText = (() => {
+      if (!item.billDate) return '';
+      const parts = String(item.billDate).split('-');
+      return `${Number(parts[1])}月${Number(parts[2])}日`;
+    })();
+    const metaParts = [];
+    if (dateText) metaParts.push(dateText);
+    if (item.remark) metaParts.push(item.remark);
+    return {
+      ...item,
+      _localId: `voice_${Date.now()}_${index}`,
+      amount: String(item.amount || '0'),
+      billDateText: dateText,
+      categoryText: `${item.categoryIcon || '□'} ${item.categoryName || '未匹配分类'}`,
+      amountSign: item.type === 1 ? '-' : '+',
+      amountClass: `voice-amount${item.type === 2 ? ' voice-amount--income' : ''}`,
+      metaText: metaParts.join(' · '),
+    };
+  },
+
+  initRecorder() {
+    this._recorderStarted = false;
+    this._stopBeforeStart = null;
+
+    this.recorder.onStart(() => {
+      const pending = this._stopBeforeStart;
+      this._stopBeforeStart = null;
+      this._recorderStarted = true;
+      if (pending !== null) {
+        this._abortVoiceUpload = true;
+        this.recorder.stop();
+        if (pending.canceled) showToast('已取消', 'none');
+        else showError('录音时间太短，请长按说话');
+      }
+    });
+
+    this.recorder.onStop(async (res) => {
+      this._recorderStarted = false;
+      this._stopBeforeStart = null;
+      this.setData(this.buildRecordingViewState(false, false));
+      if (this._abortVoiceUpload) {
+        this._abortVoiceUpload = false;
+        return;
+      }
+      if (!res.tempFilePath) return;
+      this.setData({ voiceParsing: true });
+      try {
+        const parsed = await voiceService.uploadAudioAndParse(res.tempFilePath);
+        const items = (parsed || []).map((item, index) => this.buildVoiceItemView(item, index));
+        if (!items.length) {
+          showError('未识别到记账信息');
+          return;
+        }
+        this.setData({ voiceItems: items, voiceConfirmVisible: true });
+        this.setTabBarHidden(true);
+      } catch (err) {
+        showError('语音解析失败，请重试');
+      } finally {
+        this.setData({ voiceParsing: false });
+      }
+    });
+
+    this.recorder.onError(() => {
+      this._recorderStarted = false;
+      this._stopBeforeStart = null;
+      this.setData(this.buildRecordingViewState(false, false));
+      this._abortVoiceUpload = false;
+      showError('录音失败，请重试');
+    });
+  },
+
+  startRecording() {
+    if (this.data.voiceParsing || this.data.recording) return;
+    if (this._startingRecord) return;
+    this._startingRecord = true;
+    this._pendingStopPayload = null;
+    wx.getSetting({
+      success: (setting) => {
+        if (setting.authSetting['scope.record'] === false) {
+          this._startingRecord = false;
+          this._pendingStopPayload = null;
+          showError('需授权后才能使用语音记账');
+          return;
+        }
+        this.doStartRecording();
+      },
+      fail: () => this.doStartRecording(),
+    });
+  },
+
+  doStartRecording() {
+    if (this._pendingStopPayload) {
+      const payload = this._pendingStopPayload;
+      this._pendingStopPayload = null;
+      this._startingRecord = false;
+      const duration = Number((payload && payload.duration) || 0);
+      const canceled = Boolean(payload && payload.canceled);
+      if (canceled) showToast('已取消', 'none');
+      else if (duration < MIN_VOICE_DURATION_MS) showError('录音时间太短，请长按说话');
+      return;
+    }
+    this._abortVoiceUpload = false;
+    this._recorderStarted = false;
+    this._stopBeforeStart = null;
+    this.setData(this.buildRecordingViewState(true, false));
+    this._startingRecord = false;
+    this.recorder.start({
+      duration: 60000,
+      sampleRate: 16000,
+      numberOfChannels: 1,
+      encodeBitRate: 48000,
+      format: 'mp3',
+    });
+  },
+
+  updateRecordingCancel(payload) {
+    if (!this.data.recording) return;
+    const canceling = Boolean(payload.canceling);
+    if (this.data.recordingCanceling === canceling) return;
+    this.setData(this.buildRecordingViewState(true, canceling));
+  },
+
+  stopRecording(payload) {
+    if (this._startingRecord) {
+      this._pendingStopPayload = payload || {};
+      return;
+    }
+    if (!this.data.recording) return;
+    const duration = Number((payload && payload.duration) || 0);
+    const canceled = Boolean(payload && payload.canceled);
+    this.setData(this.buildRecordingViewState(false, false));
+    if (!this._recorderStarted) {
+      this._stopBeforeStart = { duration, canceled };
+      return;
+    }
+    if (canceled) {
+      this._abortVoiceUpload = true;
+      this.recorder.stop();
+      showToast('已取消', 'none');
+      return;
+    }
+    if (duration < MIN_VOICE_DURATION_MS) {
+      this._abortVoiceUpload = true;
+      this.recorder.stop();
+      showError('录音时间太短，请长按说话');
+      return;
+    }
+    this._abortVoiceUpload = false;
+    this.recorder.stop();
+  },
+
+  closeVoiceConfirm() {
+    this.setData({ voiceConfirmVisible: false, voiceItems: [] });
+    this.setTabBarHidden(false);
+  },
+
+  removeVoiceItem(event) {
+    const id = event.currentTarget.dataset.id;
+    this.setData({ voiceItems: this.data.voiceItems.filter((item) => item._localId !== id) });
+  },
+
+  async saveVoiceItems() {
+    if (!this.data.defaultAccount.id) {
+      showError('未找到默认账户');
+      return;
+    }
+    const items = this.data.voiceItems
+      .filter((item) => item.categoryId)
+      .map((item) => ({
+        accountId: this.data.defaultAccount.id,
+        categoryId: item.categoryId,
+        type: item.type,
+        amount: item.amount,
+        billDate: item.billDate || formatDate(new Date()),
+        remark: item.remark || undefined,
+        source: 2,
+        voiceText: item.voiceText,
+      }));
+    if (!items.length) {
+      showError('请先完善分类信息');
+      return;
+    }
+    await billsService.createBillBatch(items);
+    showToast('保存成功', 'success');
+    this.closeVoiceConfirm();
+    await this.loadData();
   },
 });
