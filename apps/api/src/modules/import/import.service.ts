@@ -13,7 +13,6 @@ export interface ImportResult {
   success: boolean;
   totalRows: number;
   successCount: number;
-  skipDuplicateCount: number;
   errorCount: number;
   errorFileUrl?: string;
   message: string;
@@ -68,7 +67,6 @@ export class ImportService implements OnModuleInit, OnModuleDestroy {
         success: false,
         totalRows: 0,
         successCount: 0,
-        skipDuplicateCount: 0,
         errorCount: 0,
         message: 'Excel 表头与模板不一致，请使用最新模板',
       };
@@ -84,7 +82,6 @@ export class ImportService implements OnModuleInit, OnModuleDestroy {
         success: false,
         totalRows: parse.totalRows,
         successCount: 0,
-        skipDuplicateCount: 0,
         errorCount: parse.invalidRows.length,
         errorFileUrl: errorUrl,
         message: `共 ${parse.totalRows} 条数据，其中 ${parse.invalidRows.length} 条校验失败，请下载错误清单查看`,
@@ -97,45 +94,25 @@ export class ImportService implements OnModuleInit, OnModuleDestroy {
         success: false,
         totalRows: 0,
         successCount: 0,
-        skipDuplicateCount: 0,
         errorCount: 0,
         message: '未读取到任何账单数据，请检查 Excel 是否填写',
       };
     }
 
-    // 去重
-    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
-    const { uniqueRows, duplicateCount } = await this.dedupe(userId, ledger.id, parse.validRows);
-
-    // 全部都是重复
-    if (uniqueRows.length === 0) {
-      return {
-        success: true,
-        totalRows: parse.totalRows,
-        successCount: 0,
-        skipDuplicateCount: duplicateCount,
-        errorCount: 0,
-        message: `共 ${parse.totalRows} 条数据，全部为重复账单，已自动跳过`,
-      };
-    }
-
     // 批量入账
-    await this.batchInsert(userId, ledger.id, uniqueRows);
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
+    await this.batchInsert(userId, ledger.id, parse.validRows);
 
     this.logger.log(
-      `导入成功 userId=${userId} total=${parse.totalRows} success=${uniqueRows.length} skip=${duplicateCount}`,
+      `导入成功 userId=${userId} total=${parse.totalRows} success=${parse.validRows.length}`,
     );
 
     return {
       success: true,
       totalRows: parse.totalRows,
-      successCount: uniqueRows.length,
-      skipDuplicateCount: duplicateCount,
+      successCount: parse.validRows.length,
       errorCount: 0,
-      message:
-        duplicateCount > 0
-          ? `导入成功 ${uniqueRows.length} 条，跳过重复 ${duplicateCount} 条`
-          : `导入成功 ${uniqueRows.length} 条`,
+      message: `导入成功 ${parse.validRows.length} 条`,
     };
   }
 
@@ -172,55 +149,6 @@ export class ImportService implements OnModuleInit, OnModuleDestroy {
 
     const serverBase = this.configService.get<string>('SERVER_BASE_URL') ?? 'http://localhost:3000';
     return `${serverBase}/uploads/${ERROR_DIR_RELATIVE}/${fileName}`;
-  }
-
-  private async dedupe(
-    userId: bigint,
-    ledgerId: bigint,
-    rows: ParsedBillRow[],
-  ): Promise<{ uniqueRows: ParsedBillRow[]; duplicateCount: number }> {
-    const dates = rows.map((r) => r.date!).sort((a, b) => a.getTime() - b.getTime());
-    const minDate = dates[0];
-    const maxDate = dates[dates.length - 1];
-
-    const existing = await this.prisma.bill.findMany({
-      where: {
-        userId,
-        ledgerId,
-        isDeleted: 0,
-        billDate: { gte: minDate, lte: maxDate },
-      },
-      select: {
-        billDate: true,
-        amount: true,
-        categoryId: true,
-        accountId: true,
-        remark: true,
-      },
-    });
-
-    const existingKeys = new Set(
-      existing.map((b) =>
-        makeBillKey(b.billDate, b.amount.toString(), b.categoryId, b.accountId, b.remark),
-      ),
-    );
-
-    const uniqueRows: ParsedBillRow[] = [];
-    let duplicateCount = 0;
-    // 用于去重导入文件内部的重复
-    const seenInBatch = new Set<string>();
-
-    for (const r of rows) {
-      const key = makeBillKey(r.date!, r.amount!, r.categoryId!, r.accountId!, r.remark ?? null);
-      if (existingKeys.has(key) || seenInBatch.has(key)) {
-        duplicateCount++;
-      } else {
-        seenInBatch.add(key);
-        uniqueRows.push(r);
-      }
-    }
-
-    return { uniqueRows, duplicateCount };
   }
 
   private async batchInsert(
@@ -296,14 +224,3 @@ export class ImportService implements OnModuleInit, OnModuleDestroy {
   }
 }
 
-function makeBillKey(
-  date: Date,
-  amount: string,
-  categoryId: bigint,
-  accountId: bigint,
-  remark: string | null,
-): string {
-  const d = date.toISOString().slice(0, 10);
-  const a = Number(amount).toFixed(2);
-  return `${d}|${a}|${categoryId.toString()}|${accountId.toString()}|${remark ?? ''}`;
-}
