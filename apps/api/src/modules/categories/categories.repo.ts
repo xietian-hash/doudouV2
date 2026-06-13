@@ -48,6 +48,24 @@ export class CategoriesRepo {
     });
   }
 
+  async findSubcategoryByName(
+    name: string,
+    userId: bigint,
+    ledgerId: bigint,
+    excludeId?: bigint,
+  ) {
+    return this.prisma.category.findFirst({
+      where: {
+        userId,
+        ledgerId,
+        name,
+        parentId: { not: null },
+        isDeleted: 0,
+        ...(excludeId !== undefined && { id: { not: excludeId } }),
+      },
+    });
+  }
+
   async create(data: {
     userId: bigint;
     ledgerId: bigint;

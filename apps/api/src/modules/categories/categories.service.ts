@@ -160,9 +160,13 @@ export class CategoriesService {
       parentCategoryName = parent.name;
     }
 
-    const existing = await this.repo.findByNameUserParent(dto.name, userId, ledger.id, parentId);
+    const existing = parentId
+      ? await this.repo.findSubcategoryByName(dto.name, userId, ledger.id)
+      : await this.repo.findByNameUserParent(dto.name, userId, ledger.id, null);
     if (existing) {
-      throw new ConflictException(`分类名称 "${dto.name}" 已存在`);
+      throw new ConflictException(
+        parentId ? `二级分类名称 "${dto.name}" 已被其他分类使用` : `分类名称 "${dto.name}" 已存在`,
+      );
     }
 
     const category = await this.repo.create({
@@ -196,15 +200,15 @@ export class CategoriesService {
     }
 
     if (dto.name) {
-      const existing = await this.repo.findByNameUserParent(
-        dto.name,
-        userId,
-        ledger.id,
-        category.parentId,
-        id,
-      );
+      const existing = category.parentId
+        ? await this.repo.findSubcategoryByName(dto.name, userId, ledger.id, id)
+        : await this.repo.findByNameUserParent(dto.name, userId, ledger.id, null, id);
       if (existing) {
-        throw new ConflictException(`分类名称 "${dto.name}" 已存在`);
+        throw new ConflictException(
+          category.parentId
+            ? `二级分类名称 "${dto.name}" 已被其他分类使用`
+            : `分类名称 "${dto.name}" 已存在`,
+        );
       }
     }
 
