@@ -66,13 +66,14 @@ export interface SerializedCategory {
 }
 
 function serializeCategory(cat: RawCategory): SerializedCategory {
+  const { categoryTags, ...rest } = cat;
   return {
-    ...cat,
+    ...rest,
     id: cat.id.toString(),
     userId: cat.userId.toString(),
     ledgerId: cat.ledgerId.toString(),
     parentId: cat.parentId?.toString() ?? null,
-    tags: cat.categoryTags?.map(({ tag }) => ({
+    tags: categoryTags?.map(({ tag }) => ({
       id: tag.id.toString(),
       userId: tag.userId.toString(),
       name: tag.name,
