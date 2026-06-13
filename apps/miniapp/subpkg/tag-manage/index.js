@@ -13,10 +13,27 @@ const TAG_TONES = [
   'tag-icon--blue',
   'tag-icon--gray',
 ];
+const TAG_TYPE_TEXT = {
+  economic: '经济属性',
+  system: '系统标签',
+};
+
+function canSwipe(item) {
+  return Boolean(item && (item.canEdit || item.canDelete));
+}
 
 function normalizeTag(item, index) {
+  const tagType = item.tagType || 'user';
+  const canEdit = item.canEdit !== false;
+  const canDelete = item.canDelete !== false;
   return {
     ...item,
+    tagType,
+    canEdit,
+    canDelete,
+    canSwipe: canEdit || canDelete,
+    tagTypeText: TAG_TYPE_TEXT[tagType] || '',
+    showTagType: tagType !== 'user' && Boolean(TAG_TYPE_TEXT[tagType]),
     icon: TAG_ICONS[index % TAG_ICONS.length],
     toneClass: TAG_TONES[index % TAG_TONES.length],
     slideX: 0,
@@ -57,6 +74,11 @@ Page({
 
   onTouchStart(event) {
     const index = Number(event.currentTarget.dataset.index);
+    if (!canSwipe(this.data.tags[index])) {
+      this._touchActiveIndex = -1;
+      this.closeSwipeRows();
+      return;
+    }
     this._touchActiveIndex = index;
     this._touchStartX = event.changedTouches[0].clientX;
     this._touchStartSlideX = this.data.tags[index].slideX || 0;
@@ -70,10 +92,12 @@ Page({
   onTouchMove(event) {
     const index = Number(event.currentTarget.dataset.index);
     if (index !== this._touchActiveIndex) return;
+    if (!canSwipe(this.data.tags[index])) return;
     const diff = event.changedTouches[0].clientX - this._touchStartX;
     let next = this._touchStartSlideX + diff;
     if (next > 0) next = 0;
-    if (next < -288) next = -288;
+    const max = this.data.tags[index].canEdit && this.data.tags[index].canDelete ? -288 : -144;
+    if (next < max) next = max;
     if (this.data.tags[index].slideX === next) return;
     const tags = this.data.tags.map((item, i) => (i === index ? { ...item, slideX: next } : item));
     this.setData({ tags });
@@ -86,9 +110,12 @@ Page({
     const startSlide = this._touchStartSlideX;
     const current = this.data.tags[index].slideX;
     const moved = current - startSlide;
-    const target = startSlide === -288 ? (moved > 96 ? 0 : -288) : (moved < -96 ? -288 : 0);
+    const max = this.data.tags[index].canEdit && this.data.tags[index].canDelete ? -288 : -144;
+    const target = startSlide === max ? (moved > 96 ? 0 : max) : moved < -96 ? max : 0;
     if (current === target) return;
-    const tags = this.data.tags.map((item, i) => (i === index ? { ...item, slideX: target } : item));
+    const tags = this.data.tags.map((item, i) =>
+      i === index ? { ...item, slideX: target } : item,
+    );
     this.setData({ tags });
   },
 
@@ -98,10 +125,17 @@ Page({
   },
 
   openEdit(event) {
+    const id = event.currentTarget.dataset.id;
+    const tag = this.data.tags.find((item) => item.id === id);
+    if (tag && !tag.canEdit) {
+      this.closeSwipeRows();
+      showError('该标签不允许编辑');
+      return;
+    }
     this.closeSwipeRows();
     this.setData({
       dialogVisible: true,
-      editingId: event.currentTarget.dataset.id,
+      editingId: id,
       name: event.currentTarget.dataset.name,
     });
   },
@@ -132,9 +166,16 @@ Page({
   },
 
   askDelete(event) {
+    const id = event.currentTarget.dataset.id;
+    const tag = this.data.tags.find((item) => item.id === id);
+    if (tag && !tag.canDelete) {
+      this.closeSwipeRows();
+      showError('该标签不允许删除');
+      return;
+    }
     this.setData({
       confirmVisible: true,
-      pendingDeleteId: event.currentTarget.dataset.id,
+      pendingDeleteId: id,
       pendingDeleteName: event.currentTarget.dataset.name,
     });
   },

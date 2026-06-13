@@ -3,7 +3,7 @@ const categoriesService = require('../../services/categories');
 const tagsService = require('../../services/tags');
 const billsService = require('../../services/bills');
 const voiceService = require('../../services/voice');
-const { buildCalendarDays, formatDate } = require('../../utils/date');
+const { buildCalendarDays, formatDate, formatDisplayDate } = require('../../utils/date');
 const { showToast, showError } = require('../../utils/toast');
 
 const KEY_ROWS = [
@@ -335,8 +335,7 @@ Page({
   },
 
   updateDisplayDate() {
-    const parts = this.data.billDate.split('-');
-    this.setData({ displayDate: `${Number(parts[1])}月${Number(parts[2])}日` });
+    this.setData({ displayDate: formatDisplayDate(this.data.billDate) });
   },
 
   openCategoryManage() {
@@ -443,11 +442,19 @@ Page({
       this.setData({ voiceParsing: true });
       try {
         const parsed = await voiceService.uploadAudioAndParse(res.tempFilePath);
-        const items = (parsed || []).map((item, index) => ({
-          ...item,
-          _localId: `voice_${Date.now()}_${index}`,
-          amount: String(item.amount || '0'),
-        }));
+        const items = (parsed || []).map((item, index) => {
+          const dateText = (() => {
+            if (!item.billDate) return '';
+            const parts = String(item.billDate).split('-');
+            return `${Number(parts[1])}月${Number(parts[2])}日`;
+          })();
+          return {
+            ...item,
+            _localId: `voice_${Date.now()}_${index}`,
+            amount: String(item.amount || '0'),
+            billDateText: dateText,
+          };
+        });
         if (!items.length) {
           showError('未识别到记账信息');
           return;

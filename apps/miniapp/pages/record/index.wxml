@@ -1,4 +1,5 @@
 <view class="page record-page">
+  <view class="record-fixed">
   <view class="month-header">
     <view class="month-nav" bindtap="prevMonth">‹</view>
     <view class="month-title">
@@ -18,7 +19,9 @@
       <view class="summary-value">¥{{monthExpense}}</view>
     </view>
   </view>
+  </view>
 
+  <scroll-view scroll-y class="record-scroll" enhanced show-scrollbar="{{false}}">
   <view class="calendar card">
     <view class="week-row">
       <text wx:for="{{weekdays}}" wx:key="*this" class="week-cell">{{item}}</text>
@@ -38,12 +41,12 @@
     </view>
   </view>
 
-  <scroll-view scroll-y class="bill-list">
+  <view class="bill-list">
     <view wx:if="{{groups.length === 0 && !loading}}" class="empty card">
       <image class="empty-icon" src="/assets/images/empty.png" mode="aspectFit" />
       <text>暂无账单</text>
     </view>
-    <view wx:for="{{groups}}" wx:key="date" class="bill-group">
+    <view wx:for="{{groups}}" wx:for-index="groupIndex" wx:key="date" class="bill-group">
       <view class="group-head">
         <text class="group-date">{{item.title}}</text>
         <view class="group-total">
@@ -55,11 +58,28 @@
         <view
           wx:for="{{item.items}}"
           wx:for-item="bill"
+          wx:for-index="billIndex"
           wx:key="id"
-          class="bill-item"
-          data-id="{{bill.id}}"
-          bindtap="openDetail"
+          class="bill-swipe-row"
+          data-group-index="{{groupIndex}}"
+          data-bill-index="{{billIndex}}"
+          bindtouchstart="onTouchStart"
+          bindtouchmove="onTouchMove"
+          bindtouchend="onTouchEnd"
+          bindtouchcancel="onTouchEnd"
         >
+          <view class="bill-swipe-actions">
+            <view class="bill-swipe-action bill-swipe-action--edit" data-id="{{bill.id}}" catchtap="openEdit">编辑</view>
+            <view class="bill-swipe-action bill-swipe-action--delete" data-id="{{bill.id}}" catchtap="deleteBill">删除</view>
+          </view>
+          <view class="bill-swipe-content" style="transform: translateX({{bill.slideX || 0}}rpx);">
+            <view
+              class="bill-item"
+              data-id="{{bill.id}}"
+              data-group-index="{{groupIndex}}"
+              data-bill-index="{{billIndex}}"
+              bindtap="openDetail"
+            >
           <view class="bill-icon">{{bill.categoryIcon || '□'}}</view>
           <view class="bill-main">
             <text class="bill-name">{{bill.categoryName}}</text>
@@ -67,8 +87,11 @@
             <text wx:if="{{bill.remark}}" class="bill-account">{{bill.accountName}}</text>
           </view>
           <text class="bill-amount {{bill.type === 2 ? 'bill-amount--income' : ''}}">{{bill.sign}}{{bill.amountText}}</text>
+            </view>
+          </view>
         </view>
       </view>
     </view>
+  </view>
   </scroll-view>
 </view>

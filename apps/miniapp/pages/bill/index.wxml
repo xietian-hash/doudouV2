@@ -248,9 +248,11 @@
             <text class="voice-cat">{{item.categoryIcon || '□'}} {{item.categoryName || '未匹配分类'}}</text>
             <text class="voice-amount {{item.type === 2 ? 'voice-amount--income' : ''}}">{{item.type === 1 ? '-' : '+'}}{{item.amount}}</text>
           </view>
-          <text wx:if="{{item.remark}}" class="voice-remark">{{item.remark}}</text>
+          <view class="voice-bottom-row">
+            <text class="voice-meta-text">{{item.billDateText}}{{item.remark ? ' · ' + item.remark : ''}}</text>
+            <text class="voice-del-btn" data-id="{{item._localId}}" bindtap="removeVoiceItem">删除</text>
+          </view>
           <text wx:if="{{item.needsConfirm}}" class="voice-warn">需要确认分类或金额</text>
-          <text class="voice-delete" data-id="{{item._localId}}" bindtap="removeVoiceItem">×</text>
         </view>
       </scroll-view>
       <view class="sheet-footer">

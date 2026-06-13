@@ -28,6 +28,11 @@ export interface ParsedBillRaw {
   billDate: string;
 }
 
+export interface EconomicTagOption {
+  name: string;
+  description: string | null;
+}
+
 @Injectable()
 export class LlmService {
   private readonly logger = new Logger(LlmService.name);
@@ -47,9 +52,7 @@ export class LlmService {
       ? categoryNames.join('、')
       : '早餐、午餐、晚餐、打车、公交地铁、日用品、工资、其他';
     const exampleCategory1 =
-      categoryNames.find((name) => name.includes('午餐')) ||
-      categoryNames[0] ||
-      '午餐';
+      categoryNames.find((name) => name.includes('午餐')) || categoryNames[0] || '午餐';
     const exampleCategory2 =
       categoryNames.find((name) => name.includes('打车')) ||
       categoryNames.find((name) => name.includes('交通')) ||
@@ -80,7 +83,9 @@ ${categoryList}
       { role: 'user', content: text },
     ];
 
-    this.logger.log(`LLM请求 model=${model} url=${baseUrl}/chat/completions text="${text.slice(0, 100)}"`);
+    this.logger.log(
+      `LLM请求 model=${model} url=${baseUrl}/chat/completions text="${text.slice(0, 100)}"`,
+    );
 
     try {
       const response = await axios.post<LlmResponse>(
@@ -125,7 +130,9 @@ ${categoryList}
           item.amount > 0 &&
           typeof item.categoryName === 'string',
       );
-      this.logger.log(`LLM解析完成 原始条数=${parsed.length} 有效条数=${filtered.length} 结果=${JSON.stringify(filtered)}`);
+      this.logger.log(
+        `LLM解析完成 原始条数=${parsed.length} 有效条数=${filtered.length} 结果=${JSON.stringify(filtered)}`,
+      );
       return filtered;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -137,6 +144,90 @@ ${categoryList}
       if (error instanceof SyntaxError) {
         this.logger.warn('LLM返回的JSON解析失败');
         return [];
+      }
+      throw error;
+    }
+  }
+
+  async recommendEconomicTag(params: {
+    parentCategoryName: string;
+    categoryName: string;
+    tagOptions: EconomicTagOption[];
+  }): Promise<string | null> {
+    const baseUrl = this.configService.get<string>('LLM_BASE_URL');
+    const model = this.configService.get<string>('LLM_MODEL');
+    const apiKey = this.configService.get<string>('LLM_API_KEY');
+    const tagList = params.tagOptions
+      .map((tag) => `- ${tag.name}：${tag.description || ''}`)
+      .join('\n');
+
+    const systemPrompt = `你是一个记账分类助手，负责判断一个支出二级分类应该归属到哪个经济属性标签。
+
+【经济属性标签】
+${tagList}
+
+请只返回 JSON 对象，不要包含任何其他文字或 markdown。
+格式：{"tagName":"标签名"}
+
+要求：
+- tagName 必须严格从上面的经济属性标签名称中选择一个
+- 只能返回一个标签
+- 如果无法判断，返回 {"tagName":"不计入统计"}`;
+
+    const userPrompt = `父分类：${params.parentCategoryName}
+二级分类：${params.categoryName}`;
+
+    const messages: LlmMessage[] = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ];
+
+    this.logger.log(
+      `LLM经济属性推荐请求 model=${model} parent="${params.parentCategoryName}" category="${params.categoryName}"`,
+    );
+
+    try {
+      const response = await axios.post<LlmResponse>(
+        `${baseUrl}/chat/completions`,
+        {
+          model,
+          messages,
+          temperature: 0.1,
+          max_tokens: 200,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          timeout: 30000,
+        },
+      );
+
+      const content = response.data.choices[0]?.message?.content ?? '{}';
+      const trimmed = content.trim();
+      this.logger.log(
+        `LLM经济属性推荐响应 status=${response.status} content="${trimmed.slice(0, 200)}"`,
+      );
+
+      const jsonMatch = trimmed.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        this.logger.warn(`LLM经济属性推荐格式异常: ${trimmed}`);
+        return null;
+      }
+
+      const parsed = JSON.parse(jsonMatch[0]) as { tagName?: unknown };
+      return typeof parsed.tagName === 'string' ? parsed.tagName : null;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        this.logger.error(
+          `LLM经济属性推荐失败 status=${error.response?.status} message=${error.message} body=${JSON.stringify(error.response?.data)}`,
+        );
+        return null;
+      }
+      if (error instanceof SyntaxError) {
+        this.logger.warn('LLM经济属性推荐JSON解析失败');
+        return null;
       }
       throw error;
     }

@@ -3,6 +3,7 @@ import ExcelJS = require('exceljs');
 import { CategoriesRepo } from '../categories/categories.repo';
 import { AccountsRepo } from '../accounts/accounts.repo';
 import { TagsRepo } from '../tags/tags.repo';
+import { LedgersService } from '../ledgers/ledgers.service';
 
 const HEADER_ROW = ['日期', '类型', '金额', '二级分类', '账户名', '备注', '标签'];
 
@@ -12,13 +13,15 @@ export class ImportTemplateService {
     private readonly categoriesRepo: CategoriesRepo,
     private readonly accountsRepo: AccountsRepo,
     private readonly tagsRepo: TagsRepo,
+    private readonly ledgersService: LedgersService,
   ) {}
 
   async generateTemplate(userId: bigint): Promise<Buffer> {
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
     const [leafCategories, accounts, tags] = await Promise.all([
-      this.categoriesRepo.findLeafCategories(userId),
-      this.accountsRepo.findAllByUserId(userId),
-      this.tagsRepo.findAllByUserId(userId),
+      this.categoriesRepo.findLeafCategories(userId, undefined, ledger.id),
+      this.accountsRepo.findAllByUserId(userId, ledger.id),
+      this.tagsRepo.findAllByUserId(userId, ledger.id),
     ]);
 
     const workbook = new ExcelJS.Workbook();
@@ -54,9 +57,33 @@ export class ImportTemplateService {
     const now = new Date();
     const today = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
     const samples = [
-      { date: today, type: '支出', amount: 35.0, category: sampleCategoryExpense, account: sampleAccount, remark: '示例：午餐', tag: sampleTag },
-      { date: today, type: '支出', amount: 12.5, category: sampleCategoryExpense, account: sampleAccount, remark: '示例：早餐', tag: '' },
-      { date: today, type: '收入', amount: 5000, category: sampleCategoryIncome, account: sampleAccount, remark: '示例：工资', tag: '' },
+      {
+        date: today,
+        type: '支出',
+        amount: 35.0,
+        category: sampleCategoryExpense,
+        account: sampleAccount,
+        remark: '示例：午餐',
+        tag: sampleTag,
+      },
+      {
+        date: today,
+        type: '支出',
+        amount: 12.5,
+        category: sampleCategoryExpense,
+        account: sampleAccount,
+        remark: '示例：早餐',
+        tag: '',
+      },
+      {
+        date: today,
+        type: '收入',
+        amount: 5000,
+        category: sampleCategoryIncome,
+        account: sampleAccount,
+        remark: '示例：工资',
+        tag: '',
+      },
     ];
 
     samples.forEach((row) => dataSheet.addRow(row));
@@ -82,12 +109,7 @@ export class ImportTemplateService {
       pattern: 'solid',
       fgColor: { argb: 'FFEAF7EF' },
     };
-    referenceSheet.columns = [
-      { width: 14 },
-      { width: 14 },
-      { width: 14 },
-      { width: 14 },
-    ];
+    referenceSheet.columns = [{ width: 14 }, { width: 14 }, { width: 14 }, { width: 14 }];
 
     const expenseLeafs = leafCategories.filter((c) => c.type === 1);
     const incomeLeafs = leafCategories.filter((c) => c.type === 2);

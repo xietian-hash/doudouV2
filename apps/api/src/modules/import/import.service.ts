@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
 import { join } from 'path';
@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { ImportTemplateService } from './import.template';
 import { ImportParserService, ParsedBillRow } from './import.parser';
+import { LedgersService } from '../ledgers/ledgers.service';
 
 export interface ImportResult {
   success: boolean;
@@ -23,7 +24,7 @@ const ERROR_RETENTION_HOURS = 24;
 const BILL_SOURCE_IMPORT = 3;
 
 @Injectable()
-export class ImportService implements OnModuleInit {
+export class ImportService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(ImportService.name);
   private readonly uploadsRoot = join(process.cwd(), 'uploads');
   private readonly errorDir = join(this.uploadsRoot, ERROR_DIR_RELATIVE);
@@ -34,6 +35,7 @@ export class ImportService implements OnModuleInit {
     private readonly configService: ConfigService,
     private readonly templateService: ImportTemplateService,
     private readonly parserService: ImportParserService,
+    private readonly ledgersService: LedgersService,
   ) {
     mkdirSync(this.errorDir, { recursive: true });
   }
@@ -42,6 +44,13 @@ export class ImportService implements OnModuleInit {
     // 启动时清理一次，之后每小时一次
     this.cleanExpiredErrorFiles();
     this.cleanTimer = setInterval(() => this.cleanExpiredErrorFiles(), 60 * 60 * 1000);
+  }
+
+  onModuleDestroy() {
+    if (this.cleanTimer) {
+      clearInterval(this.cleanTimer);
+      this.cleanTimer = undefined;
+    }
   }
 
   async getTemplate(userId: bigint): Promise<Buffer> {
@@ -95,7 +104,8 @@ export class ImportService implements OnModuleInit {
     }
 
     // 去重
-    const { uniqueRows, duplicateCount } = await this.dedupe(userId, parse.validRows);
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
+    const { uniqueRows, duplicateCount } = await this.dedupe(userId, ledger.id, parse.validRows);
 
     // 全部都是重复
     if (uniqueRows.length === 0) {
@@ -110,7 +120,7 @@ export class ImportService implements OnModuleInit {
     }
 
     // 批量入账
-    await this.batchInsert(userId, uniqueRows);
+    await this.batchInsert(userId, ledger.id, uniqueRows);
 
     this.logger.log(
       `导入成功 userId=${userId} total=${parse.totalRows} success=${uniqueRows.length} skip=${duplicateCount}`,
@@ -160,13 +170,13 @@ export class ImportService implements OnModuleInit {
     const filePath = join(this.errorDir, fileName);
     writeFileSync(filePath, buffer);
 
-    const serverBase =
-      this.configService.get<string>('SERVER_BASE_URL') ?? 'http://localhost:3000';
+    const serverBase = this.configService.get<string>('SERVER_BASE_URL') ?? 'http://localhost:3000';
     return `${serverBase}/uploads/${ERROR_DIR_RELATIVE}/${fileName}`;
   }
 
   private async dedupe(
     userId: bigint,
+    ledgerId: bigint,
     rows: ParsedBillRow[],
   ): Promise<{ uniqueRows: ParsedBillRow[]; duplicateCount: number }> {
     const dates = rows.map((r) => r.date!).sort((a, b) => a.getTime() - b.getTime());
@@ -176,6 +186,7 @@ export class ImportService implements OnModuleInit {
     const existing = await this.prisma.bill.findMany({
       where: {
         userId,
+        ledgerId,
         isDeleted: 0,
         billDate: { gte: minDate, lte: maxDate },
       },
@@ -190,13 +201,7 @@ export class ImportService implements OnModuleInit {
 
     const existingKeys = new Set(
       existing.map((b) =>
-        makeBillKey(
-          b.billDate,
-          b.amount.toString(),
-          b.categoryId,
-          b.accountId,
-          b.remark,
-        ),
+        makeBillKey(b.billDate, b.amount.toString(), b.categoryId, b.accountId, b.remark),
       ),
     );
 
@@ -218,7 +223,11 @@ export class ImportService implements OnModuleInit {
     return { uniqueRows, duplicateCount };
   }
 
-  private async batchInsert(userId: bigint, rows: ParsedBillRow[]): Promise<void> {
+  private async batchInsert(
+    userId: bigint,
+    ledgerId: bigint,
+    rows: ParsedBillRow[],
+  ): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
       // 1. 批量插入无 tag 行
       const noTagRows = rows.filter((r) => !r.tagId);
@@ -226,6 +235,7 @@ export class ImportService implements OnModuleInit {
         await tx.bill.createMany({
           data: noTagRows.map((r) => ({
             userId,
+            ledgerId,
             accountId: r.accountId!,
             categoryId: r.categoryId!,
             type: r.type!,
@@ -243,6 +253,7 @@ export class ImportService implements OnModuleInit {
         const bill = await tx.bill.create({
           data: {
             userId,
+            ledgerId,
             accountId: r.accountId!,
             categoryId: r.categoryId!,
             type: r.type!,

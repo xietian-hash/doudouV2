@@ -32,6 +32,7 @@ export class BillsRepo {
 
   async findAll(
     userId: bigint,
+    ledgerId: bigint,
     options: {
       month?: string;
       date?: string;
@@ -43,7 +44,7 @@ export class BillsRepo {
     },
   ) {
     const { month, date, year, categoryId, type, pageNo = 1, pageSize = 20 } = options;
-    const where: Prisma.BillWhereInput = { userId, isDeleted: 0 };
+    const where: Prisma.BillWhereInput = { userId, ledgerId, isDeleted: 0 };
 
     if (date) {
       const start = new Date(date);
@@ -101,6 +102,7 @@ export class BillsRepo {
     prismaClient: Prisma.TransactionClient,
     data: {
       userId: bigint;
+      ledgerId: bigint;
       accountId: bigint;
       categoryId: bigint;
       type: number;
@@ -114,11 +116,7 @@ export class BillsRepo {
     return prismaClient.bill.create({ data });
   }
 
-  async createBillTags(
-    prismaClient: Prisma.TransactionClient,
-    billId: bigint,
-    tagIds: bigint[],
-  ) {
+  async createBillTags(prismaClient: Prisma.TransactionClient, billId: bigint, tagIds: bigint[]) {
     if (tagIds.length === 0) return;
     await prismaClient.billTag.createMany({
       data: tagIds.map((tagId) => ({ billId, tagId })),
@@ -136,20 +134,14 @@ export class BillsRepo {
     });
   }
 
-  async updateCategoryLastUsedAt(
-    prismaClient: Prisma.TransactionClient,
-    categoryId: bigint,
-  ) {
+  async updateCategoryLastUsedAt(prismaClient: Prisma.TransactionClient, categoryId: bigint) {
     await prismaClient.category.update({
       where: { id: categoryId },
       data: { lastUsedAt: new Date() },
     });
   }
 
-  async softDelete(
-    prismaClient: Prisma.TransactionClient,
-    id: bigint,
-  ) {
+  async softDelete(prismaClient: Prisma.TransactionClient, id: bigint) {
     return prismaClient.bill.update({
       where: { id },
       data: { isDeleted: 1 },
@@ -171,14 +163,11 @@ export class BillsRepo {
     return prismaClient.bill.update({ where: { id }, data });
   }
 
-  async deleteBillTags(
-    prismaClient: Prisma.TransactionClient,
-    billId: bigint,
-  ) {
+  async deleteBillTags(prismaClient: Prisma.TransactionClient, billId: bigint) {
     await prismaClient.billTag.deleteMany({ where: { billId } });
   }
 
-  async calendarSummary(userId: bigint, month: string) {
+  async calendarSummary(userId: bigint, ledgerId: bigint, month: string) {
     const [year, mon] = month.split('-').map(Number);
     const start = new Date(year, (mon ?? 1) - 1, 1);
     const end = new Date(year, mon ?? 1, 1);
@@ -190,6 +179,7 @@ export class BillsRepo {
       SELECT DATE(bill_date) AS bill_date, type, SUM(amount) AS amount
       FROM bills
       WHERE user_id = ${userId}
+        AND ledger_id = ${ledgerId}
         AND is_deleted = 0
         AND bill_date >= ${start}
         AND bill_date < ${end}

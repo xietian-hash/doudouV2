@@ -5,12 +5,14 @@ import {
   StatsBillType,
   StatsCategoryItem,
   StatsCategoryLevel,
+  StatsEconomicIndicator,
   StatsCategoryTrendResult,
   StatsDailySeriesResult,
   StatsOverviewResult,
   StatsPeriod,
   StatsTopBillsResult,
 } from './statistics.dto';
+import { LedgersService } from '../ledgers/ledgers.service';
 
 interface PeriodRange {
   start: Date | null;
@@ -22,17 +24,26 @@ interface PeriodRange {
   prevEnd: Date | null;
 }
 
+const ECONOMIC_TAGS = {
+  FOOD: '餐饮必要',
+  HOUSING: '居住刚性',
+  DEBT: '债务还款',
+  NECESSARY: '生活必要',
+  OPTIONAL: '可选消费',
+  INVESTMENT: '转账投资',
+  EXCLUDED: '不计入统计',
+} as const;
+
 @Injectable()
 export class StatisticsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly ledgersService: LedgersService,
+  ) {}
 
   // ============ 公共：周期区间计算（UTC） ============
 
-  private resolvePeriod(
-    period: StatsPeriod,
-    month?: string,
-    year?: string,
-  ): PeriodRange {
+  private resolvePeriod(period: StatsPeriod, month?: string, year?: string): PeriodRange {
     if (period === 'month') {
       const [y, m] = (month ?? '').split('-').map(Number);
       const start = new Date(Date.UTC(y, m - 1, 1));
@@ -58,12 +69,14 @@ export class StatisticsService {
 
   private buildBillWhere(
     userId: bigint,
+    ledgerId: bigint,
     type: StatsBillType,
     start: Date | null,
     end: Date | null,
   ): Prisma.BillWhereInput {
     const where: Prisma.BillWhereInput = {
       userId,
+      ledgerId,
       isDeleted: 0,
       type,
     };
@@ -71,6 +84,42 @@ export class StatisticsService {
       where.billDate = { gte: start, lt: end };
     }
     return where;
+  }
+
+  private resolveYearOverYearPeriod(
+    period: StatsPeriod,
+    month?: string,
+    year?: string,
+  ): { start: Date; end: Date } | null {
+    if (period === 'month') {
+      const [y, m] = (month ?? '').split('-').map(Number);
+      return {
+        start: new Date(Date.UTC(y - 1, m - 1, 1)),
+        end: new Date(Date.UTC(y - 1, m, 1)),
+      };
+    }
+    if (period === 'year') {
+      const y = Number(year);
+      return {
+        start: new Date(Date.UTC(y - 1, 0, 1)),
+        end: new Date(Date.UTC(y, 0, 1)),
+      };
+    }
+    return null;
+  }
+
+  private async sumBills(
+    userId: bigint,
+    ledgerId: bigint,
+    type: StatsBillType,
+    start: Date,
+    end: Date,
+  ): Promise<Prisma.Decimal> {
+    const result = await this.prisma.bill.aggregate({
+      where: this.buildBillWhere(userId, ledgerId, type, start, end),
+      _sum: { amount: true },
+    });
+    return result._sum.amount ?? new Prisma.Decimal(0);
   }
 
   // ============ /overview ============
@@ -83,11 +132,12 @@ export class StatisticsService {
     month?: string,
     year?: string,
   ): Promise<StatsOverviewResult> {
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
     const range = this.resolvePeriod(period, month, year);
 
     // 当期所有账单（仅聚合需要的字段）
     const current = await this.prisma.bill.findMany({
-      where: this.buildBillWhere(userId, type, range.start, range.end),
+      where: this.buildBillWhere(userId, ledger.id, type, range.start, range.end),
       select: { amount: true, categoryId: true },
     });
 
@@ -96,7 +146,7 @@ export class StatisticsService {
       period === 'all'
         ? []
         : await this.prisma.bill.findMany({
-            where: this.buildBillWhere(userId, type, range.prevStart, range.prevEnd),
+            where: this.buildBillWhere(userId, ledger.id, type, range.prevStart, range.prevEnd),
             select: { amount: true, categoryId: true },
           });
 
@@ -198,6 +248,34 @@ export class StatisticsService {
     if (period !== 'all') {
       summary.prevTotal = prevTotal.toFixed(2);
       summary.changePercent = this.calcChangePercent(totalAmount, prevTotal);
+      if (period === 'month') {
+        const yearOverYearRange = this.resolveYearOverYearPeriod(period, month, year);
+        const yearOverYearTotal = yearOverYearRange
+          ? await this.sumBills(
+              userId,
+              ledger.id,
+              type,
+              yearOverYearRange.start,
+              yearOverYearRange.end,
+            )
+          : new Prisma.Decimal(0);
+        summary.yearOverYear = {
+          label: '同比',
+          amount: yearOverYearTotal.toFixed(2),
+          changePercent: this.calcChangePercent(totalAmount, yearOverYearTotal),
+        };
+        summary.periodOverPeriod = {
+          label: '环比',
+          amount: prevTotal.toFixed(2),
+          changePercent: this.calcChangePercent(totalAmount, prevTotal),
+        };
+      } else if (period === 'year') {
+        summary.yearOverYear = {
+          label: '同比',
+          amount: prevTotal.toFixed(2),
+          changePercent: this.calcChangePercent(totalAmount, prevTotal),
+        };
+      }
     }
 
     // 关键洞察
@@ -209,7 +287,152 @@ export class StatisticsService {
       categories: categoryItems,
     });
 
-    return { summary, categories: categoryItems, insights };
+    const economicIndicators = await this.buildEconomicIndicators(
+      userId,
+      ledger.id,
+      range.start,
+      range.end,
+    );
+
+    return { summary, categories: categoryItems, insights, economicIndicators };
+  }
+
+  private async buildEconomicIndicators(
+    userId: bigint,
+    ledgerId: bigint,
+    start: Date | null,
+    end: Date | null,
+  ): Promise<StatsEconomicIndicator[]> {
+    const dateFilter = start && end ? { gte: start, lt: end } : undefined;
+    const incomeAgg = await this.prisma.bill.aggregate({
+      where: {
+        userId,
+        ledgerId,
+        isDeleted: 0,
+        type: 2,
+        ...(dateFilter && { billDate: dateFilter }),
+      },
+      _sum: { amount: true },
+    });
+    const incomeTotal = incomeAgg._sum.amount ?? new Prisma.Decimal(0);
+
+    const expenseBills = await this.prisma.bill.findMany({
+      where: {
+        userId,
+        ledgerId,
+        isDeleted: 0,
+        type: 1,
+        ...(dateFilter && { billDate: dateFilter }),
+      },
+      select: {
+        amount: true,
+        category: {
+          select: {
+            categoryTags: {
+              where: {
+                tag: {
+                  userId,
+                  ledgerId,
+                  tagType: 'economic',
+                  isDeleted: 0,
+                },
+              },
+              select: {
+                tag: { select: { name: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const sums = new Map<string, Prisma.Decimal>();
+    for (const bill of expenseBills) {
+      const tagName = bill.category.categoryTags[0]?.tag.name;
+      if (!tagName || tagName === ECONOMIC_TAGS.EXCLUDED) continue;
+      sums.set(tagName, (sums.get(tagName) ?? new Prisma.Decimal(0)).plus(bill.amount));
+    }
+
+    const amountOf = (...names: string[]) =>
+      names.reduce(
+        (sum, name) => sum.plus(sums.get(name) ?? new Prisma.Decimal(0)),
+        new Prisma.Decimal(0),
+      );
+
+    const food = amountOf(ECONOMIC_TAGS.FOOD);
+    const rigidLiving = amountOf(ECONOMIC_TAGS.HOUSING, ECONOMIC_TAGS.NECESSARY);
+    const debt = amountOf(ECONOMIC_TAGS.DEBT);
+    const optional = amountOf(ECONOMIC_TAGS.OPTIONAL);
+    const investment = amountOf(ECONOMIC_TAGS.INVESTMENT);
+    const allEconomicExpense = amountOf(
+      ECONOMIC_TAGS.FOOD,
+      ECONOMIC_TAGS.HOUSING,
+      ECONOMIC_TAGS.DEBT,
+      ECONOMIC_TAGS.NECESSARY,
+      ECONOMIC_TAGS.OPTIONAL,
+      ECONOMIC_TAGS.INVESTMENT,
+    );
+    const savings = incomeTotal.minus(allEconomicExpense).plus(investment);
+
+    const toIndicator = (
+      key: StatsEconomicIndicator['key'],
+      name: string,
+      numerator: Prisma.Decimal,
+      formula: string,
+      description: string,
+    ): StatsEconomicIndicator => {
+      const value = incomeTotal.isZero()
+        ? null
+        : parseFloat(numerator.div(incomeTotal).mul(100).toFixed(2));
+      return {
+        key,
+        name,
+        value,
+        valueText: value == null ? '--' : `${value.toFixed(1)}%`,
+        numerator: numerator.toFixed(2),
+        denominator: incomeTotal.toFixed(2),
+        formula,
+        description,
+      };
+    };
+
+    return [
+      toIndicator(
+        'engel',
+        '恩格尔系数',
+        food,
+        '餐饮必要 / 收入总额',
+        '衡量基础饮食支出占收入的比例，比例越高，说明收入中用于基本吃饭的部分越多。',
+      ),
+      toIndicator(
+        'rigidLiving',
+        '生活刚性',
+        rigidLiving,
+        '(居住刚性 + 生活必要) / 收入总额',
+        '衡量维持基本生活、居住、通勤、医疗等必要支出占收入的比例。',
+      ),
+      toIndicator(
+        'debtRepayment',
+        '债务还款',
+        debt,
+        '债务还款 / 收入总额',
+        '衡量房贷、车贷、信用卡、借款等还款金额占收入的比例，用于观察债务压力。',
+      ),
+      toIndicator(
+        'optionalConsumption',
+        '可选消费',
+        optional,
+        '可选消费 / 收入总额',
+        '衡量娱乐、购物、旅游、游戏、非必要外卖等弹性消费占收入的比例。',
+      ),
+      toIndicator(
+        'savingsRate',
+        '储蓄率',
+        savings,
+        '(收入总额 - 所有经济属性支出 + 转账投资) / 收入总额',
+        '衡量收入扣除本期消费并加回储蓄投资后的留存比例，用于观察真实储蓄能力。',
+      ),
+    ];
   }
 
   private calcChangePercent(cur: Prisma.Decimal, prev: Prisma.Decimal): number | null {
@@ -244,7 +467,9 @@ export class StatisticsService {
         );
       }
     } else {
-      insights.push(`${periodLabel}${typeLabel}合计 ${total.toFixed(2)} 元，共 ${categories.reduce((s, c) => s + c.count, 0)} 笔`);
+      insights.push(
+        `${periodLabel}${typeLabel}合计 ${total.toFixed(2)} 元，共 ${categories.reduce((s, c) => s + c.count, 0)} 笔`,
+      );
     }
 
     // 洞察 2：最高分类占比
@@ -269,6 +494,7 @@ export class StatisticsService {
     level: StatsCategoryLevel,
     type: StatsBillType,
   ): Promise<StatsCategoryTrendResult> {
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
     // 最近 6 个月（含当月）
     const now = new Date();
     const baseY = now.getUTCFullYear();
@@ -286,7 +512,7 @@ export class StatisticsService {
     const allEnd = ranges[ranges.length - 1].end;
 
     const bills = await this.prisma.bill.findMany({
-      where: this.buildBillWhere(userId, type, allStart, allEnd),
+      where: this.buildBillWhere(userId, ledger.id, type, allStart, allEnd),
       select: { amount: true, categoryId: true, billDate: true },
     });
 
@@ -320,10 +546,7 @@ export class StatisticsService {
     };
 
     // 月份分桶
-    const matrix = new Map<
-      string,
-      { name: string; icon: string | null; sums: Prisma.Decimal[] }
-    >();
+    const matrix = new Map<string, { name: string; icon: string | null; sums: Prisma.Decimal[] }>();
     const monthIndexOf = (d: Date): number => {
       const ts = d.getTime();
       for (let i = 0; i < ranges.length; i++) {
@@ -367,10 +590,11 @@ export class StatisticsService {
     month?: string,
     year?: string,
   ): Promise<StatsDailySeriesResult> {
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
     const range = this.resolvePeriod(period, month, year);
 
     const bills = await this.prisma.bill.findMany({
-      where: this.buildBillWhere(userId, type, range.start, range.end),
+      where: this.buildBillWhere(userId, ledger.id, type, range.start, range.end),
       select: { amount: true, billDate: true },
     });
 
@@ -424,10 +648,11 @@ export class StatisticsService {
     month?: string,
     year?: string,
   ): Promise<StatsTopBillsResult> {
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
     const range = this.resolvePeriod(period, month, year);
 
     const bills = await this.prisma.bill.findMany({
-      where: this.buildBillWhere(userId, type, range.start, range.end),
+      where: this.buildBillWhere(userId, ledger.id, type, range.start, range.end),
       orderBy: { amount: 'desc' },
       take: limit,
       select: {

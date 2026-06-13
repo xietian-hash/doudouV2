@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CategoriesRepo } from './categories.repo';
 import { CreateCategoryDto, UpdateCategoryDto } from './categories.dto';
+import { LlmService } from '../voice/llm.service';
+import { LedgersService } from '../ledgers/ledgers.service';
 import {
   AppException,
   ErrorCode,
@@ -12,6 +14,7 @@ import {
 interface RawCategory {
   id: bigint;
   userId: bigint;
+  ledgerId: bigint;
   parentId: bigint | null;
   name: string;
   type: number;
@@ -21,11 +24,26 @@ interface RawCategory {
   isDeleted: number;
   createdAt: Date;
   updatedAt: Date;
+  categoryTags?: Array<{
+    tag: {
+      id: bigint;
+      userId: bigint;
+      name: string;
+      description: string | null;
+      tagType: string;
+      canEdit: number;
+      canDelete: number;
+      isDeleted: number;
+      createdAt: Date;
+      updatedAt: Date;
+    };
+  }>;
 }
 
 export interface SerializedCategory {
   id: string;
   userId: string;
+  ledgerId: string;
   parentId: string | null;
   name: string;
   type: number;
@@ -35,6 +53,15 @@ export interface SerializedCategory {
   isDeleted: number;
   createdAt: Date;
   updatedAt: Date;
+  tags?: Array<{
+    id: string;
+    userId: string;
+    name: string;
+    description: string | null;
+    tagType: string;
+    canEdit: boolean;
+    canDelete: boolean;
+  }>;
   children?: SerializedCategory[];
 }
 
@@ -43,7 +70,17 @@ function serializeCategory(cat: RawCategory): SerializedCategory {
     ...cat,
     id: cat.id.toString(),
     userId: cat.userId.toString(),
+    ledgerId: cat.ledgerId.toString(),
     parentId: cat.parentId?.toString() ?? null,
+    tags: cat.categoryTags?.map(({ tag }) => ({
+      id: tag.id.toString(),
+      userId: tag.userId.toString(),
+      name: tag.name,
+      description: tag.description,
+      tagType: tag.tagType,
+      canEdit: tag.canEdit === 1,
+      canDelete: tag.canDelete === 1,
+    })),
   };
 }
 
@@ -77,7 +114,13 @@ function buildTree(categories: RawCategory[]): SerializedCategory[] {
 
 @Injectable()
 export class CategoriesService {
-  constructor(private readonly repo: CategoriesRepo) {}
+  private readonly logger = new Logger(CategoriesService.name);
+
+  constructor(
+    private readonly repo: CategoriesRepo,
+    private readonly llmService: LlmService,
+    private readonly ledgersService: LedgersService,
+  ) {}
 
   async listIcons() {
     const icons = await this.repo.findIcons();
@@ -88,17 +131,20 @@ export class CategoriesService {
   }
 
   async list(userId: bigint, type?: number, onlyLeaf?: boolean) {
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
     if (onlyLeaf) {
-      const leaves = await this.repo.findLeafCategories(userId, type);
+      const leaves = await this.repo.findLeafCategories(userId, type, ledger.id);
       return leaves.map(serializeCategory);
     }
 
-    const all = await this.repo.findAllByUserId(userId, type);
+    const all = await this.repo.findAllByUserId(userId, type, ledger.id);
     return buildTree(all);
   }
 
   async create(userId: bigint, dto: CreateCategoryDto) {
     const parentId = dto.parentId ? BigInt(dto.parentId) : null;
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
+    let parentCategoryName = '';
 
     if (parentId) {
       const parent = await this.repo.findById(parentId);
@@ -108,19 +154,20 @@ export class CategoriesService {
       if (parent.userId !== userId) {
         throw new ForbiddenException('无权操作该分类');
       }
+      if (parent.ledgerId !== ledger.id) {
+        throw new ForbiddenException('无权操作该分类');
+      }
+      parentCategoryName = parent.name;
     }
 
-    const existing = await this.repo.findByNameUserParent(
-      dto.name,
-      userId,
-      parentId,
-    );
+    const existing = await this.repo.findByNameUserParent(dto.name, userId, ledger.id, parentId);
     if (existing) {
       throw new ConflictException(`分类名称 "${dto.name}" 已存在`);
     }
 
     const category = await this.repo.create({
       userId,
+      ledgerId: ledger.id,
       name: dto.name,
       type: dto.type,
       icon: dto.icon,
@@ -128,10 +175,15 @@ export class CategoriesService {
       parentId,
     });
 
+    if (parentId && dto.type === 1) {
+      this.assignEconomicTagAsync(userId, category.id, parentCategoryName, category.name);
+    }
+
     return serializeCategory(category);
   }
 
   async update(userId: bigint, id: bigint, dto: UpdateCategoryDto) {
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
     const category = await this.repo.findById(id);
     if (!category) {
       throw new NotFoundException('分类不存在');
@@ -139,11 +191,15 @@ export class CategoriesService {
     if (category.userId !== userId) {
       throw new ForbiddenException('无权操作该分类');
     }
+    if (category.ledgerId !== ledger.id) {
+      throw new ForbiddenException('无权操作该分类');
+    }
 
     if (dto.name) {
       const existing = await this.repo.findByNameUserParent(
         dto.name,
         userId,
+        ledger.id,
         category.parentId,
         id,
       );
@@ -162,11 +218,15 @@ export class CategoriesService {
   }
 
   async remove(userId: bigint, id: bigint, force = false) {
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
     const category = await this.repo.findById(id);
     if (!category) {
       throw new NotFoundException('分类不存在');
     }
     if (category.userId !== userId) {
+      throw new ForbiddenException('无权操作该分类');
+    }
+    if (category.ledgerId !== ledger.id) {
       throw new ForbiddenException('无权操作该分类');
     }
 
@@ -186,5 +246,51 @@ export class CategoriesService {
 
     await this.repo.softDelete(id);
     return { success: true };
+  }
+
+  private assignEconomicTagAsync(
+    userId: bigint,
+    categoryId: bigint,
+    parentCategoryName: string,
+    categoryName: string,
+  ) {
+    void this.assignEconomicTag(userId, categoryId, parentCategoryName, categoryName).catch(
+      (error) => {
+        this.logger.error(
+          `异步绑定经济属性标签失败 userId=${userId} categoryId=${categoryId} category="${categoryName}"`,
+          error,
+        );
+      },
+    );
+  }
+
+  private async assignEconomicTag(
+    userId: bigint,
+    categoryId: bigint,
+    parentCategoryName: string,
+    categoryName: string,
+  ) {
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
+    const economicTags = await this.repo.findEconomicTagsByUserId(userId, ledger.id);
+    if (!economicTags.length) {
+      this.logger.warn(`未找到经济属性标签 userId=${userId} categoryId=${categoryId}`);
+      return;
+    }
+
+    const fallbackTag = economicTags.find((tag) => tag.name === '不计入统计') || economicTags[0];
+    const recommendedName = await this.llmService.recommendEconomicTag({
+      parentCategoryName,
+      categoryName,
+      tagOptions: economicTags.map((tag) => ({
+        name: tag.name,
+        description: tag.description,
+      })),
+    });
+    const selectedTag = economicTags.find((tag) => tag.name === recommendedName) || fallbackTag;
+
+    await this.repo.replaceCategoryTags(categoryId, [selectedTag.id]);
+    this.logger.log(
+      `已绑定经济属性标签 userId=${userId} categoryId=${categoryId} category="${categoryName}" tag="${selectedTag.name}" recommended="${recommendedName ?? ''}"`,
+    );
   }
 }

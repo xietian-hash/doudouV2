@@ -1,13 +1,4 @@
-import {
-  IsIn,
-  IsInt,
-  IsOptional,
-  IsString,
-  Matches,
-  Max,
-  Min,
-  ValidateIf,
-} from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, Matches, Max, Min, ValidateIf } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export type StatsPeriod = 'month' | 'year' | 'all';
@@ -77,6 +68,14 @@ export interface StatsSummary {
   dailyAvg?: string;
   prevTotal?: string;
   changePercent?: number | null;
+  yearOverYear?: StatsComparison;
+  periodOverPeriod?: StatsComparison;
+}
+
+export interface StatsComparison {
+  label: '同比' | '环比';
+  amount: string;
+  changePercent: number | null;
 }
 
 export interface StatsCategoryItem {
@@ -94,6 +93,18 @@ export interface StatsOverviewResult {
   summary: StatsSummary;
   categories: StatsCategoryItem[];
   insights: string[];
+  economicIndicators: StatsEconomicIndicator[];
+}
+
+export interface StatsEconomicIndicator {
+  key: 'engel' | 'rigidLiving' | 'debtRepayment' | 'optionalConsumption' | 'savingsRate';
+  name: string;
+  value: number | null;
+  valueText: string;
+  numerator: string;
+  denominator: string;
+  formula: string;
+  description: string;
 }
 
 export interface StatsCategoryTrendResult {

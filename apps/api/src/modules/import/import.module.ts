@@ -7,9 +7,10 @@ import { CategoriesModule } from '../categories/categories.module';
 import { AccountsModule } from '../accounts/accounts.module';
 import { TagsModule } from '../tags/tags.module';
 import { BillsModule } from '../bills/bills.module';
+import { LedgersModule } from '../ledgers/ledgers.module';
 
 @Module({
-  imports: [CategoriesModule, AccountsModule, TagsModule, BillsModule],
+  imports: [CategoriesModule, AccountsModule, TagsModule, BillsModule, LedgersModule],
   controllers: [ImportController],
   providers: [ImportService, ImportTemplateService, ImportParserService],
 })

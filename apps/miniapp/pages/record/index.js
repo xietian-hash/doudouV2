@@ -1,6 +1,7 @@
 const billsService = require('../../services/bills');
 const { buildCalendarDays, formatDate } = require('../../utils/date');
 const { formatAmount } = require('../../utils/format');
+const { showToast, showError } = require('../../utils/toast');
 
 const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日'];
 
@@ -48,6 +49,7 @@ Page({
         ...bill,
         sign: bill.type === 1 ? '-' : '+',
         amountText: formatAmount(bill.amount),
+        slideX: 0,
       }));
       this.setData({
         calendarDays: this.buildCalendar(summary || []),
@@ -137,9 +139,97 @@ Page({
     this.setData({ selectedDate: this.data.selectedDate === date ? '' : date }, () => this.loadData());
   },
 
+  closeSwipeRows() {
+    const groups = this.data.groups.map((group) => ({
+      ...group,
+      items: group.items.map((bill) => ({ ...bill, slideX: 0 })),
+    }));
+    this.setData({ groups });
+  },
+
+  updateBillSlide(groupIndex, billIndex, slideX) {
+    const groups = this.data.groups.map((group, gi) => {
+      if (gi !== groupIndex) {
+        return {
+          ...group,
+          items: group.items.map((bill) => ({ ...bill, slideX: 0 })),
+        };
+      }
+      return {
+        ...group,
+        items: group.items.map((bill, bi) => ({ ...bill, slideX: bi === billIndex ? slideX : 0 })),
+      };
+    });
+    this.setData({ groups });
+  },
+
+  onTouchStart(event) {
+    const groupIndex = Number(event.currentTarget.dataset.groupIndex);
+    const billIndex = Number(event.currentTarget.dataset.billIndex);
+    const bill = this.data.groups[groupIndex] && this.data.groups[groupIndex].items[billIndex];
+    if (!bill) return;
+    this._touchActive = { groupIndex, billIndex };
+    this._touchStartX = event.changedTouches[0].clientX;
+    this._touchStartSlideX = bill.slideX || 0;
+  },
+
+  onTouchMove(event) {
+    const groupIndex = Number(event.currentTarget.dataset.groupIndex);
+    const billIndex = Number(event.currentTarget.dataset.billIndex);
+    if (!this._touchActive || this._touchActive.groupIndex !== groupIndex || this._touchActive.billIndex !== billIndex) {
+      return;
+    }
+    const diff = event.changedTouches[0].clientX - this._touchStartX;
+    let next = this._touchStartSlideX + diff;
+    if (next > 0) next = 0;
+    if (next < -288) next = -288;
+    const current = this.data.groups[groupIndex].items[billIndex].slideX || 0;
+    if (current === next) return;
+    this.updateBillSlide(groupIndex, billIndex, next);
+  },
+
+  onTouchEnd(event) {
+    const groupIndex = Number(event.currentTarget.dataset.groupIndex);
+    const billIndex = Number(event.currentTarget.dataset.billIndex);
+    if (!this._touchActive || this._touchActive.groupIndex !== groupIndex || this._touchActive.billIndex !== billIndex) {
+      return;
+    }
+    this._touchActive = null;
+    const current = this.data.groups[groupIndex].items[billIndex].slideX || 0;
+    const moved = current - this._touchStartSlideX;
+    const target = this._touchStartSlideX === -288 ? (moved > 96 ? 0 : -288) : (moved < -96 ? -288 : 0);
+    if (current === target) return;
+    this.updateBillSlide(groupIndex, billIndex, target);
+  },
+
   openDetail(event) {
+    const groupIndex = Number(event.currentTarget.dataset.groupIndex);
+    const billIndex = Number(event.currentTarget.dataset.billIndex);
+    const bill = this.data.groups[groupIndex] && this.data.groups[groupIndex].items[billIndex];
+    if (bill && bill.slideX) {
+      this.closeSwipeRows();
+      return;
+    }
+    this.openEdit(event);
+  },
+
+  openEdit(event) {
+    this.closeSwipeRows();
     wx.navigateTo({
       url: `/subpkg/bill-edit/index?id=${event.currentTarget.dataset.id}`,
     });
+  },
+
+  async deleteBill(event) {
+    const id = event.currentTarget.dataset.id;
+    if (!id) return;
+    this.closeSwipeRows();
+    try {
+      await billsService.deleteBill(id);
+      showToast('删除成功', 'success');
+      await this.loadData();
+    } catch (error) {
+      showError('删除失败');
+    }
   },
 });

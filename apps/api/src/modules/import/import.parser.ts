@@ -3,6 +3,7 @@ import ExcelJS = require('exceljs');
 import { CategoriesRepo } from '../categories/categories.repo';
 import { AccountsRepo } from '../accounts/accounts.repo';
 import { TagsRepo } from '../tags/tags.repo';
+import { LedgersService } from '../ledgers/ledgers.service';
 
 export interface ParsedBillRow {
   // 原始字段（用于错误清单回写）
@@ -43,6 +44,7 @@ export class ImportParserService {
     private readonly categoriesRepo: CategoriesRepo,
     private readonly accountsRepo: AccountsRepo,
     private readonly tagsRepo: TagsRepo,
+    private readonly ledgersService: LedgersService,
   ) {}
 
   async parseAndValidate(userId: bigint, filePath: string): Promise<ParseResult> {
@@ -67,10 +69,11 @@ export class ImportParserService {
     }
 
     // 预加载校验数据
+    const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
     const [leafCategories, accounts, tags] = await Promise.all([
-      this.categoriesRepo.findLeafCategories(userId),
-      this.accountsRepo.findAllByUserId(userId),
-      this.tagsRepo.findAllByUserId(userId),
+      this.categoriesRepo.findLeafCategories(userId, undefined, ledger.id),
+      this.accountsRepo.findAllByUserId(userId, ledger.id),
+      this.tagsRepo.findAllByUserId(userId, ledger.id),
     ]);
     const categoryByName = new Map(leafCategories.map((c) => [c.name, c]));
     const accountByName = new Map(accounts.map((a) => [a.name, a]));
