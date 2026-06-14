@@ -423,6 +423,16 @@
   line-height: 1.55;
 }
 
+.eco-tag {
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+  background: #f0f0f0;
+  color: #888;
+  font-size: 20rpx;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
 .empty-state {
   padding: 96rpx 24rpx 32rpx;
   text-align: center;

@@ -442,19 +442,12 @@ Page({
       this.setData({ voiceParsing: true });
       try {
         const parsed = await voiceService.uploadAudioAndParse(res.tempFilePath);
-        const items = (parsed || []).map((item, index) => {
-          const dateText = (() => {
-            if (!item.billDate) return '';
-            const parts = String(item.billDate).split('-');
-            return `${Number(parts[1])}月${Number(parts[2])}日`;
-          })();
-          return {
-            ...item,
-            _localId: `voice_${Date.now()}_${index}`,
-            amount: String(item.amount || '0'),
-            billDateText: dateText,
-          };
-        });
+        const items = (parsed || []).map((item, index) => ({
+          ...item,
+          _localId: `voice_${Date.now()}_${index}`,
+          amount: String(item.amount || '0'),
+          billDateText: item.billDate ? formatDisplayDate(item.billDate) : '',
+        }));
         if (!items.length) {
           showError('未识别到记账信息');
           return;

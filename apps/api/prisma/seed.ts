@@ -226,14 +226,14 @@ export async function seedUserData(client: PrismaClient, userId: bigint): Promis
       icon: '🍜',
       sort: 1,
       children: [
-        { name: '早餐', icon: '☕', sort: 1 },
-        { name: '午餐', icon: '🍱', sort: 2 },
-        { name: '晚餐', icon: '🍽', sort: 3 },
-        { name: '零食饮料', icon: '🧋', sort: 4 },
-        { name: '餐厅聚餐', icon: '🥂', sort: 5 },
-        { name: '外卖', icon: '🛵', sort: 6 },
-        { name: '夜宵', icon: '🌙', sort: 7 },
-        { name: '下午茶', icon: '🍵', sort: 8 },
+        { name: '早餐', icon: '☕', sort: 1, ecoTag: '餐饮必要' },
+        { name: '午餐', icon: '🍱', sort: 2, ecoTag: '餐饮必要' },
+        { name: '晚餐', icon: '🍽', sort: 3, ecoTag: '餐饮必要' },
+        { name: '零食饮料', icon: '🧋', sort: 4, ecoTag: '可选消费' },
+        { name: '餐厅聚餐', icon: '🥂', sort: 5, ecoTag: '可选消费' },
+        { name: '外卖', icon: '🛵', sort: 6, ecoTag: '餐饮必要' },
+        { name: '夜宵', icon: '🌙', sort: 7, ecoTag: '可选消费' },
+        { name: '下午茶', icon: '🍵', sort: 8, ecoTag: '可选消费' },
       ],
     },
     {
@@ -241,14 +241,14 @@ export async function seedUserData(client: PrismaClient, userId: bigint): Promis
       icon: '🚌',
       sort: 2,
       children: [
-        { name: '公交地铁', icon: '🚇', sort: 1 },
-        { name: '打车', icon: '🚕', sort: 2 },
-        { name: '加油', icon: '⛽', sort: 3 },
-        { name: '停车', icon: '🅿', sort: 4 },
-        { name: '高铁火车', icon: '🚄', sort: 5 },
-        { name: '飞机出行', icon: '🛫', sort: 6 },
-        { name: '共享单车', icon: '🚲', sort: 7 },
-        { name: '过路费', icon: '🛣', sort: 8 },
+        { name: '公交地铁', icon: '🚇', sort: 1, ecoTag: '生活必要' },
+        { name: '打车', icon: '🚕', sort: 2, ecoTag: '可选消费' },
+        { name: '加油', icon: '⛽', sort: 3, ecoTag: '生活必要' },
+        { name: '停车', icon: '🅿', sort: 4, ecoTag: '生活必要' },
+        { name: '高铁火车', icon: '🚄', sort: 5, ecoTag: '生活必要' },
+        { name: '飞机出行', icon: '🛫', sort: 6, ecoTag: '可选消费' },
+        { name: '共享单车', icon: '🚲', sort: 7, ecoTag: '生活必要' },
+        { name: '过路费', icon: '🛣', sort: 8, ecoTag: '生活必要' },
       ],
     },
     {
@@ -256,14 +256,14 @@ export async function seedUserData(client: PrismaClient, userId: bigint): Promis
       icon: '🛍',
       sort: 3,
       children: [
-        { name: '日用品', icon: '🧴', sort: 1 },
-        { name: '服装', icon: '👗', sort: 2 },
-        { name: '数码电器', icon: '📱', sort: 3 },
-        { name: '家居用品', icon: '🛋', sort: 4 },
-        { name: '食品杂货', icon: '🛒', sort: 5 },
-        { name: '美妆护肤', icon: '💄', sort: 6 },
-        { name: '箱包配饰', icon: '👜', sort: 7 },
-        { name: '运动装备', icon: '🎽', sort: 8 },
+        { name: '日用品', icon: '🧴', sort: 1, ecoTag: '生活必要' },
+        { name: '服装', icon: '👗', sort: 2, ecoTag: '可选消费' },
+        { name: '数码电器', icon: '📱', sort: 3, ecoTag: '可选消费' },
+        { name: '家居用品', icon: '🛋', sort: 4, ecoTag: '可选消费' },
+        { name: '食品杂货', icon: '🛒', sort: 5, ecoTag: '餐饮必要' },
+        { name: '美妆护肤', icon: '💄', sort: 6, ecoTag: '可选消费' },
+        { name: '箱包配饰', icon: '👜', sort: 7, ecoTag: '可选消费' },
+        { name: '运动装备', icon: '🎽', sort: 8, ecoTag: '可选消费' },
       ],
     },
     {
@@ -271,14 +271,14 @@ export async function seedUserData(client: PrismaClient, userId: bigint): Promis
       icon: '🎮',
       sort: 4,
       children: [
-        { name: '电影演出', icon: '🎬', sort: 1 },
-        { name: '游戏', icon: '🎯', sort: 2 },
-        { name: '运动健身', icon: '🏋', sort: 3 },
-        { name: '旅游', icon: '✈', sort: 4 },
-        { name: '书籍音乐', icon: '🎵', sort: 5 },
-        { name: 'KTV', icon: '🎤', sort: 6 },
-        { name: '桌游剧本杀', icon: '🎲', sort: 7 },
-        { name: '宠物', icon: '🐾', sort: 8 },
+        { name: '电影演出', icon: '🎬', sort: 1, ecoTag: '可选消费' },
+        { name: '游戏', icon: '🎯', sort: 2, ecoTag: '可选消费' },
+        { name: '运动健身', icon: '🏋', sort: 3, ecoTag: '可选消费' },
+        { name: '旅游', icon: '✈', sort: 4, ecoTag: '可选消费' },
+        { name: '书籍音乐', icon: '🎵', sort: 5, ecoTag: '可选消费' },
+        { name: 'KTV', icon: '🎤', sort: 6, ecoTag: '可选消费' },
+        { name: '桌游剧本杀', icon: '🎲', sort: 7, ecoTag: '可选消费' },
+        { name: '宠物', icon: '🐾', sort: 8, ecoTag: '可选消费' },
       ],
     },
     {
@@ -286,14 +286,14 @@ export async function seedUserData(client: PrismaClient, userId: bigint): Promis
       icon: '🏠',
       sort: 5,
       children: [
-        { name: '房租', icon: '🏠', sort: 1 },
-        { name: '水电燃气', icon: '💡', sort: 2 },
-        { name: '物业维修', icon: '🔧', sort: 3 },
-        { name: '宽带网络', icon: '📡', sort: 4 },
-        { name: '家政保洁', icon: '🧹', sort: 5 },
-        { name: '装修装饰', icon: '🪴', sort: 6 },
-        { name: '日用耗材', icon: '🧻', sort: 7 },
-        { name: '购房贷款', icon: '🏦', sort: 8 },
+        { name: '房租', icon: '🏠', sort: 1, ecoTag: '居住刚性' },
+        { name: '水电燃气', icon: '💡', sort: 2, ecoTag: '居住刚性' },
+        { name: '物业维修', icon: '🔧', sort: 3, ecoTag: '居住刚性' },
+        { name: '宽带网络', icon: '📡', sort: 4, ecoTag: '居住刚性' },
+        { name: '家政保洁', icon: '🧹', sort: 5, ecoTag: '居住刚性' },
+        { name: '装修装饰', icon: '🪴', sort: 6, ecoTag: '可选消费' },
+        { name: '日用耗材', icon: '🧻', sort: 7, ecoTag: '生活必要' },
+        { name: '购房贷款', icon: '🏦', sort: 8, ecoTag: '债务还款' },
       ],
     },
     {
@@ -301,14 +301,14 @@ export async function seedUserData(client: PrismaClient, userId: bigint): Promis
       icon: '💊',
       sort: 6,
       children: [
-        { name: '看病就医', icon: '🏥', sort: 1 },
-        { name: '药品', icon: '💊', sort: 2 },
-        { name: '体检', icon: '🩺', sort: 3 },
-        { name: '口腔牙科', icon: '🦷', sort: 4 },
-        { name: '眼科视力', icon: '👓', sort: 5 },
-        { name: '心理咨询', icon: '🧠', sort: 6 },
-        { name: '保健品', icon: '💪', sort: 7 },
-        { name: '医疗保险', icon: '🛡', sort: 8 },
+        { name: '看病就医', icon: '🏥', sort: 1, ecoTag: '生活必要' },
+        { name: '药品', icon: '💊', sort: 2, ecoTag: '生活必要' },
+        { name: '体检', icon: '🩺', sort: 3, ecoTag: '生活必要' },
+        { name: '口腔牙科', icon: '🦷', sort: 4, ecoTag: '可选消费' },
+        { name: '眼科视力', icon: '👓', sort: 5, ecoTag: '生活必要' },
+        { name: '心理咨询', icon: '🧠', sort: 6, ecoTag: '可选消费' },
+        { name: '保健品', icon: '💪', sort: 7, ecoTag: '可选消费' },
+        { name: '医疗保险', icon: '🛡', sort: 8, ecoTag: '生活必要' },
       ],
     },
     {
@@ -316,14 +316,14 @@ export async function seedUserData(client: PrismaClient, userId: bigint): Promis
       icon: '📚',
       sort: 7,
       children: [
-        { name: '学费', icon: '🎓', sort: 1 },
-        { name: '书籍文具', icon: '📖', sort: 2 },
-        { name: '培训课程', icon: '🎨', sort: 3 },
-        { name: '考试报名', icon: '📝', sort: 4 },
-        { name: '网课订阅', icon: '💻', sort: 5 },
-        { name: '兴趣班', icon: '🎸', sort: 6 },
-        { name: '留学费用', icon: '🌍', sort: 7 },
-        { name: '工具软件', icon: '🔌', sort: 8 },
+        { name: '学费', icon: '🎓', sort: 1, ecoTag: '生活必要' },
+        { name: '书籍文具', icon: '📖', sort: 2, ecoTag: '生活必要' },
+        { name: '培训课程', icon: '🎨', sort: 3, ecoTag: '可选消费' },
+        { name: '考试报名', icon: '📝', sort: 4, ecoTag: '生活必要' },
+        { name: '网课订阅', icon: '💻', sort: 5, ecoTag: '可选消费' },
+        { name: '兴趣班', icon: '🎸', sort: 6, ecoTag: '可选消费' },
+        { name: '留学费用', icon: '🌍', sort: 7, ecoTag: '生活必要' },
+        { name: '工具软件', icon: '🔌', sort: 8, ecoTag: '可选消费' },
       ],
     },
     {
@@ -331,14 +331,14 @@ export async function seedUserData(client: PrismaClient, userId: bigint): Promis
       icon: '🎁',
       sort: 8,
       children: [
-        { name: '红包礼金', icon: '🧧', sort: 1 },
-        { name: '聚餐请客', icon: '🍽', sort: 2 },
-        { name: '婚礼份子钱', icon: '💍', sort: 3 },
-        { name: '生日礼物', icon: '🎂', sort: 4 },
-        { name: '节日礼品', icon: '🎀', sort: 5 },
-        { name: '公益捐款', icon: '❤', sort: 6 },
-        { name: '朋友借款', icon: '🤝', sort: 7 },
-        { name: '家人赡养', icon: '👨‍👩‍👧', sort: 8 },
+        { name: '红包礼金', icon: '🧧', sort: 1, ecoTag: '可选消费' },
+        { name: '聚餐请客', icon: '🍽', sort: 2, ecoTag: '可选消费' },
+        { name: '婚礼份子钱', icon: '💍', sort: 3, ecoTag: '可选消费' },
+        { name: '生日礼物', icon: '🎂', sort: 4, ecoTag: '可选消费' },
+        { name: '节日礼品', icon: '🎀', sort: 5, ecoTag: '可选消费' },
+        { name: '公益捐款', icon: '❤', sort: 6, ecoTag: '可选消费' },
+        { name: '朋友借款', icon: '🤝', sort: 7, ecoTag: '不计入统计' },
+        { name: '家人赡养', icon: '👨‍👩‍👧', sort: 8, ecoTag: '生活必要' },
       ],
     },
   ];
@@ -405,7 +405,7 @@ export async function seedUserData(client: PrismaClient, userId: bigint): Promis
     });
 
     for (const child of parent.children) {
-      await client.category.create({
+      const childCategory = await client.category.create({
         data: {
           userId,
           ledgerId: defaultLedger.id,
@@ -416,6 +416,17 @@ export async function seedUserData(client: PrismaClient, userId: bigint): Promis
           parentId: parentCategory.id,
         },
       });
+
+      if (child.ecoTag) {
+        const tag = await client.tag.findFirst({
+          where: { userId, ledgerId: defaultLedger.id, name: child.ecoTag, isDeleted: 0 },
+        });
+        if (tag) {
+          await client.categoryTag.create({
+            data: { categoryId: childCategory.id, tagId: tag.id },
+          });
+        }
+      }
     }
   }
 
