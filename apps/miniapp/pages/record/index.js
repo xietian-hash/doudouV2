@@ -1,7 +1,7 @@
 const billsService = require('../../services/bills');
 const accountsService = require('../../services/accounts');
 const voiceService = require('../../services/voice');
-const { buildCalendarDays, formatDate } = require('../../utils/date');
+const { buildCalendarDays, formatDate, formatDisplayDate, formatDayOfWeek } = require('../../utils/date');
 const { formatAmount } = require('../../utils/format');
 const { showToast, showError } = require('../../utils/toast');
 
@@ -168,7 +168,7 @@ Page({
         const parts = date.split('-');
         return {
           date,
-          title: `${Number(parts[1])}月${Number(parts[2])}日`,
+          title: `${formatDisplayDate(date)} ${formatDayOfWeek(date)}`,
           expense,
           income,
           expenseText: formatAmount(expense),
@@ -332,11 +332,7 @@ Page({
   },
 
   buildVoiceItemView(item, index) {
-    const dateText = (() => {
-      if (!item.billDate) return '';
-      const parts = String(item.billDate).split('-');
-      return `${Number(parts[1])}月${Number(parts[2])}日`;
-    })();
+    const dateText = item.billDate ? formatDisplayDate(item.billDate) : '';
     const metaParts = [];
     if (dateText) metaParts.push(dateText);
     if (item.remark) metaParts.push(item.remark);

@@ -22,6 +22,11 @@ function formatDisplayDate(date) {
   return `${value.getMonth() + 1}月${value.getDate()}日`;
 }
 
+function formatDayOfWeek(date) {
+  const value = date instanceof Date ? date : new Date(date);
+  return ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][value.getDay()];
+}
+
 function getDaysInMonth(year, month) {
   return new Date(year, month, 0).getDate();
 }
@@ -40,6 +45,7 @@ function buildCalendarDays(year, month) {
 module.exports = {
   formatDate,
   formatDisplayDate,
+  formatDayOfWeek,
   formatMonth,
   getDaysInMonth,
   getFirstDayOfWeek,
