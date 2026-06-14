@@ -449,7 +449,7 @@ Page({
           billDateText: item.billDate ? formatDisplayDate(item.billDate) : '',
         }));
         if (!items.length) {
-          showError('未识别到记账信息');
+          showError('兜兜没听清账单哦');
           return;
         }
         this.setData({ voiceItems: items, voiceConfirmVisible: true });

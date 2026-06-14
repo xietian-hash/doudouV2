@@ -132,9 +132,15 @@ export class AsrService {
         throw error;
       }
 
-      // 成功：result.text 有非空内容（空字符串表示识别仍在进行中）
+      // 成功：有识别文本
       if (data.result?.text) {
         return data.result.text;
+      }
+
+      // 识别已完成但无语音内容：audio_info.duration 存在说明引擎已处理完毕
+      if (data.audio_info?.duration != null) {
+        this.logger.log(`ASR 识别完成，无语音内容 requestId=${requestId}`);
+        return '';
       }
 
       // 错误码（部分场景通过 base_resp 返回）
