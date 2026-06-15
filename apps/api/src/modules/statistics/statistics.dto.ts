@@ -66,6 +66,9 @@ export interface StatsSummary {
   total: string;
   count: number;
   dailyAvg?: string;
+  dailyAvgChangePercent?: number | null;
+  monthlyAvg?: string;
+  monthlyAvgChangePercent?: number | null;
   prevTotal?: string;
   changePercent?: number | null;
   yearOverYear?: StatsComparison;

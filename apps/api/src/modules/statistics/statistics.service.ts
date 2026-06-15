@@ -49,9 +49,20 @@ export class StatisticsService {
       const start = new Date(Date.UTC(y, m - 1, 1));
       const end = new Date(Date.UTC(y, m, 1));
       const days = Math.round((end.getTime() - start.getTime()) / 86400000);
-      // 上一月
       const prevStart = new Date(Date.UTC(y, m - 2, 1));
-      const prevEnd = start;
+
+      // 若查看的是当前进行中的月份，按比例折算环比截止日，避免拿部分月与完整上月比较
+      const now = new Date();
+      let prevEnd: Date;
+      if (y === now.getUTCFullYear() && m === now.getUTCMonth() + 1) {
+        const todayDay = now.getUTCDate();
+        const prevMonthDays = Math.round((start.getTime() - prevStart.getTime()) / 86400000);
+        const cutoff = Math.max(1, Math.floor((todayDay / days) * prevMonthDays));
+        prevEnd = new Date(Date.UTC(y, m - 2, cutoff + 1));
+      } else {
+        prevEnd = start;
+      }
+
       return { start, end, days, prevStart, prevEnd };
     }
     if (period === 'year') {
@@ -93,10 +104,25 @@ export class StatisticsService {
   ): { start: Date; end: Date } | null {
     if (period === 'month') {
       const [y, m] = (month ?? '').split('-').map(Number);
-      return {
-        start: new Date(Date.UTC(y - 1, m - 1, 1)),
-        end: new Date(Date.UTC(y - 1, m, 1)),
-      };
+      const yoyStart = new Date(Date.UTC(y - 1, m - 1, 1));
+      const yoyFullEnd = new Date(Date.UTC(y - 1, m, 1));
+
+      // 若查看的是当前进行中的月份，按比例折算同比截止日
+      const now = new Date();
+      let yoyEnd: Date;
+      if (y === now.getUTCFullYear() && m === now.getUTCMonth() + 1) {
+        const todayDay = now.getUTCDate();
+        const currentMonthDays = Math.round(
+          (new Date(Date.UTC(y, m, 1)).getTime() - new Date(Date.UTC(y, m - 1, 1)).getTime()) / 86400000,
+        );
+        const yoyMonthDays = Math.round((yoyFullEnd.getTime() - yoyStart.getTime()) / 86400000);
+        const cutoff = Math.max(1, Math.floor((todayDay / currentMonthDays) * yoyMonthDays));
+        yoyEnd = new Date(Date.UTC(y - 1, m - 1, cutoff + 1));
+      } else {
+        yoyEnd = yoyFullEnd;
+      }
+
+      return { start: yoyStart, end: yoyEnd };
     }
     if (period === 'year') {
       const y = Number(year);
@@ -242,9 +268,50 @@ export class StatisticsService {
       total: totalAmount.toFixed(2),
       count: current.length,
     };
-    if (range.days) {
-      summary.dailyAvg = totalAmount.div(range.days).toFixed(2);
+    // 日均（仅月视图）：当月用已过天数，历史月用全月天数
+    if (period === 'month' && range.days && range.start) {
+      const now = new Date();
+      const elapsedDays =
+        range.start.getUTCFullYear() === now.getUTCFullYear() &&
+        range.start.getUTCMonth() === now.getUTCMonth()
+          ? now.getUTCDate()
+          : range.days;
+      summary.dailyAvg = totalAmount.div(elapsedDays).toFixed(2);
+      if (range.prevStart && range.prevEnd) {
+        const prevDays = Math.round(
+          (range.prevEnd.getTime() - range.prevStart.getTime()) / 86400000,
+        );
+        if (prevDays > 0) {
+          summary.dailyAvgChangePercent = this.calcChangePercent(
+            totalAmount.div(elapsedDays),
+            prevTotal.div(prevDays),
+          );
+        }
+      }
     }
+
+    // 月均（年视图 / 全部视图）
+    if (period === 'year') {
+      summary.monthlyAvg = totalAmount.div(12).toFixed(2);
+    }
+    if (period === 'all') {
+      const minAgg = await this.prisma.bill.aggregate({
+        where: this.buildBillWhere(userId, ledger.id, type, null, null),
+        _min: { billDate: true },
+      });
+      const minDate = minAgg._min.billDate;
+      if (minDate) {
+        const now = new Date();
+        const monthCount =
+          (now.getUTCFullYear() - minDate.getUTCFullYear()) * 12 +
+          (now.getUTCMonth() - minDate.getUTCMonth()) +
+          1;
+        if (monthCount > 0) {
+          summary.monthlyAvg = totalAmount.div(monthCount).toFixed(2);
+        }
+      }
+    }
+
     if (period !== 'all') {
       summary.prevTotal = prevTotal.toFixed(2);
       summary.changePercent = this.calcChangePercent(totalAmount, prevTotal);
@@ -275,6 +342,7 @@ export class StatisticsService {
           amount: prevTotal.toFixed(2),
           changePercent: this.calcChangePercent(totalAmount, prevTotal),
         };
+        summary.monthlyAvgChangePercent = this.calcChangePercent(totalAmount, prevTotal);
       }
     }
 
