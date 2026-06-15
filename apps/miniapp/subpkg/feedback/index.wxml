@@ -26,23 +26,6 @@
       <view class="word-count">{{content.length}}/1000</view>
     </view>
 
-    <view class="form-card">
-      <view class="field-head">
-        <text class="field-title">上传照片</text>
-        <text class="field-optional">选填，最多 3 张</text>
-      </view>
-      <view class="image-grid">
-        <view wx:for="{{images}}" wx:key="path" class="image-cell">
-          <image class="feedback-image" src="{{item.path}}" mode="aspectFill" data-path="{{item.path}}" bindtap="previewImage" />
-          <view class="image-remove" data-index="{{index}}" catchtap="removeImage">×</view>
-        </view>
-        <view wx:if="{{images.length < 3}}" class="image-add" bindtap="chooseImages">
-          <text class="image-add-plus">+</text>
-          <text class="image-add-text">添加照片</text>
-        </view>
-      </view>
-    </view>
-
     <view class="hint-card">
       <text class="hint-title">建议这样写</text>
       <text class="hint-text">1. 你正在做什么操作；2. 发生了什么问题；3. 你期望它怎么表现。截图可以帮助我们更快定位问题。</text>

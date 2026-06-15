@@ -47,7 +47,8 @@
           <view class="summary-amount">¥ {{summary.total}}</view>
           <view class="summary-meta">
             <text>{{summary.count}} 笔</text>
-            <text wx:if="{{summary.dailyAvg}}">日均 ¥{{summary.dailyAvg}}</text>
+            <text wx:if="{{summary.dailyAvg}}">日均 ¥{{summary.dailyAvg}}<text wx:if="{{summary.dailyAvgChangeText}}" class="summary-change--{{summary.dailyAvgChangeDir}}">  同比 {{summary.dailyAvgChangeText}}</text></text>
+            <text wx:if="{{summary.monthlyAvg}}">月均 ¥{{summary.monthlyAvg}}<text wx:if="{{summary.monthlyAvgChangeText}}" class="summary-change--{{summary.monthlyAvgChangeDir}}">  同比 {{summary.monthlyAvgChangeText}}</text></text>
           </view>
         </view>
         <view class="summary-compare">
@@ -154,6 +155,7 @@
       </view>
     </view>
   </block>
+  <view class="scroll-bottom-spacer"></view>
   </scroll-view>
 
   <!-- 分类详情弹层 -->
