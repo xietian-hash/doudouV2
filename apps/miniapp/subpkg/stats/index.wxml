@@ -155,6 +155,7 @@
       </view>
     </view>
   </block>
+  <view class="scroll-bottom-spacer"></view>
   </scroll-view>
 
   <!-- 分类详情弹层 -->
