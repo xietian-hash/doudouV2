@@ -40,6 +40,10 @@
     {
       "root": "subpkg/stats",
       "pages": ["index"]
+    },
+    {
+      "root": "subpkg/export",
+      "pages": ["index"]
     }
   ],
   "window": {

@@ -1,0 +1,41 @@
+<view class="export-page">
+  <view class="export-nav">
+    <view class="nav-back" bindtap="goBack">‹</view>
+    <view class="nav-title">数据导出</view>
+    <view class="nav-spacer"></view>
+  </view>
+
+  <scroll-view class="export-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+    <view class="intro-card">
+      <text class="intro-title">导出全部账单到邮箱</text>
+      <text class="intro-desc">将账单明细、分类列表、账户列表打包为 Excel 文件发送到你的邮箱，方便留存和二次分析。</text>
+    </view>
+
+    <view class="form-card">
+      <view class="field-head">
+        <text class="field-title">收件邮箱</text>
+        <text class="field-required">必填</text>
+      </view>
+      <input
+        class="email-input"
+        type="text"
+        value="{{email}}"
+        placeholder="请输入邮箱地址"
+        placeholder-class="input-placeholder"
+        bindinput="onEmailInput"
+        confirm-type="done"
+      />
+    </view>
+
+    <view class="hint-card">
+      <text class="hint-title">温馨提示</text>
+      <text class="hint-text">邮件发送后通常在 1 分钟内到达，若未收到请检查垃圾邮件文件夹。</text>
+    </view>
+  </scroll-view>
+
+  <view class="submit-bar">
+    <view class="submit-btn {{exporting ? 'submit-btn--disabled' : ''}}" bindtap="onExport">
+      {{exporting ? '发送中...' : '开始导出'}}
+    </view>
+  </view>
+</view>

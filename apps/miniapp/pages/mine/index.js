@@ -43,6 +43,10 @@ Page({
     wx.navigateTo({ url: '/subpkg/import/index' });
   },
 
+  goExport() {
+    wx.navigateTo({ url: '/subpkg/export/index' });
+  },
+
   goStats() {
     wx.navigateTo({ url: '/subpkg/stats/index' });
   },
