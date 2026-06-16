@@ -1,0 +1,151 @@
+.export-page {
+  min-height: 100vh;
+  background: var(--color-bg-page);
+  color: var(--color-text-main);
+}
+
+.export-nav {
+  height: 184rpx;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 32rpx 22rpx;
+}
+
+.nav-back,
+.nav-spacer {
+  width: 44rpx;
+  height: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-main);
+  font-size: 42rpx;
+  line-height: 44rpx;
+}
+
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.export-scroll {
+  height: calc(100vh - 320rpx);
+  padding: 0 32rpx 32rpx;
+}
+
+.intro-card,
+.form-card,
+.hint-card {
+  margin-bottom: 24rpx;
+  padding: 32rpx;
+  border-radius: 32rpx;
+  background: #ffffff;
+  box-shadow: 0 8rpx 40rpx rgba(43, 74, 58, 0.09);
+}
+
+.intro-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f7faf8 100%);
+}
+
+.intro-title {
+  display: block;
+  color: var(--color-text-main);
+  font-size: 34rpx;
+  font-weight: 800;
+}
+
+.intro-desc {
+  display: block;
+  margin-top: 16rpx;
+  color: var(--color-text-sub);
+  font-size: 26rpx;
+  line-height: 1.6;
+}
+
+.field-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.field-title {
+  color: var(--color-text-main);
+  font-size: 30rpx;
+  font-weight: 800;
+}
+
+.field-required {
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+  background: #fff0f3;
+  color: var(--color-income);
+}
+
+.email-input {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 24rpx;
+  border: 1rpx solid var(--color-divider);
+  border-radius: 24rpx;
+  background: var(--color-surface-soft);
+  color: var(--color-text-main);
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.input-placeholder {
+  color: var(--color-text-weak);
+}
+
+.hint-card {
+  margin-bottom: 48rpx;
+  background: #f7faf8;
+  border: 1rpx solid var(--color-divider);
+}
+
+.hint-title {
+  display: block;
+  color: var(--color-text-main);
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.hint-text {
+  display: block;
+  margin-top: 12rpx;
+  color: var(--color-text-sub);
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+
+.submit-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(136rpx + env(safe-area-inset-bottom));
+  padding: 20rpx 32rpx calc(20rpx + env(safe-area-inset-bottom));
+  border-top: 1rpx solid var(--color-divider);
+  background: var(--color-bg-page);
+}
+
+.submit-btn {
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 24rpx;
+  background: var(--color-brand);
+  color: #ffffff;
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.submit-btn--disabled {
+  opacity: 0.62;
+}

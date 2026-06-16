@@ -32,6 +32,8 @@ tags:
     description: 意见反馈
   - name: Import
     description: 数据导入
+  - name: Export
+    description: 数据导出
 
 security:
   - bearerAuth: []
@@ -991,6 +993,44 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/ImportBillsResult'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /export/bills:
+    post:
+      tags: [Export]
+      summary: 导出账单到邮箱
+      description: |
+        将当前用户默认账本下的全部账单、分类、账户数据生成 Excel 文件，
+        以附件形式发送到用户指定邮箱。
+      x-permissions:
+        auth: jwt
+        interface: export:bills
+        dataScope: current-user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: 接收导出文件的邮箱地址
+      responses:
+        '200':
+          description: 邮件发送成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: 'null'
         '400':
           $ref: '#/components/responses/ValidationError'
 

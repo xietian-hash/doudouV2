@@ -64,7 +64,7 @@
         <text class="setting-arrow">›</text>
       </view>
       <view class="section-divider"></view>
-      <view class="setting-item">
+      <view class="setting-item" bindtap="goExport">
         <view class="setting-icon setting-icon--muted">出</view>
         <view class="setting-main">
           <text class="setting-title">数据导出</text>
