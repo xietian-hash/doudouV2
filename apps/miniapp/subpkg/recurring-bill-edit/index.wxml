@@ -1,0 +1,207 @@
+<view class="rbe-page">
+  <view class="manage-nav">
+    <view class="nav-back" bindtap="goBack">‹</view>
+    <view class="nav-title">{{isEdit ? '编辑重复账单' : '添加重复账单'}}</view>
+    <view class="nav-spacer"></view>
+  </view>
+
+  <scroll-view scroll-y class="rbe-scroll" enhanced show-scrollbar="{{false}}">
+
+    <!-- 收支类型 -->
+    <view class="rbe-section">
+      <view class="rbe-type-switch">
+        <view class="rbe-type-btn {{type === 1 ? 'rbe-type-btn--expense rbe-type-btn--active' : ''}}" data-type="1" bindtap="switchType">支出</view>
+        <view class="rbe-type-btn {{type === 2 ? 'rbe-type-btn--income rbe-type-btn--active' : ''}}" data-type="2" bindtap="switchType">收入</view>
+      </view>
+    </view>
+
+    <!-- 基本信息 -->
+    <view class="rbe-section">
+      <view class="rbe-card">
+        <view class="rbe-row" bindtap="openCategorySheet">
+          <text class="rbe-label">分类</text>
+          <view class="rbe-row-right">
+            <text wx:if="{{selectedCategory.id}}" class="rbe-val">{{selectedCategory.icon ? selectedCategory.icon + ' ' : ''}}{{selectedCategory.name}}</text>
+            <text wx:else class="rbe-placeholder">请选择分类</text>
+            <text class="rbe-chev">›</text>
+          </view>
+        </view>
+        <view class="rbe-divider"></view>
+        <view class="rbe-row" bindtap="openAccountSheet">
+          <text class="rbe-label">账户</text>
+          <view class="rbe-row-right">
+            <text wx:if="{{selectedAccount.id}}" class="rbe-val">{{selectedAccount.name}}</text>
+            <text wx:else class="rbe-placeholder">请选择账户</text>
+            <text class="rbe-chev">›</text>
+          </view>
+        </view>
+        <view class="rbe-divider"></view>
+        <view class="rbe-row">
+          <text class="rbe-label">金额</text>
+          <view class="rbe-row-right">
+            <input
+              class="rbe-amount-input"
+              type="digit"
+              value="{{amount}}"
+              placeholder="0.00"
+              placeholder-class="rbe-placeholder"
+              maxlength="12"
+              bindinput="onAmountInput"
+            />
+            <text class="rbe-unit">¥</text>
+          </view>
+        </view>
+        <view class="rbe-divider"></view>
+        <view class="rbe-row">
+          <text class="rbe-label">备注</text>
+          <input
+            class="rbe-remark-input"
+            type="text"
+            value="{{remark}}"
+            placeholder="选填"
+            placeholder-class="rbe-placeholder"
+            maxlength="255"
+            bindinput="onRemarkInput"
+          />
+        </view>
+      </view>
+    </view>
+
+    <!-- 重复规则 -->
+    <view class="rbe-section">
+      <view class="rbe-section-title">重复规则</view>
+      <view class="rbe-card">
+        <view class="rbe-repeat-types">
+          <view class="rbe-repeat-btn {{repeatType === 1 ? 'rbe-repeat-btn--active' : ''}}" data-type="1" bindtap="selectRepeatType">每天</view>
+          <view class="rbe-repeat-btn {{repeatType === 2 ? 'rbe-repeat-btn--active' : ''}}" data-type="2" bindtap="selectRepeatType">每月</view>
+          <view class="rbe-repeat-btn {{repeatType === 3 ? 'rbe-repeat-btn--active' : ''}}" data-type="3" bindtap="selectRepeatType">每年</view>
+        </view>
+
+        <view wx:if="{{repeatType === 3}}" class="rbe-divider"></view>
+        <view wx:if="{{repeatType === 3}}" class="rbe-row">
+          <text class="rbe-label">月份</text>
+          <view class="rbe-row-right">
+            <picker mode="selector" range="{{monthNames}}" value="{{repeatMonth - 1}}" bindchange="onRepeatMonthChange">
+              <view class="rbe-picker-val">{{monthNames[repeatMonth - 1]}} <text class="rbe-chev">›</text></view>
+            </picker>
+          </view>
+        </view>
+
+        <view wx:if="{{repeatType >= 2}}" class="rbe-divider"></view>
+        <view wx:if="{{repeatType >= 2}}" class="rbe-row">
+          <text class="rbe-label">{{repeatType === 3 ? '日期' : '每月几号'}}</text>
+          <view class="rbe-row-right">
+            <picker mode="selector" range="{{dayOptions}}" range-key="label" value="{{repeatDay - 1}}" bindchange="onRepeatDayChange">
+              <view class="rbe-picker-val">{{dayOptions[repeatDay - 1].label}} <text class="rbe-chev">›</text></view>
+            </picker>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 有效期 -->
+    <view class="rbe-section">
+      <view class="rbe-section-title">有效期</view>
+      <view class="rbe-card">
+        <view class="rbe-row" bindtap="openStartDateSheet">
+          <text class="rbe-label">开始日期</text>
+          <view class="rbe-row-right">
+            <text class="rbe-val">{{startDate}}</text>
+            <text class="rbe-chev">›</text>
+          </view>
+        </view>
+        <view class="rbe-divider"></view>
+        <view class="rbe-row">
+          <text class="rbe-label">结束日期</text>
+          <view class="rbe-row-right">
+            <text wx:if="{{endDate}}" class="rbe-val" bindtap="openEndDateSheet">{{endDate}}</text>
+            <text wx:else class="rbe-placeholder" bindtap="openEndDateSheet">长期有效</text>
+            <text wx:if="{{endDate}}" class="rbe-clear" catchtap="clearEndDate">×</text>
+            <text wx:else class="rbe-chev" bindtap="openEndDateSheet">›</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="rbe-bottom-pad"></view>
+  </scroll-view>
+
+  <view class="rbe-footer">
+    <view class="rbe-save-btn" bindtap="save">保存</view>
+  </view>
+
+  <!-- 分类选择 sheet -->
+  <view wx:if="{{sheet === 'category'}}" class="sheet-mask" bindtap="closeSheet">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <text class="sheet-title">选择分类</text>
+        <text class="sheet-close" bindtap="closeSheet">×</text>
+      </view>
+      <scroll-view scroll-y class="sheet-scroll">
+        <view wx:for="{{categorySections}}" wx:key="title" class="category-section">
+          <view class="section-title">{{item.title}}</view>
+          <view class="section-grid">
+            <view
+              wx:for="{{item.items}}"
+              wx:for-item="cat"
+              wx:key="id"
+              class="category-item {{selectedCategory.id === cat.id ? 'category-item--active' : ''}}"
+              data-id="{{cat.id}}"
+              bindtap="selectCategory"
+            >
+              <text class="category-icon">{{cat.icon || '📝'}}</text>
+              <text class="category-name">{{cat.name}}</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 账户选择 sheet -->
+  <view wx:if="{{sheet === 'account'}}" class="sheet-mask" bindtap="closeSheet">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <text class="sheet-title">选择账户</text>
+        <text class="sheet-close" bindtap="closeSheet">×</text>
+      </view>
+      <scroll-view scroll-y class="sheet-scroll sheet-scroll--small">
+        <view wx:for="{{accounts}}" wx:key="id" class="account-item {{selectedAccount.id === item.id ? 'account-item--active' : ''}}" data-id="{{item.id}}" bindtap="selectAccount">
+          <text class="account-icon">{{item.icon || '💳'}}</text>
+          <view class="account-main">
+            <text class="account-name">{{item.name}}</text>
+            <text class="account-sub">{{item.isDefault ? '默认账户' : '余额 ¥' + item.balance}}</text>
+          </view>
+          <text wx:if="{{selectedAccount.id === item.id}}" class="check">✓</text>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 日期选择 sheet -->
+  <view wx:if="{{sheet === 'date'}}" class="sheet-mask" bindtap="closeSheet">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <text class="sheet-title">{{calField === 'startDate' ? '开始日期' : '结束日期'}}</text>
+        <text class="sheet-close" bindtap="closeSheet">×</text>
+      </view>
+      <view class="date-head">
+        <text bindtap="prevCalMonth">‹</text>
+        <text>{{calYear}}年{{calMonth}}月</text>
+        <text bindtap="nextCalMonth">›</text>
+      </view>
+      <view class="date-week">
+        <text wx:for="{{weekdays}}" wx:key="*this">{{item}}</text>
+      </view>
+      <view class="date-grid">
+        <view wx:for="{{dateDays}}" wx:key="key" class="date-day {{item.today ? 'date-day--today' : ''}} {{item.selected ? 'date-day--selected' : ''}}" data-date="{{item.date}}" bindtap="selectDate">
+          {{item.day}}
+        </view>
+      </view>
+      <view class="sheet-footer">
+        <view class="secondary-btn" bindtap="closeSheet">取消</view>
+        <view class="primary-btn" bindtap="selectToday">今天</view>
+      </view>
+    </view>
+  </view>
+</view>

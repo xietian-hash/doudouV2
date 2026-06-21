@@ -44,6 +44,14 @@
     {
       "root": "subpkg/export",
       "pages": ["index"]
+    },
+    {
+      "root": "subpkg/recurring-bill-list",
+      "pages": ["index"]
+    },
+    {
+      "root": "subpkg/recurring-bill-edit",
+      "pages": ["index"]
     }
   ],
   "window": {

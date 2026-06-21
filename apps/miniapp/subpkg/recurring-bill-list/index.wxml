@@ -1,0 +1,67 @@
+<view class="manage-page">
+  <view class="manage-nav">
+    <view class="nav-back" bindtap="goBack">‹</view>
+    <view class="nav-title">重复账单</view>
+    <view class="nav-spacer"></view>
+  </view>
+
+  <scroll-view class="manage-list manage-list--no-tabs" scroll-y enhanced show-scrollbar="{{false}}">
+    <view class="manage-list-inner">
+      <view
+        wx:for="{{bills}}"
+        wx:key="id"
+        class="swipe-row swipe-row--tall"
+        data-index="{{index}}"
+        bindtouchstart="onTouchStart"
+        bindtouchmove="onTouchMove"
+        bindtouchend="onTouchEnd"
+        bindtouchcancel="onTouchEnd"
+      >
+        <view class="swipe-actions">
+          <view class="swipe-action swipe-action--edit" data-id="{{item.id}}" catchtap="goEdit">编辑</view>
+          <view class="swipe-action swipe-action--delete" data-id="{{item.id}}" catchtap="askDelete">删除</view>
+        </view>
+        <view class="swipe-content" style="transform: translateX({{item.slideX || 0}}rpx);">
+          <view class="rb-card" data-id="{{item.id}}" bindtap="goEdit">
+            <view class="rb-icon {{item.isActive ? '' : 'rb-icon--inactive'}}">
+              {{item.categoryIcon || '📝'}}
+            </view>
+            <view class="rb-main">
+              <text class="rb-name">{{item.categoryName}}</text>
+              <text class="rb-repeat">{{item.repeatDesc}}</text>
+              <text wx:if="{{item.nextGenerateDate}}" class="rb-next">下次：{{item.nextGenerateDate}}</text>
+              <text wx:else class="rb-next rb-next--none">{{item.isActive ? '已结束' : '已停用'}}</text>
+            </view>
+            <view class="rb-amount {{item.type === 2 ? 'rb-amount--income' : ''}}">
+              {{item.type === 2 ? '+' : '-'}}{{item.amount}}
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{!bills.length}}" class="empty-state">
+        <text>暂无重复账单</text>
+        <text class="empty-hint">添加后，系统将每天自动生成账单</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="bottom-add">
+    <view class="bottom-add-btn" bindtap="goCreate">
+      <text class="bottom-add-plus">+</text>
+      <text>添加重复账单</text>
+    </view>
+  </view>
+
+  <view wx:if="{{confirmVisible}}" class="dialog-mask" bindtap="closeConfirm">
+    <view class="confirm-dialog" catchtap="noop">
+      <view class="confirm-icon">!</view>
+      <text class="confirm-title">删除重复账单</text>
+      <text class="confirm-text">删除后不再自动生成账单，已生成的历史账单不受影响。确认删除"{{pendingDeleteName}}"？</text>
+      <view class="dialog-actions">
+        <view class="dialog-btn dialog-btn--secondary" bindtap="closeConfirm">取消</view>
+        <view class="dialog-btn dialog-btn--danger" bindtap="confirmDelete">确认删除</view>
+      </view>
+    </view>
+  </view>
+</view>

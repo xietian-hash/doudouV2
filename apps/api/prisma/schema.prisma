@@ -18,12 +18,13 @@ model User {
   isDeleted  Int        @default(0) @map("is_deleted") @db.TinyInt
   createdAt  DateTime   @default(now()) @map("created_at")
   updatedAt  DateTime   @updatedAt @map("updated_at")
-  accounts   Account[]
-  categories Category[]
-  tags       Tag[]
-  bills      Bill[]
-  ledgers    Ledger[]
-  feedbacks  Feedback[]
+  accounts        Account[]
+  categories      Category[]
+  tags            Tag[]
+  bills           Bill[]
+  ledgers         Ledger[]
+  feedbacks       Feedback[]
+  recurringBills  RecurringBill[]
 
   @@map("users")
 }
@@ -37,11 +38,12 @@ model Ledger {
   isDeleted  Int        @default(0) @map("is_deleted") @db.TinyInt
   createdAt  DateTime   @default(now()) @map("created_at")
   updatedAt  DateTime   @updatedAt @map("updated_at")
-  user       User       @relation(fields: [userId], references: [id])
-  accounts   Account[]
-  categories Category[]
-  tags       Tag[]
-  bills      Bill[]
+  user            User            @relation(fields: [userId], references: [id])
+  accounts        Account[]
+  categories      Category[]
+  tags            Tag[]
+  bills           Bill[]
+  recurringBills  RecurringBill[]
 
   @@index([userId], map: "ledgers_user_id_idx")
   @@map("ledgers")
@@ -60,9 +62,10 @@ model Account {
   isDeleted Int      @default(0) @map("is_deleted") @db.TinyInt
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  user      User     @relation(fields: [userId], references: [id])
-  ledger    Ledger   @relation(fields: [ledgerId], references: [id])
-  bills     Bill[]
+  user            User            @relation(fields: [userId], references: [id])
+  ledger          Ledger          @relation(fields: [ledgerId], references: [id])
+  bills           Bill[]
+  recurringBills  RecurringBill[]
 
   @@map("accounts")
 }
@@ -84,8 +87,9 @@ model Category {
   ledger       Ledger        @relation(fields: [ledgerId], references: [id])
   parent       Category?     @relation("CategoryTree", fields: [parentId], references: [id])
   children     Category[]    @relation("CategoryTree")
-  bills        Bill[]
-  categoryTags CategoryTag[]
+  bills           Bill[]
+  categoryTags    CategoryTag[]
+  recurringBills  RecurringBill[]
 
   @@map("categories")
 }
@@ -112,17 +116,20 @@ model Bill {
   amount     Decimal   @db.Decimal(12, 2)
   remark     String?   @db.VarChar(255)
   billDate   DateTime  @map("bill_date") @db.DateTime(0)
-  source     Int       @default(1) @db.TinyInt
-  voiceText  String?   @map("voice_text") @db.VarChar(500)
-  isDeleted  Int       @default(0) @map("is_deleted") @db.TinyInt
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @updatedAt @map("updated_at")
-  user       User      @relation(fields: [userId], references: [id])
-  ledger     Ledger    @relation(fields: [ledgerId], references: [id])
-  account    Account   @relation(fields: [accountId], references: [id])
-  category   Category  @relation(fields: [categoryId], references: [id])
-  billTags   BillTag[]
+  source           Int            @default(1) @db.TinyInt
+  voiceText        String?        @map("voice_text") @db.VarChar(500)
+  recurringBillId  BigInt?        @map("recurring_bill_id")
+  isDeleted        Int            @default(0) @map("is_deleted") @db.TinyInt
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+  user             User           @relation(fields: [userId], references: [id])
+  ledger           Ledger         @relation(fields: [ledgerId], references: [id])
+  account          Account        @relation(fields: [accountId], references: [id])
+  category         Category       @relation(fields: [categoryId], references: [id])
+  recurringBill    RecurringBill? @relation(fields: [recurringBillId], references: [id])
+  billTags         BillTag[]
 
+  @@index([recurringBillId], map: "bills_recurring_bill_id_idx")
   @@map("bills")
 }
 
@@ -168,6 +175,35 @@ model CategoryTag {
   @@unique([categoryId, tagId], map: "category_tags_category_id_tag_id_key")
   @@index([tagId], map: "category_tags_tag_id_idx")
   @@map("category_tags")
+}
+
+model RecurringBill {
+  id                BigInt    @id @default(autoincrement())
+  userId            BigInt    @map("user_id")
+  ledgerId          BigInt    @map("ledger_id")
+  accountId         BigInt    @map("account_id")
+  categoryId        BigInt    @map("category_id")
+  type              Int       @db.TinyInt
+  amount            Decimal   @db.Decimal(12, 2)
+  remark            String?   @db.VarChar(255)
+  repeatType        Int       @map("repeat_type") @db.TinyInt
+  repeatDay         Int?      @map("repeat_day") @db.TinyInt
+  repeatMonth       Int?      @map("repeat_month") @db.TinyInt
+  startDate         DateTime  @map("start_date") @db.Date
+  endDate           DateTime? @map("end_date") @db.Date
+  lastGeneratedDate DateTime? @map("last_generated_date") @db.Date
+  isActive          Int       @default(1) @map("is_active") @db.TinyInt
+  isDeleted         Int       @default(0) @map("is_deleted") @db.TinyInt
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  user              User      @relation(fields: [userId], references: [id])
+  ledger            Ledger    @relation(fields: [ledgerId], references: [id])
+  account           Account   @relation(fields: [accountId], references: [id])
+  category          Category  @relation(fields: [categoryId], references: [id])
+  bills             Bill[]
+
+  @@index([userId, isDeleted], map: "recurring_bills_user_id_idx")
+  @@map("recurring_bills")
 }
 
 model Feedback {
