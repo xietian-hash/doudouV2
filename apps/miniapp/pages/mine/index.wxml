@@ -42,6 +42,15 @@
         </view>
         <text class="setting-arrow">›</text>
       </view>
+      <view class="section-divider"></view>
+      <view class="setting-item" bindtap="goRecurringBills">
+        <view class="setting-icon">循</view>
+        <view class="setting-main">
+          <text class="setting-title">重复账单</text>
+          <text class="setting-desc">按日、月、年自动生成账单</text>
+        </view>
+        <text class="setting-arrow">›</text>
+      </view>
     </view>
 
     <view class="setting-section">

@@ -50,4 +50,8 @@ Page({
   goStats() {
     wx.navigateTo({ url: '/subpkg/stats/index' });
   },
+
+  goRecurringBills() {
+    wx.navigateTo({ url: '/subpkg/recurring-bill-list/index' });
+  },
 });

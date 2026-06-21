@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { AppExceptionFilter } from './common/errors/exception.filter';
@@ -17,6 +18,8 @@ import { FeedbackModule } from './modules/feedback/feedback.module';
 import { ImportModule } from './modules/import/import.module';
 import { ExportModule } from './modules/export/export.module';
 import { LedgersModule } from './modules/ledgers/ledgers.module';
+import { RecurringBillsModule } from './modules/recurring-bills/recurring-bills.module';
+import { SchedulerModule } from './modules/scheduler/scheduler.module';
 
 @Module({
   imports: [
@@ -24,6 +27,7 @@ import { LedgersModule } from './modules/ledgers/ledgers.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
     UsersModule,
@@ -37,6 +41,8 @@ import { LedgersModule } from './modules/ledgers/ledgers.module';
     ImportModule,
     ExportModule,
     LedgersModule,
+    RecurringBillsModule,
+    SchedulerModule,
   ],
   providers: [
     {
