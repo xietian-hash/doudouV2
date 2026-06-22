@@ -24,6 +24,7 @@ function serializeBill(bill: {
   billDate: Date;
   source: number;
   voiceText: string | null;
+  recurringBillId?: bigint | null;
   isDeleted: number;
   createdAt: Date;
   updatedAt: Date;
@@ -44,6 +45,7 @@ function serializeBill(bill: {
     ledgerId: bill.ledgerId.toString(),
     accountId: bill.accountId.toString(),
     categoryId: bill.categoryId.toString(),
+    recurringBillId: bill.recurringBillId != null ? bill.recurringBillId.toString() : null,
     amount: bill.amount.toString(),
     category: bill.category
       ? {

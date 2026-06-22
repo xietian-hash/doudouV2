@@ -238,11 +238,15 @@ Page({
 
     if (this.data.isEdit) {
       await rbService.updateRecurringBill(this.data.id, payload);
-      showToast('修改成功', 'success');
     } else {
       await rbService.createRecurringBill(payload);
-      showToast('添加成功', 'success');
     }
-    wx.navigateBack();
+    wx.showModal({
+      title: this.data.isEdit ? '修改成功' : '添加成功',
+      content: '若有历史账单将在明天凌晨自动补齐',
+      showCancel: false,
+      confirmText: '好的',
+      success: () => wx.navigateBack(),
+    });
   },
 });
