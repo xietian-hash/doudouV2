@@ -3,6 +3,12 @@ Page({
     user: {},
     avatarText: '我',
     version: '0.1.11',
+    statusBarHeight: 0,
+  },
+
+  onLoad() {
+    const { statusBarHeight = 0 } = wx.getSystemInfoSync();
+    this.setData({ statusBarHeight });
   },
 
   async onShow() {
