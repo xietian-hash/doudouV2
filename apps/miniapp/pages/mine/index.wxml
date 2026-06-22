@@ -1,9 +1,5 @@
 <view class="mine-page">
-  <view class="mine-hero">
-    <view class="hero-status">
-      <text>9:41</text>
-      <text>▮ ▮ ▰</text>
-    </view>
+  <view class="mine-hero" style="padding-top: {{statusBarHeight}}px; height: calc(280rpx + {{statusBarHeight}}px);">
     <view class="hero-user">
       <view class="avatar">
         <image wx:if="{{user.avatarUrl}}" class="avatar-img" src="{{user.avatarUrl}}" mode="aspectFill" />
@@ -103,6 +99,7 @@
         <text class="setting-arrow">›</text>
       </view>
     </view>
+    <view class="mine-bottom-spacer"></view>
   </scroll-view>
 
 </view>

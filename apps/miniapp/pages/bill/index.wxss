@@ -124,7 +124,7 @@ page {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 8rpx;
-  padding: 20rpx 32rpx 28rpx;
+  padding: 20rpx 32rpx 48rpx;
 }
 
 .category-item {
@@ -157,6 +157,23 @@ page {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 22rpx;
+}
+
+.category-item--more {
+  border: 1rpx dashed var(--color-brand);
+  color: var(--color-brand);
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.category-item--more .category-icon,
+.category-item--more .category-name {
+  color: var(--color-brand);
+}
+
+.category-item--more .category-name {
+  margin-top: 0;
+  font-size: 24rpx;
 }
 
 .bill-bottom {
@@ -307,6 +324,12 @@ page {
   color: var(--color-warning);
 }
 
+.key--again {
+  background: var(--color-selected);
+  color: var(--color-brand-deep);
+  font-size: 26rpx;
+}
+
 .key--done {
   flex: 1;
   display: flex;
@@ -316,7 +339,7 @@ page {
   background: var(--color-brand);
   color: #ffffff;
   line-height: 1.2;
-  font-size: 20rpx;
+  font-size: 26rpx;
 }
 
 .done-mark {

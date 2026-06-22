@@ -2,7 +2,7 @@ function showToast(title, icon) {
   wx.showToast({
     title,
     icon: icon === 'success' ? 'success' : 'none',
-    duration: 2000,
+    duration: 1500,
   });
 }
 
