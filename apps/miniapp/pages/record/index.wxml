@@ -21,7 +21,7 @@
   </view>
   </view>
 
-  <scroll-view scroll-y class="record-scroll" enhanced show-scrollbar="{{false}}" lower-threshold="120" bindscrolltolower="loadMoreBills">
+  <scroll-view scroll-y class="record-scroll" style="height: calc(100vh - {{fixedHeight}}px - 136rpx - env(safe-area-inset-bottom));" enhanced show-scrollbar="{{false}}" lower-threshold="120" bindscrolltolower="loadMoreBills">
   <view class="calendar card">
     <view class="week-row">
       <text wx:for="{{weekdays}}" wx:key="*this" class="week-cell">{{item}}</text>
@@ -93,6 +93,7 @@
     </view>
     <view wx:if="{{footerVisible}}" class="list-footer">{{footerText}}</view>
   </view>
+  <view class="record-bottom-spacer"></view>
   </scroll-view>
 
   <view wx:if="{{voiceConfirmVisible}}" class="sheet-mask" bindtap="closeVoiceConfirm">

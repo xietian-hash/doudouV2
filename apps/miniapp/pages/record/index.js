@@ -11,6 +11,7 @@ const PAGE_SIZE = 20;
 
 Page({
   data: {
+    fixedHeight: 0,
     weekdays: WEEKDAYS,
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,
@@ -38,6 +39,12 @@ Page({
     cancelTipClass: 'recording-tip recording-tip--cancel',
     cancelTipText: '上滑取消',
     doneTipClass: 'recording-tip recording-tip--done recording-tip--active',
+  },
+
+  onReady() {
+    wx.createSelectorQuery().select('.record-fixed').boundingClientRect((res) => {
+      if (res) this.setData({ fixedHeight: res.height });
+    }).exec();
   },
 
   onLoad() {
