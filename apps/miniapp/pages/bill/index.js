@@ -160,7 +160,11 @@ Page({
   handleKey(event) {
     const key = event.currentTarget.dataset.key;
     if (key === '完成') {
-      this.saveBill();
+      this.saveBill(false);
+      return;
+    }
+    if (key === '再记') {
+      this.saveBill(true);
       return;
     }
     if (key === '清空') {
@@ -186,7 +190,7 @@ Page({
     this.setData({ amount: value || '0' });
   },
 
-  async saveBill() {
+  async saveBill(again = false) {
     if (!this.data.selectedAccount.id) {
       showError('请选择账户');
       return;
@@ -212,12 +216,19 @@ Page({
     if (this.data.editId) {
       await billsService.updateBill(this.data.editId, payload);
       showToast('修改成功', 'success');
-    } else {
-      await billsService.createBill(payload);
-      showToast('记账成功', 'success');
+      this.setData({ amount: '0', remark: '', selectedTag: {}, editId: '' });
+      wx.switchTab({ url: '/pages/record/index' });
+      return;
     }
-    this.setData({ amount: '0', remark: '', selectedTag: {}, editId: '' });
-    wx.switchTab({ url: '/pages/record/index' });
+    await billsService.createBill(payload);
+    if (again) {
+      showToast('已记录', 'success');
+      this.setData({ amount: '0', remark: '', selectedTag: {}, amountInputStarted: false });
+    } else {
+      showToast('记账成功', 'success');
+      this.setData({ amount: '0', remark: '', selectedTag: {}, editId: '' });
+      wx.switchTab({ url: '/pages/record/index' });
+    }
   },
 
   loadEditDraft() {

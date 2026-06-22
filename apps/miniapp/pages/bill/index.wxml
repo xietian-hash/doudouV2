@@ -28,9 +28,9 @@
         <text class="category-icon">{{item.icon || '📝'}}</text>
         <text class="category-name">{{item.name}}</text>
       </view>
-      <view class="category-item category-item--add" bindtap="openCategoryManage">
-        <text class="category-icon">＋</text>
-        <text class="category-name">添加</text>
+      <view class="category-item category-item--more" bindtap="openCategorySheet">
+        <text class="category-icon">⋯</text>
+        <text class="category-name">更多</text>
       </view>
     </view>
   </scroll-view>
@@ -72,6 +72,7 @@
       </view>
       <view class="keyboard-right">
         <view class="key key--delete" data-key="⌫" bindtap="handleKey">⌫</view>
+        <view class="key key--again" data-key="再记" bindtap="handleKey">再记</view>
         <view class="key key--done" data-key="完成" bindtap="handleKey">
           <text class="done-mark">✓</text>
           <text>完成</text>
