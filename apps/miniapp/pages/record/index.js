@@ -28,6 +28,9 @@ Page({
     hasMore: false,
     footerVisible: false,
     footerText: '',
+    datePickerVisible: false,
+    pickerYear: 0,
+    pickerMonths: [],
     recording: false,
     recordingCanceling: false,
     voiceParsing: false,
@@ -217,6 +220,53 @@ Page({
   nextMonth() {
     const next = new Date(this.data.year, this.data.month, 1);
     this.setData({ year: next.getFullYear(), month: next.getMonth() + 1, selectedDate: '' }, () => this.loadData());
+  },
+
+  openDatePicker() {
+    const pickerYear = this.data.year;
+    this.setData({
+      datePickerVisible: true,
+      pickerYear,
+      pickerMonths: this.buildPickerMonths(pickerYear),
+    });
+    this.setTabBarHidden(true);
+  },
+
+  closeDatePicker() {
+    this.setData({ datePickerVisible: false });
+    this.setTabBarHidden(false);
+  },
+
+  buildPickerMonths(pickerYear) {
+    const { year: viewYear, month: viewMonth } = this.data;
+    const now = new Date();
+    const realYear = now.getFullYear();
+    const realMonth = now.getMonth() + 1;
+    return Array.from({ length: 12 }, (_, i) => {
+      const m = i + 1;
+      return {
+        m,
+        active: pickerYear === viewYear && m === viewMonth,
+        today: pickerYear === realYear && m === realMonth,
+      };
+    });
+  },
+
+  prevPickerYear() {
+    const pickerYear = this.data.pickerYear - 1;
+    this.setData({ pickerYear, pickerMonths: this.buildPickerMonths(pickerYear) });
+  },
+
+  nextPickerYear() {
+    const pickerYear = this.data.pickerYear + 1;
+    this.setData({ pickerYear, pickerMonths: this.buildPickerMonths(pickerYear) });
+  },
+
+  selectPickerMonth(e) {
+    const month = Number(e.currentTarget.dataset.month);
+    const year = this.data.pickerYear;
+    this.setTabBarHidden(false);
+    this.setData({ year, month, selectedDate: '', datePickerVisible: false }, () => this.loadData());
   },
 
   selectDate(event) {

@@ -4,6 +4,7 @@ Page({
     avatarText: '我',
     version: '0.1.11',
     statusBarHeight: 0,
+    isAdmin: false,
   },
 
   onLoad() {
@@ -20,6 +21,7 @@ Page({
     this.setData({
       user,
       avatarText: nickname ? nickname.slice(0, 1) : '我',
+      isAdmin: user.id === '1',
     });
   },
 
@@ -59,5 +61,9 @@ Page({
 
   goRecurringBills() {
     wx.navigateTo({ url: '/subpkg/recurring-bill-list/index' });
+  },
+
+  goUserOperations() {
+    wx.navigateTo({ url: '/subpkg/user-operations/index' });
   },
 });

@@ -2,8 +2,11 @@
   <view class="record-fixed">
   <view class="month-header">
     <view class="month-nav" bindtap="prevMonth">‹</view>
-    <view class="month-title">
-      <text class="month-text">{{year}}年{{month}}月</text>
+    <view class="month-title" bindtap="openDatePicker">
+      <view class="month-text-row">
+        <text class="month-text">{{year}}年{{month}}月</text>
+        <text class="month-chevron">∨</text>
+      </view>
       <text class="month-sub">{{selectedDate ? '已筛选单日账单' : '每一笔都是生活的印记'}}</text>
     </view>
     <view class="month-nav" bindtap="nextMonth">›</view>
@@ -95,6 +98,31 @@
   </view>
   <view class="record-bottom-spacer"></view>
   </scroll-view>
+
+  <view wx:if="{{datePickerVisible}}" class="sheet-mask" bindtap="closeDatePicker">
+    <view class="sheet sheet--date-picker" catchtap="noop">
+      <view class="sheet-head">
+        <text class="sheet-title">选择月份</text>
+        <text class="sheet-close" bindtap="closeDatePicker">×</text>
+      </view>
+      <view class="dp-year-row">
+        <view class="dp-year-nav" bindtap="prevPickerYear">‹</view>
+        <text class="dp-year-text">{{pickerYear}}年</text>
+        <view class="dp-year-nav" bindtap="nextPickerYear">›</view>
+      </view>
+      <view class="dp-month-grid">
+        <view
+          wx:for="{{pickerMonths}}"
+          wx:key="m"
+          class="dp-month-cell {{item.active ? 'dp-month-cell--active' : ''}} {{item.today ? 'dp-month-cell--today' : ''}}"
+          data-month="{{item.m}}"
+          bindtap="selectPickerMonth"
+        >
+          <text>{{item.m}}月</text>
+        </view>
+      </view>
+    </view>
+  </view>
 
   <view wx:if="{{voiceConfirmVisible}}" class="sheet-mask" bindtap="closeVoiceConfirm">
     <view class="sheet sheet--voice" catchtap="noop">
