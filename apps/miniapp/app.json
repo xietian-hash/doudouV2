@@ -52,6 +52,10 @@
     {
       "root": "subpkg/recurring-bill-edit",
       "pages": ["index"]
+    },
+    {
+      "root": "subpkg/user-operations",
+      "pages": ["index"]
     }
   ],
   "window": {

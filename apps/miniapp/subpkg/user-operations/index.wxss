@@ -1,0 +1,136 @@
+.page {
+  min-height: 100vh;
+  background: var(--color-bg-page);
+  color: var(--color-text-main);
+}
+
+.nav {
+  height: 184rpx;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 32rpx 22rpx;
+}
+
+.nav-back,
+.nav-spacer {
+  width: 44rpx;
+  height: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-main);
+  font-size: 42rpx;
+  line-height: 44rpx;
+}
+
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.scroll {
+  height: calc(100vh - 184rpx);
+  padding: 0 32rpx 48rpx;
+}
+
+.loading-tip {
+  margin-top: 120rpx;
+  text-align: center;
+  color: var(--color-text-sub);
+  font-size: 28rpx;
+}
+
+.stat-row {
+  display: flex;
+  gap: 24rpx;
+  margin-bottom: 40rpx;
+}
+
+.stat-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx 0;
+  border-radius: 32rpx;
+  background: #ffffff;
+  box-shadow: 0 8rpx 40rpx rgba(43, 74, 58, 0.09);
+}
+
+.stat-num {
+  font-size: 64rpx;
+  font-weight: 800;
+  color: var(--color-brand);
+  line-height: 1.1;
+}
+
+.stat-label {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: var(--color-text-sub);
+}
+
+.section-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--color-text-sub);
+  margin-bottom: 16rpx;
+  padding-left: 4rpx;
+}
+
+.user-list {
+  border-radius: 32rpx;
+  background: #ffffff;
+  box-shadow: 0 8rpx 40rpx rgba(43, 74, 58, 0.09);
+  overflow: hidden;
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 32rpx;
+  border-top: 1rpx solid var(--color-divider);
+}
+
+.user-item:first-child {
+  border-top: none;
+}
+
+.user-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.user-name {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.user-id {
+  font-size: 22rpx;
+  color: var(--color-text-sub);
+}
+
+.user-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8rpx;
+}
+
+.bill-count {
+  font-size: 28rpx;
+  font-weight: 800;
+  color: var(--color-brand);
+}
+
+.last-active {
+  font-size: 22rpx;
+  color: var(--color-text-sub);
+}

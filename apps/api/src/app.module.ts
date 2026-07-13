@@ -20,6 +20,7 @@ import { ExportModule } from './modules/export/export.module';
 import { LedgersModule } from './modules/ledgers/ledgers.module';
 import { RecurringBillsModule } from './modules/recurring-bills/recurring-bills.module';
 import { SchedulerModule } from './modules/scheduler/scheduler.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { SchedulerModule } from './modules/scheduler/scheduler.module';
     LedgersModule,
     RecurringBillsModule,
     SchedulerModule,
+    AdminModule,
   ],
   providers: [
     {

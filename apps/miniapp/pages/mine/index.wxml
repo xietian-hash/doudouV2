@@ -81,6 +81,15 @@
 
     <view class="setting-section">
       <view class="section-title">其他</view>
+      <view wx:if="{{isAdmin}}" class="setting-item" bindtap="goUserOperations">
+        <view class="setting-icon setting-icon--muted">运</view>
+        <view class="setting-main">
+          <text class="setting-title">用户运营</text>
+          <text class="setting-desc">活跃用户与账单数据</text>
+        </view>
+        <text class="setting-arrow">›</text>
+      </view>
+      <view wx:if="{{isAdmin}}" class="section-divider"></view>
       <view class="setting-item" bindtap="goAbout">
         <view class="setting-icon setting-icon--muted">i</view>
         <view class="setting-main">
