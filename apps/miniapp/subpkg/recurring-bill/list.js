@@ -1,4 +1,4 @@
-const service = require('../../services/recurring-bills');
+const service = require('./recurring-bills');
 const { showToast, showError } = require('../../utils/toast');
 
 Page({
@@ -67,12 +67,12 @@ Page({
 
   goEdit(event) {
     const id = event.currentTarget.dataset.id;
-    wx.navigateTo({ url: `/subpkg/recurring-bill-edit/index?id=${id}` });
+    wx.navigateTo({ url: `/subpkg/recurring-bill/edit?id=${id}` });
   },
 
   goCreate() {
     this.closeSwipeRows();
-    wx.navigateTo({ url: '/subpkg/recurring-bill-edit/index' });
+    wx.navigateTo({ url: '/subpkg/recurring-bill/edit' });
   },
 
   askDelete(event) {

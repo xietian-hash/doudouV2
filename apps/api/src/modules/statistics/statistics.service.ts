@@ -561,12 +561,21 @@ export class StatisticsService {
     userId: bigint,
     level: StatsCategoryLevel,
     type: StatsBillType,
+    endMonth?: string,
   ): Promise<StatsCategoryTrendResult> {
     const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
-    // 最近 6 个月（含当月）
-    const now = new Date();
-    const baseY = now.getUTCFullYear();
-    const baseM = now.getUTCMonth(); // 0-based
+    // 最近 6 个月（含 endMonth 指定的月份，未传则用当月）
+    let baseY: number;
+    let baseM: number; // 0-based
+    if (endMonth) {
+      const [y, m] = endMonth.split('-').map(Number);
+      baseY = y;
+      baseM = m - 1;
+    } else {
+      const now = new Date();
+      baseY = now.getUTCFullYear();
+      baseM = now.getUTCMonth();
+    }
     const months: string[] = [];
     const ranges: Array<{ start: Date; end: Date }> = [];
     for (let i = 5; i >= 0; i--) {

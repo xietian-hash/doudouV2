@@ -55,13 +55,9 @@ Page({
     this.recorder = wx.getRecorderManager();
     this._startingRecord = false;
     this._pendingStopPayload = null;
-    this.initRecorder();
     this.onVoiceStart = () => this.startRecording();
     this.onVoiceMove = (payload) => this.updateRecordingCancel(payload || {});
     this.onVoiceStop = (payload) => this.stopRecording(payload || {});
-    wx.$on('voiceRecord:start', this.onVoiceStart);
-    wx.$on('voiceRecord:move', this.onVoiceMove);
-    wx.$on('voiceRecord:stop', this.onVoiceStop);
   },
 
   onUnload() {
@@ -73,7 +69,20 @@ Page({
   onShow() {
     const tabBar = this.getTabBar && this.getTabBar();
     if (tabBar) tabBar.setSelected(0);
+    wx.$off('voiceRecord:start', this.onVoiceStart);
+    wx.$off('voiceRecord:move', this.onVoiceMove);
+    wx.$off('voiceRecord:stop', this.onVoiceStop);
+    wx.$on('voiceRecord:start', this.onVoiceStart);
+    wx.$on('voiceRecord:move', this.onVoiceMove);
+    wx.$on('voiceRecord:stop', this.onVoiceStop);
+    this.initRecorder();
     this.ensureAndLoad();
+  },
+
+  onHide() {
+    wx.$off('voiceRecord:start', this.onVoiceStart);
+    wx.$off('voiceRecord:move', this.onVoiceMove);
+    wx.$off('voiceRecord:stop', this.onVoiceStop);
   },
 
   async ensureAndLoad() {

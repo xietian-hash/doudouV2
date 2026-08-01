@@ -1,6 +1,6 @@
 const accountsService = require('../../services/accounts');
 const categoriesService = require('../../services/categories');
-const rbService = require('../../services/recurring-bills');
+const rbService = require('./recurring-bills');
 const { buildCalendarDays, formatDate } = require('../../utils/date');
 const { showToast, showError } = require('../../utils/toast');
 

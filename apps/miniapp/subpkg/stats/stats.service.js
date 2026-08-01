@@ -13,8 +13,8 @@ module.exports = {
 
   getOverview: (params) => get('/api/statistics/overview', buildOverviewQuery(params)),
 
-  getCategoryTrend: ({ level, type }) =>
-    get('/api/statistics/category-trend', { level, type }),
+  getCategoryTrend: ({ level, type, endMonth }) =>
+    get('/api/statistics/category-trend', { level, type, ...(endMonth ? { endMonth } : {}) }),
 
   getDailySeries: (params) => {
     const q = { period: params.period, type: params.type };

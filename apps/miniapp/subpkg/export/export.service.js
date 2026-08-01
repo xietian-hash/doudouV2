@@ -1,4 +1,4 @@
-const { post } = require('./request');
+const { post } = require('../../services/request');
 
 function exportBills(email) {
   return post('/api/export/bills', { email });

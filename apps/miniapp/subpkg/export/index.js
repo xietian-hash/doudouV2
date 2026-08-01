@@ -1,4 +1,4 @@
-const exportService = require('../../services/export');
+const exportService = require('./export.service');
 const { showToast, showError } = require('../../utils/toast');
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

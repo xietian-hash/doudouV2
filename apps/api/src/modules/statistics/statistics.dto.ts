@@ -34,7 +34,7 @@ export class StatsOverviewDto extends BaseStatsQuery {
   level!: StatsCategoryLevel;
 }
 
-/** /category-trend 查询：固定回最近 6 个月，不带时间字段 */
+/** /category-trend 查询 */
 export class StatsCategoryTrendDto {
   @Type(() => Number)
   @IsInt()
@@ -45,6 +45,11 @@ export class StatsCategoryTrendDto {
   @IsInt()
   @IsIn([1, 2], { message: 'type 必须是 1（支出）或 2（收入）' })
   type!: StatsBillType;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{4}-(0[1-9]|1[0-2])$/, { message: 'endMonth 格式必须为 YYYY-MM' })
+  endMonth?: string;
 }
 
 /** /daily-series 查询 */

@@ -60,7 +60,7 @@ Page({
   },
 
   goRecurringBills() {
-    wx.navigateTo({ url: '/subpkg/recurring-bill-list/index' });
+    wx.navigateTo({ url: '/subpkg/recurring-bill/list' });
   },
 
   goUserOperations() {
