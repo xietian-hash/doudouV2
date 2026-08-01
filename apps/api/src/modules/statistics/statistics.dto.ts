@@ -126,7 +126,7 @@ export interface StatsCategoryTrendResult {
 }
 
 export interface StatsDailySeriesResult {
-  granularity: 'day' | 'month';
+  granularity: 'day' | 'month' | 'year';
   points: Array<{ date: string; amount: string }>;
 }
 

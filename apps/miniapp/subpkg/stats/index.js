@@ -68,6 +68,7 @@ Page({
     showLine: false,
     lineTitle: '',
     showHeatmap: false,
+    heatmapTitle: '',
 
     // 弹层
     sheetVisible: false,
@@ -305,28 +306,39 @@ Page({
   },
 
   applyDailySeries(series) {
-    const { period } = this.data;
+    const { period, typeLabel } = this.data;
     if (period === 'all') {
+      const points = (series && series.points) || [];
+      const showHeatmap = series && series.granularity === 'year' && points.length > 0;
       this.setData({
-        showLine: false,
-        showHeatmap: false,
+        showLine: points.length > 0,
+        lineTitle: '每年趋势',
+        showHeatmap,
+        heatmapTitle: `每年${typeLabel}`,
         lineImageSrc: '',
         heatmapImageSrc: '',
-        _lineSeries: null,
-        _heatmapDays: null,
+        _lineSeries: points,
+        _heatmapDays: showHeatmap ? points : null,
       });
       return;
     }
     const points = (series && series.points) || [];
-    const showHeatmap = period === 'month' && series && series.granularity === 'day';
+    const showHeatmap =
+      (period === 'month' && series && series.granularity === 'day') ||
+      (period === 'year' && series && series.granularity === 'month');
     const lineTitle =
       period === 'month'
         ? `${this.data.periodLabelShort}每日趋势`
-        : `${this.data.periodLabelShort}每日趋势`;
+        : `${this.data.periodLabelShort}每月趋势`;
+    const heatmapTitle =
+      period === 'month'
+        ? `本月每日${typeLabel}`
+        : `${this.data.periodLabelShort}每月${typeLabel}`;
     this.setData({
       showLine: points.length > 0,
       lineTitle,
       showHeatmap,
+      heatmapTitle,
       lineImageSrc: '',
       heatmapImageSrc: '',
       _lineSeries: points,

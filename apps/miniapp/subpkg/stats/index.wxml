@@ -146,9 +146,9 @@
       </view>
     </view>
 
-    <!-- 月度热力 -->
+    <!-- 月度/年度热力 -->
     <view wx:if="{{showHeatmap}}" class="card">
-      <view class="card-title">本月每日{{typeLabel}}</view>
+      <view class="card-title">{{heatmapTitle}}</view>
       <view class="chart-frame chart-frame--heatmap">
         <image wx:if="{{heatmapImageSrc}}" class="chart-image chart-image--heatmap" src="{{heatmapImageSrc}}" mode="aspectFit"></image>
         <canvas wx:if="{{!heatmapImageSrc}}" type="2d" id="heatmap-canvas" class="heatmap-canvas"></canvas>
