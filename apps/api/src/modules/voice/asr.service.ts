@@ -100,7 +100,7 @@ export class AsrService {
     requestId: string,
     apiKey: string,
     resourceId: string,
-    maxAttempts = 30,
+    maxAttempts = 15,
     intervalMs = 2000,
   ): Promise<string> {
     for (let i = 0; i < maxAttempts; i++) {
@@ -155,7 +155,7 @@ export class AsrService {
       this.logger.log(`ASR 进行中 attempt=${i + 1}`);
     }
 
-    throw new AppException(ErrorCode.INTERNAL, '语音识别超时（60s），请重试');
+    throw new AppException(ErrorCode.INTERNAL, '语音识别超时（30s），请重试');
   }
 
   private buildHeaders(

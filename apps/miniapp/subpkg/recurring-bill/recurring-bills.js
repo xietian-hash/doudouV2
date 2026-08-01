@@ -1,4 +1,4 @@
-const { get, post, patch, del } = require('./request');
+const { get, post, patch, del } = require('../../services/request');
 
 module.exports = {
   getRecurringBills: () => get('/api/recurring-bills'),

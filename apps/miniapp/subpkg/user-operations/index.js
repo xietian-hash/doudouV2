@@ -1,4 +1,4 @@
-const { getUserStats } = require('../../services/admin');
+const { getUserStats } = require('./admin');
 
 Page({
   data: {

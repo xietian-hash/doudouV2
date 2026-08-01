@@ -48,7 +48,7 @@ export class StatisticsController {
     @CurrentUser() user: JwtUser,
     @Query() query: StatsCategoryTrendDto,
   ) {
-    return this.statisticsService.categoryTrend(user.id, query.level, query.type);
+    return this.statisticsService.categoryTrend(user.id, query.level, query.type, query.endMonth);
   }
 
   @Get('daily-series')

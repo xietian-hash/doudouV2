@@ -10,17 +10,18 @@
     <view class="manage-tab {{type === 2 ? 'manage-tab--active' : ''}}" data-type="2" bindtap="switchType">收入</view>
   </view>
 
-  <scroll-view class="manage-list" scroll-y enhanced show-scrollbar="{{false}}">
+  <scroll-view class="manage-list" scroll-y="{{!dragging}}" enhanced show-scrollbar="{{false}}">
     <view class="manage-list-inner">
       <view
         wx:for="{{categories}}"
         wx:key="id"
-        class="swipe-row"
+        class="swipe-row {{index === dragIndex ? 'swipe-row--dragging' : ''}}"
+        style="transform: translateY({{item.translateY || 0}}px); z-index: {{index === dragIndex ? 10 : 1}}; transition: {{index === dragIndex ? 'none' : 'transform 0.15s ease'}};"
         data-index="{{index}}"
         bindtouchstart="onTouchStart"
         bindtouchmove="onTouchMove"
         bindtouchend="onTouchEnd"
-        bindtouchcancel="onTouchEnd"
+        bindtouchcancel="onTouchCancel"
       >
         <view class="swipe-actions">
           <view class="swipe-action swipe-action--edit" data-id="{{item.id}}" catchtap="openEdit">编辑</view>
@@ -62,7 +63,22 @@
         </view>
         <view class="field">
           <text class="field-label">分类图标</text>
-          <input class="field-input" value="{{form.icon}}" bindinput="onIconInput" placeholder="请输入 Emoji，可不填" />
+          <scroll-view scroll-y class="icon-picker">
+            <view class="icon-grid">
+              <view class="icon-option {{form.icon === '' ? 'icon-option--active' : ''}}" data-icon="" bindtap="selectIcon">
+                <text class="icon-option-none">无</text>
+              </view>
+              <view
+                wx:for="{{icons}}"
+                wx:key="id"
+                class="icon-option {{form.icon === item.icon ? 'icon-option--active' : ''}}"
+                data-icon="{{item.icon}}"
+                bindtap="selectIcon"
+              >
+                <text>{{item.icon}}</text>
+              </view>
+            </view>
+          </scroll-view>
         </view>
       </view>
       <view class="dialog-actions">
@@ -76,7 +92,7 @@
     <view class="confirm-dialog">
       <view class="confirm-icon">!</view>
       <text class="confirm-title">删除分类</text>
-      <text class="confirm-text">该分类有关联账单或子分类时不可删除。确认删除“{{pendingDeleteName}}”？</text>
+      <text class="confirm-text">该分类有关联账单或子分类时不可删除。确认删除"{{pendingDeleteName}}"？</text>
       <view class="dialog-actions">
         <view class="dialog-btn dialog-btn--secondary" bindtap="closeConfirm">取消</view>
         <view class="dialog-btn dialog-btn--danger" bindtap="confirmDelete">确认删除</view>

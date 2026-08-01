@@ -561,12 +561,21 @@ export class StatisticsService {
     userId: bigint,
     level: StatsCategoryLevel,
     type: StatsBillType,
+    endMonth?: string,
   ): Promise<StatsCategoryTrendResult> {
     const ledger = await this.ledgersService.getOrCreateDefaultLedger(userId);
-    // 最近 6 个月（含当月）
-    const now = new Date();
-    const baseY = now.getUTCFullYear();
-    const baseM = now.getUTCMonth(); // 0-based
+    // 最近 6 个月（含 endMonth 指定的月份，未传则用当月）
+    let baseY: number;
+    let baseM: number; // 0-based
+    if (endMonth) {
+      const [y, m] = endMonth.split('-').map(Number);
+      baseY = y;
+      baseM = m - 1;
+    } else {
+      const now = new Date();
+      baseY = now.getUTCFullYear();
+      baseM = now.getUTCMonth();
+    }
     const months: string[] = [];
     const ranges: Array<{ start: Date; end: Date }> = [];
     for (let i = 5; i >= 0; i--) {
@@ -667,16 +676,16 @@ export class StatisticsService {
     });
 
     if (period === 'all') {
-      // 按月聚合
+      // 按年聚合
       const map = new Map<string, Prisma.Decimal>();
       for (const b of bills) {
-        const key = `${b.billDate.getUTCFullYear()}-${String(b.billDate.getUTCMonth() + 1).padStart(2, '0')}`;
+        const key = `${b.billDate.getUTCFullYear()}`;
         map.set(key, (map.get(key) ?? new Prisma.Decimal(0)).plus(b.amount));
       }
       const points = [...map.entries()]
         .sort((a, b) => a[0].localeCompare(b[0]))
         .map(([date, amt]) => ({ date, amount: amt.toFixed(2) }));
-      return { granularity: 'month', points };
+      return { granularity: 'year', points };
     }
 
     // month / year：按天聚合，未发生天也填 0（仅 month 模式，year 模式仅输出有数据的日）
@@ -699,11 +708,20 @@ export class StatisticsService {
       return { granularity: 'day', points };
     }
 
-    // year 模式只返有数据的日
-    const points = [...map.entries()]
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([date, amt]) => ({ date, amount: amt.toFixed(2) }));
-    return { granularity: 'day', points };
+    // year 模式按月聚合，补齐 1-12 月
+    const monthMap = new Map<string, Prisma.Decimal>();
+    for (const b of bills) {
+      const d = b.billDate;
+      const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+      monthMap.set(key, (monthMap.get(key) ?? new Prisma.Decimal(0)).plus(b.amount));
+    }
+    const y = Number(year);
+    const points: StatsDailySeriesResult['points'] = [];
+    for (let m = 1; m <= 12; m++) {
+      const key = `${y}-${String(m).padStart(2, '0')}`;
+      points.push({ date: key, amount: (monthMap.get(key) ?? new Prisma.Decimal(0)).toFixed(2) });
+    }
+    return { granularity: 'month', points };
   }
 
   // ============ /top-bills ============

@@ -46,12 +46,8 @@
       "pages": ["index"]
     },
     {
-      "root": "subpkg/recurring-bill-list",
-      "pages": ["index"]
-    },
-    {
-      "root": "subpkg/recurring-bill-edit",
-      "pages": ["index"]
+      "root": "subpkg/recurring-bill",
+      "pages": ["list", "edit"]
     },
     {
       "root": "subpkg/user-operations",
@@ -90,6 +86,7 @@
       "desc": "用于语音记账时录制账单描述"
     }
   },
+  "lazyCodeLoading": "requiredComponents",
   "style": "v2",
   "sitemapLocation": "sitemap.json"
 }

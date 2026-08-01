@@ -130,7 +130,7 @@
       </scroll-view>
       <view class="sheet-footer">
         <view class="secondary-btn" bindtap="closeSheet">取消</view>
-        <view class="primary-btn" bindtap="openCreateAccountDialog">添加账户</view>
+        <view class="primary-btn" bindtap="openAccountManage">管理账户</view>
       </view>
     </view>
   </view>
@@ -153,7 +153,7 @@
       </view>
       <view class="sheet-footer">
         <view class="secondary-btn" bindtap="closeSheet">取消</view>
-        <view class="primary-btn" bindtap="openCreateTagDialog">添加标签</view>
+        <view class="primary-btn" bindtap="openTagManage">管理标签</view>
       </view>
     </view>
   </view>
