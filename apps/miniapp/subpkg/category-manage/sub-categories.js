@@ -11,6 +11,8 @@ Page({
     parentName: '',
     type: 1,
     children: [],
+    parentCategories: [],
+    selectedParentIndex: 0,
     icons: [],
     dragging: false,
     dragIndex: -1,
@@ -45,7 +47,10 @@ Page({
     await getApp().ensureLogin();
     const tree = await service.getCategories({ type: this.data.type });
     const parent = tree.find((item) => String(item.id) === String(this.data.parentId));
-    this.setData({ children: parent && parent.children ? parent.children.map(normalizeChild) : [] });
+    this.setData({
+      children: parent && parent.children ? parent.children.map(normalizeChild) : [],
+      parentCategories: tree.filter((item) => !item.parentId),
+    });
   },
 
   closeSwipeRows() {
@@ -218,14 +223,21 @@ Page({
 
   openCreate() {
     this.closeSwipeRows();
-    this.setData({ dialogVisible: true, editingId: '', form: { name: '', icon: '' } });
+    this.setData({ dialogVisible: true, editingId: '', form: { name: '', icon: '', parentId: this.data.parentId } });
   },
 
   openEdit(event) {
     const id = event.currentTarget.dataset.id;
     const child = this.data.children.find((item) => String(item.id) === String(id));
     if (!child) return;
-    this.setData({ dialogVisible: true, editingId: id, form: { name: child.name, icon: child.icon || '' } });
+    const parentId = child.parentId || this.data.parentId;
+    const selectedParentIndex = Math.max(0, this.data.parentCategories.findIndex((item) => String(item.id) === String(parentId)));
+    this.setData({
+      dialogVisible: true,
+      editingId: id,
+      selectedParentIndex,
+      form: { name: child.name, icon: child.icon || '', parentId },
+    });
   },
 
   closeDialog() {
@@ -240,13 +252,19 @@ Page({
     this.setData({ 'form.icon': event.currentTarget.dataset.icon });
   },
 
+  onParentChange(event) {
+    const index = Number(event.detail.value);
+    const parent = this.data.parentCategories[index];
+    if (parent) this.setData({ 'form.parentId': parent.id, selectedParentIndex: index });
+  },
+
   async save() {
     const name = this.data.form.name.trim();
     if (!name) {
       showError('请输入分类名称');
       return;
     }
-    const payload = { name, icon: this.data.form.icon || undefined, type: this.data.type, parentId: this.data.parentId };
+    const payload = { name, icon: this.data.form.icon || undefined, type: this.data.type, parentId: this.data.form.parentId };
     if (this.data.editingId) {
       await service.updateCategory(this.data.editingId, payload);
       showToast('修改成功', 'success');

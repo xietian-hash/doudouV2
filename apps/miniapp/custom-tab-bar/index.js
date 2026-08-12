@@ -46,7 +46,14 @@ Component({
       }
       const url = TAB_LIST[index];
       if (!url || index === this.data.selected) return;
+      if (index === 1) this.passSelectedRecordDate();
       wx.switchTab({ url });
+    },
+
+    passSelectedRecordDate() {
+      const currentPage = getCurrentPages().slice(-1)[0];
+      if (!currentPage || currentPage.route !== 'pages/record/index') return;
+      getApp().globalData.pendingBillDate = currentPage.data.selectedDate || '';
     },
 
     handleFabTouchStart(event) {

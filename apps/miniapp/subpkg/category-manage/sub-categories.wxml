@@ -55,7 +55,10 @@
       <view class="dialog-body">
         <view class="field">
           <text class="field-label">所属一级分类</text>
-          <input class="field-input" value="{{parentName}}" disabled />
+          <picker wx:if="{{editingId}}" class="field-picker" mode="selector" range="{{parentCategories}}" range-key="name" value="{{selectedParentIndex}}" bindchange="onParentChange">
+            <view class="field-picker-value">{{parentCategories[selectedParentIndex].name}} <text>›</text></view>
+          </picker>
+          <input wx:else class="field-input" value="{{parentName}}" disabled />
         </view>
         <view class="field">
           <text class="field-label">分类名称</text>

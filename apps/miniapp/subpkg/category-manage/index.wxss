@@ -15,6 +15,17 @@
   max-height: 240rpx;
 }
 
+.field-picker-value {
+  min-height: 76rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24rpx;
+  border-radius: 16rpx;
+  background: var(--color-surface-soft);
+  color: var(--color-text);
+}
+
 .icon-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);

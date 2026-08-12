@@ -2,7 +2,7 @@ Page({
   data: {
     user: {},
     avatarText: '我',
-    version: '0.1.11',
+    version: '0.1.29',
     statusBarHeight: 0,
     isAdmin: false,
   },

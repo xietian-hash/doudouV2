@@ -1531,6 +1531,10 @@ components:
     CategoryUpdateRequest:
       type: object
       properties:
+        parentId:
+          type: integer
+          format: int64
+          description: 二级分类调整后的所属一级分类 ID；只能选择同收支类型的一级分类
         name:
           type: string
           minLength: 1

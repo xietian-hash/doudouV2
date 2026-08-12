@@ -71,4 +71,8 @@ export class UpdateCategoryDto {
   @Min(0)
   @Type(() => Number)
   sort?: number;
+
+  @IsOptional()
+  @IsString()
+  parentId?: string;
 }
