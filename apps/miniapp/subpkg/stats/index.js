@@ -192,9 +192,7 @@ Page({
       const [overview, trend, dailySeries, topBillsRes] = await Promise.all([
         statsService.getOverview({ ...params, level }),
         statsService.getCategoryTrend({ level, type, endMonth: period === 'month' ? monthStr(year, month) : period === 'year' ? `${year}-12` : undefined }),
-        period !== 'all'
-          ? statsService.getDailySeries(params)
-          : Promise.resolve({ granularity: 'month', points: [] }),
+        statsService.getDailySeries(params),
         statsService.getTopBills({ ...params, limit: 5 }),
       ]);
 

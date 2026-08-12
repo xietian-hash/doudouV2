@@ -74,6 +74,7 @@ Page({
   },
 
   onShow() {
+    this.applySelectedRecordDate();
     const tabBar = this.getTabBar && this.getTabBar();
     if (tabBar) {
       tabBar.setSelected(1);
@@ -87,6 +88,14 @@ Page({
     wx.$on('voiceRecord:stop', this.onVoiceStop);
     this.initRecorder();
     this.ensureAndLoad();
+  },
+
+  applySelectedRecordDate() {
+    const app = getApp();
+    const billDate = app.globalData.pendingBillDate;
+    app.globalData.pendingBillDate = '';
+    if (!billDate) return;
+    this.setData({ billDate }, () => this.updateDisplayDate());
   },
 
   onHide() {

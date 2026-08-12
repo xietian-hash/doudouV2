@@ -200,14 +200,36 @@ export class CategoriesService {
       throw new ForbiddenException('无权操作该分类');
     }
 
-    if (dto.name) {
-      const existing = category.parentId
-        ? await this.repo.findSubcategoryByName(dto.name, userId, ledger.id, id)
-        : await this.repo.findByNameUserParent(dto.name, userId, ledger.id, null, id);
+    let parentId = category.parentId;
+    if (dto.parentId !== undefined) {
+      if (!category.parentId) {
+        throw new ConflictException('只有二级分类可以更换所属一级分类');
+      }
+      parentId = BigInt(dto.parentId);
+      if (parentId === id) {
+        throw new ConflictException('所属一级分类不能选择自身');
+      }
+      const parent = await this.repo.findById(parentId);
+      if (!parent || parent.isDeleted) {
+        throw new NotFoundException('父分类不存在');
+      }
+      if (parent.userId !== userId || parent.ledgerId !== ledger.id || parent.type !== category.type || parent.parentId) {
+        throw new ForbiddenException('只能选择同类型的一级分类');
+      }
+    }
+
+    if (dto.name || dto.parentId !== undefined) {
+      const existing = await this.repo.findByNameUserParent(
+        dto.name || category.name,
+        userId,
+        ledger.id,
+        parentId,
+        id,
+      );
       if (existing) {
         throw new ConflictException(
-          category.parentId
-            ? `二级分类名称 "${dto.name}" 已被其他分类使用`
+          parentId
+            ? `二级分类名称 "${dto.name || category.name}" 已被其他分类使用`
             : `分类名称 "${dto.name}" 已存在`,
         );
       }
@@ -217,6 +239,7 @@ export class CategoriesService {
       name: dto.name,
       icon: dto.icon,
       sort: dto.sort,
+      ...(dto.parentId !== undefined && { parentId }),
     });
 
     return serializeCategory(updated);

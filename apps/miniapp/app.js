@@ -21,6 +21,7 @@ App({
     user: null,
     token: '',
     loginReady: null,
+    pendingBillDate: '',
   },
 
   onLaunch() {

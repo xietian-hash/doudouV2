@@ -104,7 +104,7 @@ export class CategoriesRepo {
     });
   }
 
-  async update(id: bigint, data: { name?: string; icon?: string; sort?: number }) {
+  async update(id: bigint, data: { name?: string; icon?: string; sort?: number; parentId?: bigint | null }) {
     return this.prisma.category.update({ where: { id }, data });
   }
 
